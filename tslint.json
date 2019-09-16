@@ -1,0 +1,46 @@
+{
+  "extends": "tslint:recommended",
+  "rules": {
+    "max-line-length": [
+      true,
+      240
+    ],
+    "indent": [
+      true,
+      "spaces",
+      2
+    ],
+    "whitespace": [
+      true,
+      "check-module"
+    ],
+    "quotes": [
+      "warn",
+      "double"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ],
+    "no-var": [
+      "error"
+    ],
+    "no-unused-vars": [
+      "warn"
+    ],
+    "no-mixed-spaces-and-tabs": [
+      "warn"
+    ],
+    "curly": false,
+    "no-empty": false,
+    "no-console": false,
+    "member-ordering": false,
+    "interface-over-type-literal": false,
+    "object-literal-sort-keys": false,
+    "ordered-imports": false,
+    "typedef-whitespace": false,
+    "arrow-parens": false,
+    "interface-name": false,
+    "no-empty-interface": false
+  }
+}

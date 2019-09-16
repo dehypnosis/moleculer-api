@@ -1,0 +1,113 @@
+{
+  "name": "moleculer-api",
+  "version": "0.1.1",
+  "description": "A dynamic API Gateway for MoleculerJS which updates REST endpoints and aggregated GraphQL schema, access control policy for each action calls from metadata of remote services&amp;amp;#x27; schema without restart or deployment.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "nodemon --watch ./src ./examples --exec ts-node ./examples",
+    "build": "rm -rf ./dist && tsc",
+    "lint": "tslint -p tsconfig.json",
+    "deps": "npm-check -u",
+    "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "test": "node --trace-warnings node_modules/.bin/jest --coverage --detectOpenHandles"
+  },
+  "keywords": [
+    "QMIT",
+    "moleculer",
+    "MSA",
+    "microservice",
+    "API Gateway",
+    "gateway"
+  ],
+  "author": "QMIT Inc.",
+  "dependencies": {
+    "apollo-server": "^2.9.7",
+    "async-lock": "^1.2.2",
+    "axax": "^0.2.2",
+    "cors": "^2.8.5",
+    "dataloader": "^1.4.0",
+    "express": "^4.17.1",
+    "fastest-validator": "^0.6.18",
+    "graphql": "^14.5.8",
+    "graphql-iso-date": "^3.6.1",
+    "graphql-type-json": "^0.3.0",
+    "helmet": "^3.21.2",
+    "kleur": "^3.0.3",
+    "lodash": "^4.17.15",
+    "moleculer": "^0.14.0-beta4",
+    "moment": "^2.24.0",
+    "node-fetch": "^2.6.0",
+    "object-hash": "^1.3.1",
+    "path-to-regexp": "^3.1.0",
+    "smart-circular": "^1.0.2",
+    "subscriptions-transport-ws": "^0.9.16",
+    "table": "^5.4.6",
+    "tslib": "^1.10.0",
+    "winston": "^3.2.1",
+    "ws": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/async-lock": "^1.1.1",
+    "@types/bluebird": "^3.5.24",
+    "@types/express": "^4.17.1",
+    "@types/graphql-iso-date": "^3.3.3",
+    "@types/graphql-type-json": "^0.3.2",
+    "@types/helmet": "0.0.45",
+    "@types/jest": "^24.0.18",
+    "@types/lodash": "^4.14.139",
+    "@types/node": "^12.7.5",
+    "@types/node-fetch": "^2.5.2",
+    "@types/object-hash": "^1.3.0",
+    "@types/table": "^4.0.7",
+    "apollo-client": "^2.6.4",
+    "benchmarkify": "^2.1.2",
+    "coveralls": "^3.0.6",
+    "jest": "^24.9.0",
+    "jest-cli": "^24.9.0",
+    "moleculer-repl": "^0.6.1",
+    "nodemon": "^1.19.2",
+    "npm-check": "5.9.0",
+    "ts-jest": "^24.1.0",
+    "ts-node": "^8.4.1",
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.3"
+  },
+  "engines": {
+    "node": ">= 8.x.x"
+  },
+  "jest": {
+    "coverageDirectory": "<rootDir>/coverage",
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "\\.ignore\\."
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "jsx",
+      "ts",
+      "tsx",
+      "node"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "testMatch": [
+      "<rootDir>/src/**/*.spec.(ts|js)"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json"
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qmit-pro/moleculer-api.git"
+  },
+  "license": "MIT"
+}

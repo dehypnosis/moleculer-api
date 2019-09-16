@@ -1,0 +1,28 @@
+{
+	"compilerOptions": {
+    "importHelpers": true,
+		"esModuleInterop": true,
+		"noImplicitAny": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+    "pretty": true,
+		"types": [
+			"jest",
+			"node"
+		],
+		"sourceMap": true,
+		"target": "es6",
+		"declaration": true,
+		"baseUrl": "./",
+    "rootDir": "./src",
+		"outDir": "./dist",
+		"strict": true,
+    "lib": [
+      "es6",
+      "esnext.asynciterable"
+    ]
+  },
+  "include": [
+    "src"
+  ]
+}
