@@ -52,7 +52,7 @@ export class GraphQLHandlers extends ApolloServer {
         const contentType = req.header("content-type");
         if (uploads !== false && contentType && contentType.toLowerCase().startsWith("multipart/form-data")) {
           try {
-            req.body = await processFileUploads!(req, res, uploadsConfig)
+            req.body = await processFileUploads!(req, res, uploadsConfig);
           } catch (error) {
             if (error.status && error.expose) res.status(error.status);
 

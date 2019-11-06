@@ -2,6 +2,9 @@ import { ServerHTTPApplication, ServerHTTPApplicationOptions } from "./http/comp
 import { ServerWebSocketApplication, ServerWebSocketApplicationOptions } from "./ws/component";
 
 export { ServerApplicationComponent } from "./component";
+export * from "./route";
+export * from "./http/route";
+export * from "./ws/route";
 
 export type ServerApplicationComponentConstructorOptions = {
   [ServerHTTPApplication.key]: ServerHTTPApplicationOptions;
@@ -17,7 +20,3 @@ export type ServerApplicationComponentModules = {
   [ServerHTTPApplication.key]: ServerHTTPApplication["module"],
   [ServerWebSocketApplication.key]: ServerWebSocketApplication["module"],
 };
-
-export { Route, RouteHandler, RouteHandlerMap, VersionHandlerMap, BranchHandlerMap  } from "./route";
-export { HTTPRoute, HTTPRouteProps, HTTPRouteHandler  } from "./http/route";
-export { WebSocketRoute, WebSocketRouteHandler, WebSocketRouteProps  } from "./ws/route";

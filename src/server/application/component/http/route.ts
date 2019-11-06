@@ -1,7 +1,8 @@
 import * as kleur from "kleur";
 import { Route, RouteProps } from "../route";
 import express from "express-serve-static-core";
-
+export type HTTPRouteRequest = express.Request;
+export type HTTPRouteResponse = express.Response;
 export type HTTPRouteHandler<Context = any> = (context: Context, req: express.Request, res: express.Response) => void | Promise<void>;
 export type HTTPRouteInternalHandler = (req: express.Request & { context?: any }, res: express.Response, next: express.NextFunction) => void;
 

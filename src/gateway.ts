@@ -98,7 +98,7 @@ export class APIGateway {
     await this.server.stop();
   }
 
-  public static readonly ShutdownSignals = ["SIGINT", "SIGTERM", "beforeExit"];
+  public static readonly ShutdownSignals = ["SIGINT", "SIGTERM", "SIGHUP", "beforeExit"];
 
   private handleShutdown = ((...args: any) => {
     this.logger.info(`shutdown signal received: ${args}`);

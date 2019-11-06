@@ -1,17 +1,27 @@
 import * as _ from "lodash";
+import Busboy from "busboy";
 import { RecursivePartial, hash, validateObject, validateValue, ValidationError, ValidationRule } from "../../../../interface";
 import { ServiceAPIIntegration } from "../../../integration";
-import { Route, HTTPRoute, HTTPRouteHandler } from "../../../../server";
+import { Route, HTTPRoute, HTTPRouteHandler, HTTPRouteRequest } from "../../../../server";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
+import { MultipartFormDataHandler } from "./multipart";
 import { RESTProtocolPluginSchema, RESTProtocolPluginCatalog, RESTCallableRouteResolverSchema, RESTMappableRouteResolverSchema, RESTPublishableRouteResolverSchema, RESTRouteSchema, RESTRouteResolverSchema } from "./schema";
 import { ConnectorCompiler, ConnectorValidator } from "../../connector";
 
 export type RESTProtocolPluginOptions = {
+  uploads: {
+    maxFiles: number; // number
+    maxFileSize: number; // byte
+  };
 };
 
 export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema, RESTProtocolPluginCatalog> {
   public static readonly key = "REST";
   public static readonly autoLoadOptions: RESTProtocolPluginOptions = {
+    uploads: {
+      maxFiles: Infinity,
+      maxFileSize: Infinity,
+    },
   };
   private readonly opts: RESTProtocolPluginOptions;
 
@@ -281,8 +291,15 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
       disableCache: false,
     });
     const {ignoreError} = schema;
+    const multipart = new MultipartFormDataHandler(this.opts.uploads);
     const handler: HTTPRouteHandler = async (context, req, res) => {
       try {
+        // process multipart/form-data
+        const uploads = await multipart.collect(req, res);
+        if (uploads) {
+          req.body = Object.assign(req.body || {}, uploads);
+        }
+
         const mappableArgs = {context, path: req.path, query: req.query, body: req.body};
         const result = await connector(context, mappableArgs);
 
