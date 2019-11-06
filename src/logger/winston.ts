@@ -19,7 +19,7 @@ export class WinstonLogger extends Logger {
           format.prettyPrint(),
           format.colorize(),
           format.printf(({level, message, timestamp, label}) => {
-            return `${timestamp} ${level} ${kleur.yellow(label)}: ${typeof message === "object" ? WinstonLogger.printObject(message) : message}`;
+            return `${timestamp} ${level} ${kleur.yellow(label)}: ${message}`;
           }),
         ),
       }),
@@ -40,16 +40,19 @@ export class WinstonLogger extends Logger {
     return {...this.opts, defaultMeta: { label: this.props.label }};
   }
 
-  public getChild(label: string): Logger {
+  public getChild(label: string, resetLabelPrefix?: true): Logger {
     return new WinstonLogger({
       ...this.props,
-      label: `${this.props.label}/${label}`,
+      label: resetLabelPrefix ? label : `${this.props.label}/${label}`,
     }, this.opts, this.logger);
   }
 
   private log(method: "debug" | "error" | "info" | "warn", args: any[]): void {
     for (const message of args) {
-      this.logger[method]({label: this.props.label, message});
+      this.logger[method]({
+        label: this.props.label,
+        message: typeof message === "string" ? message : WinstonLogger.printObject(message),
+      });
     }
   }
 

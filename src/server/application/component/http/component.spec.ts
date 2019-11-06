@@ -16,7 +16,7 @@ beforeAll(async () => {
 
 describe("http application should work with routes", () => {
   const message = {data: Math.random() * 1000};
-  const routeMatched = jest.fn();
+  const createContext = jest.fn();
   httpApp.mountRoutes([
     new HTTPRoute({
       method: "GET",
@@ -26,7 +26,7 @@ describe("http application should work with routes", () => {
         res.json(message);
       },
     }),
-  ], ["/", "/~dev"], routeMatched);
+  ], ["/", "/~dev"], createContext);
 
   it("httpClient should got proper response", () => {
     return expect(fetch("http://localhost:8889/data", {method: "GET"}).then(res => res.json()))
@@ -38,8 +38,8 @@ describe("http application should work with routes", () => {
       .resolves.toMatchObject(message);
   });
 
-  it("handler should have been called twice", () => {
-    expect(routeMatched).toBeCalledTimes(2);
+  it("createContext should have been called twice", () => {
+    expect(createContext).toBeCalledTimes(2);
   });
 });
 

@@ -3,8 +3,8 @@ import { Route, RouteProps } from "../route";
 import express from "express-serve-static-core";
 export type HTTPRouteRequest = express.Request;
 export type HTTPRouteResponse = express.Response;
-export type HTTPRouteHandler<Context = any> = (context: Context, req: express.Request, res: express.Response) => void | Promise<void>;
-export type HTTPRouteInternalHandler = (req: express.Request & { context?: any }, res: express.Response, next: express.NextFunction) => void;
+export type HTTPRouteHandler<Context = any> = (context: Context, req: HTTPRouteRequest, res: HTTPRouteResponse) => void | Promise<void>;
+export type HTTPRouteInternalHandler = (req: HTTPRouteRequest, res: HTTPRouteResponse, next: express.NextFunction) => void;
 
 export type HTTPRouteProps<Context = any> = Omit<RouteProps, "handler"> & {
   handler: HTTPRouteHandler<Context>;

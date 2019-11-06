@@ -1,7 +1,7 @@
 import * as http from "http";
 import * as _ from "lodash";
 import { RecursivePartial } from "../../interface";
-import { ServerApplicationComponentModules } from "../application";
+import { ContextFactory, ServerApplicationComponentModules } from "../application";
 import { listeningURI, ServerProtocol, ServerProtocolProps } from "./protocol";
 
 export type ServerHTTPProtocolOptions = {
@@ -24,18 +24,25 @@ export class ServerHTTPProtocol extends ServerProtocol {
   }
 
   public async start(modules: ServerApplicationComponentModules): Promise<listeningURI[]> {
+    // mount http module
     this.server = http.createServer(modules.http);
+
+    // handle upgrade with ws module and emit connection to web socket
     this.server.on("upgrade", (req, socket, head) => {
-        modules.ws.handleUpgrade(req, socket, head, wSocket => {
-          modules.ws.emit("connection", wSocket, req);
-          process.nextTick(() => {
-            // @ts-ignore TODO: configure route matched... for middleware and branch update and socket handler not found
-            if (!wSocket.routeMatched) {
-              wSocket.close();
-            }
-          });
-        });
+      modules.ws.handleUpgrade(req, socket, head, ws => {
+        modules.ws.emit("connection", ws, req);
+
+        /* trick for route websocket handlers:
+        * if context not parsed yet, assume it there are no matched handler
+        */
+        setTimeout(() => {
+          if (!ContextFactory.parsed(req.headers)) {
+            ws.close();
+          }
+        }, 1000);
       });
+    });
+
     this.server.listen(this.opts.port, this.opts.hostname);
     return [
       `http://${this.opts.hostname}:${this.opts.port}`,

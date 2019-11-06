@@ -14,7 +14,7 @@ const gateway = new APIGateway({
             name: "file",
             metadata: {
               api: {
-                branch: "dev",
+                branch: "master",
                 protocol: {
                   REST: {
                     description: "..",
@@ -141,6 +141,9 @@ const gateway = new APIGateway({
   ],
   schema: {
     protocol: {},
+    branch: {
+      // maxVersions: 2,
+    },
   },
   server: {
     update: {

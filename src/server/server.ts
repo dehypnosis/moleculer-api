@@ -3,9 +3,9 @@ import _ from "lodash";
 import { RecursivePartial } from "../interface";
 import { Logger } from "../logger";
 import { SchemaRegistry } from "../schema";
-import { ServerApplication, ServerApplicationOptions } from "./application";
-import { ServerMiddlewareConstructorOptions, defaultServerMiddlewareConstructorOptions, ServerMiddleware, ServerMiddlewareConstructors } from "./middleware";
-import { ServerProtocolConstructorOptions, defaultServerProtocolConstructorOptions, ServerProtocol, ServerProtocolConstructors } from "./protocol";
+import { ServerApplication, ServerApplicationOptions, ContextFactoryConstructors, ContextFactoryConstructorOptions, defaultContextFactoryConstructorOptions, ContextFactory } from "./application";
+import { ServerMiddleware, ServerMiddlewareConstructorOptions, defaultServerMiddlewareConstructorOptions, ServerMiddlewareConstructors } from "./middleware";
+import { ServerProtocol, ServerProtocolConstructorOptions, defaultServerProtocolConstructorOptions, ServerProtocolConstructors } from "./protocol";
 
 export type APIServerProps = {
   schema: SchemaRegistry;
@@ -22,6 +22,7 @@ export type APIServerOptions = {
   application: ServerApplicationOptions;
   middleware: ServerMiddlewareConstructorOptions;
   protocol: ServerProtocolConstructorOptions;
+  context: ContextFactoryConstructorOptions;
 };
 
 export class APIServer {
@@ -37,19 +38,36 @@ export class APIServer {
         maxDebouncedSeconds: 5,
       },
       application: {},
+      context: defaultContextFactoryConstructorOptions,
       middleware: defaultServerMiddlewareConstructorOptions,
       protocol: defaultServerProtocolConstructorOptions,
     });
     this.opts.update.debouncedSeconds = isNaN(this.opts.update.debouncedSeconds) ? 2 : Math.max(this.opts.update.debouncedSeconds, 0);
     this.opts.update.maxDebouncedSeconds = isNaN(this.opts.update.maxDebouncedSeconds) ? 5 : Math.max(this.opts.update.maxDebouncedSeconds, this.opts.update.debouncedSeconds, 1);
 
+
+    // create context factory
+    const contextFactories = Object.entries(this.opts.context)
+      .reduce((factories, [k, options]) => {
+        const key = k as keyof ContextFactoryConstructorOptions;
+        if (options !== false) {
+          factories.push(
+            new (ContextFactoryConstructors[key])({
+              logger: this.props.logger.getChild(`context/${key}`),
+            }, options),
+          );
+        }
+        return factories;
+      }, [] as Array<ContextFactory<any>>);
+
     // create application
     this.app = new ServerApplication({
       logger: this.props.logger.getChild(`application`),
+      contextFactories,
     }, this.opts.application);
 
     // create middleware
-    const middlewares = this.opts.middleware
+    const middleware = this.opts.middleware
       .filter(obj => {
         const key = Object.keys(obj)[0] as keyof typeof ServerMiddlewareConstructors;
         // @ts-ignore: cannot infer key of union typed objects
@@ -65,10 +83,10 @@ export class APIServer {
       });
 
     // apply application middleware
-    for (const middleware of middlewares) {
-      middleware.apply(this.app.componentModules);
+    for (const middle of middleware) {
+      middle.apply(this.app.componentModules);
     }
-    this.props.logger.info(`gateway server middleware has been applied: ${middlewares.join(", ")}`);
+    this.props.logger.info(`gateway server middleware has been applied: ${middleware.join(", ")}`);
 
     // create protocol
     this.protocols = Object.entries(this.opts.protocol)

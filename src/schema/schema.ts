@@ -82,12 +82,12 @@ export class SchemaRegistry {
     for (const plugin of this.plugin.policy) {
       await plugin.start();
     }
-    this.props.logger.info(`schema policy plugin has been started: ${kleur.yellow(this.plugin.policy.map(plugin => plugin.key).join(", "))}`);
+    this.props.logger.info(`schema policy plugin has been started: ${this.plugin.policy.join(", ")}`);
 
     for (const plugin of this.plugin.protocol) {
       await plugin.start();
     }
-    this.props.logger.info(`schema protocol plugin has been started: ${kleur.yellow(this.plugin.protocol.map(plugin => plugin.key).join(", "))}`);
+    this.props.logger.info(`schema protocol plugin has been started: ${this.plugin.protocol.join(", ")}`);
 
     // initialize branch event handler
     this.emitter.on(SchemaRegistry.Event.Updated, listeners.updated);

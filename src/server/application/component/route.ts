@@ -67,7 +67,7 @@ export abstract class Route {
         sensitive: false,
         strict: false,
         end: true,
-        start: false,
+        start: true,
       });
     });
   }

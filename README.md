@@ -37,8 +37,8 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
         - [x] HTTP, WebSocket components (express, ws modules)
         - [x] HTTP protocol which mounts HTTP/WS components' modules
 - [] 0.2.x Alpha
-    - [x] Helmet (disabled by default), CORS (enabled), Serve Static (disabled), Body Parser (enabled), Error (enabled) middleware
-    - [] Normalized context flows with Cookie Parser (enabled), Locale (enabled), Auth (enabled) middleware integration
+    - [x] Helmet (disabled by default), CORS (enabled), Serve Static (disabled), Body Parser (enabled), Logging (enabled), Error (enabled) middleware
+    - [X] ID (enabled), User Agent (enabled), Cookie Parser (enabled), Locale (enabled), Auth (enabled) context factory
     - [] Integration example with `moleculer-iam`
     - [] Schema Registry plugins
         - [] Filter access control policy plugin

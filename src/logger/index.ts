@@ -1,7 +1,7 @@
-import { Logger } from "./logger";
+import { Logger, LogLevel } from "./logger";
 import { WinstonLogger, WinstonLoggerOptions } from "./winston";
 
-export { Logger, WinstonLogger };
+export { Logger, LogLevel, WinstonLogger };
 
 type LoggerClass = typeof Logger;
 

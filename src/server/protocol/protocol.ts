@@ -14,10 +14,6 @@ export abstract class ServerProtocol extends Pluggable {
     super();
   }
 
-  public toString(): string {
-    return kleur.yellow(this.key);
-  }
-
   // may return bound host and listening port include protocol scheme
   public abstract start(modules: ServerApplicationComponentModules): Promise<listeningURI[]>;
 

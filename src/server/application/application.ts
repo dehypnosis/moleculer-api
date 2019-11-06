@@ -1,14 +1,14 @@
-import * as _ from "lodash";
 import AsyncLock from "async-lock";
 import { FatalError } from "tslint/lib/error";
 import { RecursivePartial } from "../../interface";
 import { Logger } from "../../logger";
 import { Branch, Version } from "../../schema";
-import { ServerApplicationComponent, ServerApplicationComponentConstructorOptions, ServerApplicationComponentConstructors, ServerApplicationComponentModules } from "./component";
-import { BranchHandlerMap, Route, RouteHandlerMap } from "./component/route";
+import { BranchHandlerMap, Route, RouteHandlerMap, ServerApplicationComponent, ServerApplicationComponentConstructorOptions, ServerApplicationComponentConstructors, ServerApplicationComponentModules } from "./component";
+import { ContextFactory } from "./context";
 
 export type ServerApplicationProps = {
   logger: Logger;
+  contextFactories: ReadonlyArray<ContextFactory<any>>;
 };
 
 export type ServerApplicationOptions = {} & ServerApplicationComponentConstructorOptions;
@@ -16,6 +16,7 @@ export type ServerApplicationOptions = {} & ServerApplicationComponentConstructo
 export class ServerApplication {
   public readonly components: ReadonlyArray<ServerApplicationComponent<Route>>;
   private readonly componentBranchHandlerMap = new Map<ServerApplicationComponent<Route>, BranchHandlerMap<Route>>();
+  private readonly componentsAliasedVersions = new Map<ServerApplicationComponent<Route>, Array<Readonly<Version>>>();
 
   constructor(protected readonly props: ServerApplicationProps, opts?: RecursivePartial<ServerApplicationOptions>) {
     // create application components
@@ -29,6 +30,7 @@ export class ServerApplication {
     // create branch handler map for each components
     for (const component of this.components) {
       this.componentBranchHandlerMap.set(component, new Map());
+      this.componentsAliasedVersions.set(component, []);
     }
   }
 
@@ -64,23 +66,33 @@ export class ServerApplication {
       return this.lock.acquire(component.key, () => {
         // get version handler map
         const branchHandlerMap = this.componentBranchHandlerMap.get(component)!;
-        if (!branchHandlerMap) {
-          return;
-        }
         const versionHandlerMap = branchHandlerMap.get(branch) || new Map<Readonly<Version>, RouteHandlerMap<Route>>();
+
+        // get aliases versions
+        const aliasedVersions = this.componentsAliasedVersions.get(component)!;
 
         // unmount old versions
         const newVersions = branch.versions; // latest -> oldest versions
         for (const [version, routeHandlerMap] of versionHandlerMap.entries()) {
           // clear forgotten version or prev-latest version
-          if (!newVersions.includes(version) || version === branch.latestVersion.parentVersion) {
+          if (!newVersions.includes(version) || aliasedVersions.includes(version)) {
             component.unmountRoutes(routeHandlerMap);
             versionHandlerMap.delete(version);
           }
         }
 
-        // mount versions
-        const routeMatched = _.debounce(() => branch.touch(), 1000, {maxWait: 1000 * 50}); // when matched, branch lastUsedAt shall be updated
+        // prepare context factory
+        const createContext = ContextFactory.merge(this.props.contextFactories, {
+          before(source) {
+            branch.touch();
+            // console.log("create context with ", source);
+          },
+          // after(source, context) {
+          //   console.log(`${component} ${source.method} ${source.url}`);
+          // },
+        });
+
+        // mount new versions
         for (const version of newVersions) {
           if (!versionHandlerMap.has(version)) {
             // prepare mount path
@@ -91,11 +103,14 @@ export class ServerApplication {
               if (branch.isMaster) {
                 pathPrefixes.unshift(`/`);
               }
+
+              // remember aliased versions to unmount it later when alias should be removed
+              aliasedVersions.push(version);
             }
 
             // create route handlers and mount
             const routes = version.routes.filter(component.canHandleRoute.bind(component));
-            const routeHandlerMap = component.mountRoutes(routes, pathPrefixes, routeMatched);
+            const routeHandlerMap = component.mountRoutes(routes, pathPrefixes, createContext);
             versionHandlerMap.set(version, routeHandlerMap);
           }
         }
@@ -110,6 +125,9 @@ export class ServerApplication {
           this.props.logger.error(`failed to mount ${branch} handler for ${component}: ${error}`);
         });
     }));
+
+    // tslint:disable-next-line:no-shadowed-variable
+    // this.props.logger.info("\n" + this.routes.map(({branch, version, route}) => `/~${branch.name}@${version.shortHash}${route}`).join("\n"));
   }
 
   public async unmountBranchHandler(branch: Branch): Promise<void> {
@@ -143,5 +161,19 @@ export class ServerApplication {
           this.props.logger.info(`failed to unmount ${branch} handler for ${component}`, error);
         });
     }));
+  }
+
+  public get routes() {
+    const items: { branch: Readonly<Branch>, version: Readonly<Version>, route: Readonly<Route> }[] = [];
+    for (const branchHandlerMap of this.componentBranchHandlerMap.values()) {
+      for (const [branch, versionHandlerMap] of branchHandlerMap.entries()) {
+        for (const [version, routeHandlerMap] of versionHandlerMap.entries()) {
+          for (const route of routeHandlerMap.keys()) {
+            items.push({branch, version, route});
+          }
+        }
+      }
+    }
+    return items;
   }
 }

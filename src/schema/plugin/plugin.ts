@@ -1,3 +1,4 @@
+import * as kleur from "kleur";
 import { Pluggable, ValidationError } from "../../interface";
 import { Logger } from "../../logger";
 

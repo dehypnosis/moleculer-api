@@ -4,6 +4,8 @@ export type LoggerProps = {
   label: string;
 };
 
+export type LogLevel = "info"|"warn"|"debug"|"error";
+
 export abstract class Logger extends HasStaticKey {
   constructor(protected readonly props: LoggerProps, opts?: any) {
     super();
@@ -17,5 +19,5 @@ export abstract class Logger extends HasStaticKey {
 
   public abstract error(...args: any[]): void;
 
-  public abstract getChild(label: string): Logger;
+  public abstract getChild(label: string, resetLabelPrefix?: true): Logger;
 }
