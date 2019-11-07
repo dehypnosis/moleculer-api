@@ -272,7 +272,7 @@ export class Branch {
       const errors: ValidationError[] = [];
       for (const plugin of this.props.protocolPlugins) {
         try {
-          const pluginIntegrations = requiredIntegrations.filter(integration => integration.schema.protocol && integration.schema.protocol[plugin.key]);
+          const pluginIntegrations = requiredIntegrations.filter(integration => integration.schema.protocol && (integration.schema.protocol as any)[plugin.key]);
           const pluginResult = plugin.compileSchemata(routeHashMapCache, pluginIntegrations);
           for (const {hash, route} of pluginResult) {
             const routeHashIndex = routeHashes.indexOf(hash);

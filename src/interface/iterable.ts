@@ -2,15 +2,18 @@ import { map as mapAsyncIterable } from "axax/es5/map";
 import { filter as filterAsyncIterable } from "axax/es5/filter";
 import { pipe as pipeAsyncIterable } from "axax/es5/pipe";
 import { merge as mergeAsyncIterables } from "axax/es5/merge";
-import { $$asyncIterator } from "iterall";
+import { $$asyncIterator, $$iterator } from "iterall";
 
 if(Symbol.asyncIterator === undefined) ((Symbol as any).asyncIterator) = $$asyncIterator;
+
+if(Symbol.iterator === undefined) ((Symbol as any).iterator) = $$iterator;
 
 export type AsyncIteratorComposeItem<T> = {
   iterator: AsyncIterator<T>;
   filter?: ((value: T) => boolean);
   map?: ((value: T) => any);
 };
+
 export function composeAsyncIterators<T>(items: Array<AsyncIteratorComposeItem<T>>): AsyncIterator<any> {
   const iterables: Array<AsyncIterable<any>> = [];
   for (const { iterator, filter, map } of items) {

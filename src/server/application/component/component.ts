@@ -1,7 +1,7 @@
 import * as kleur from "kleur";
 import { HasStaticKey } from "../../../interface";
 import { Logger } from "../../../logger";
-import { ContextFactoryFn } from "../context";
+import { APIRequestContextConstructor } from "../context";
 import { Route, RouteHandlerMap } from "./route";
 
 export type ServerApplicationComponentProps = {
@@ -26,7 +26,7 @@ export abstract class ServerApplicationComponent<ApplicationRoute extends Route>
 
   public abstract unmountRoutes(routeHandlerMap: Readonly<RouteHandlerMap<ApplicationRoute>>): void;
 
-  public abstract mountRoutes(routes: ReadonlyArray<Readonly<ApplicationRoute>>, pathPrefixes: string[], createContext: ContextFactoryFn): Readonly<RouteHandlerMap<ApplicationRoute>>;
+  public abstract mountRoutes(routes: ReadonlyArray<Readonly<ApplicationRoute>>, pathPrefixes: string[], createContext: APIRequestContextConstructor): Readonly<RouteHandlerMap<ApplicationRoute>>;
 
   public abstract async start(): Promise<void>;
 

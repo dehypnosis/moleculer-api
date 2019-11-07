@@ -1,12 +1,12 @@
 import * as kleur from "kleur";
 import { RecursivePartial } from "../interface";
 import { Logger } from "../logger";
-import { ContextBase } from "./context";
+import { APIRequestContext } from "../server";
 import { ServiceRegistry, ServiceRegistryOptions, Service, ServiceAction, ServiceNode } from "./registry";
 import { Reporter, ReporterOptions } from "./reporter";
 import { EventPubSub, EventPacket, DiscoveryPubSub, EventListener } from "./pubsub";
 import { ParamsMapper, ParamsMapperProps } from "./params";
-import { BatchingPoolMap, BatchingPoolOptions } from "./batching";
+import { BatchingPool, BatchingPoolOptions } from "./batching";
 import { createInlineFunction, InlineFunctionOptions, InlineFunctionProps } from "./function";
 import { ServiceBrokerDelegatorConstructors, ServiceBrokerDelegatorConstructorOptions, ServiceBrokerDelegator } from "./delegator";
 
@@ -18,6 +18,7 @@ export type ServiceBrokerOptions = {
 } & ServiceBrokerDelegatorConstructorOptions;
 
 export type ServiceBrokerProps = {
+  id: string;
   logger: Logger;
 };
 
@@ -32,13 +33,12 @@ export type EventPublishArgs = Omit<EventPacket, "from">;
 export type DelegatedCallArgs = Omit<CallArgs, "batchingParams"> & { node: Readonly<ServiceNode> };
 export type DelegatedEventPublishArgs = EventPublishArgs;
 
-export class ServiceBroker<Context extends ContextBase = ContextBase> {
-  private readonly delegator: ServiceBrokerDelegator<Context>;
-  private readonly eventPubSub: EventPubSub;
-  private readonly eventSubscriptionMap = new Map<any, Array<number | AsyncIterator<EventPacket>>>();
-  private readonly discoveryPubSub: DiscoveryPubSub;
-  private readonly batchingPoolMap: BatchingPoolMap<Context>;
+export class ServiceBroker<DelegatorContext = any> {
   private readonly registry: ServiceRegistry;
+  private readonly delegator: ServiceBrokerDelegator<DelegatorContext>;
+  private readonly delegatorSymbol: symbol;
+  private readonly discoveryPubSub: DiscoveryPubSub;
+  private readonly eventPubSub: EventPubSub;
   private readonly opts: RecursivePartial<ServiceBrokerOptions>;
 
   constructor(protected readonly props: ServiceBrokerProps, opts?: RecursivePartial<ServiceBrokerOptions>) {
@@ -60,6 +60,8 @@ export class ServiceBroker<Context extends ContextBase = ContextBase> {
       emitServiceDisconnected: this.emitServiceDisconnected.bind(this),
     }, this.opts[key] || {});
 
+    this.delegatorSymbol = Symbol(`BrokerDelegator:${this.props.id}`);
+
     // create event buses
     this.eventPubSub = new EventPubSub({
       onError: error => this.props.logger.error(error),
@@ -70,9 +72,6 @@ export class ServiceBroker<Context extends ContextBase = ContextBase> {
     this.discoveryPubSub = new DiscoveryPubSub({
       onError: error => this.props.logger.error(error),
     });
-
-    // create batching pools
-    this.batchingPoolMap = new BatchingPoolMap<Context>(this.opts.batching);
 
     // create registry
     this.registry = new ServiceRegistry({
@@ -96,8 +95,6 @@ export class ServiceBroker<Context extends ContextBase = ContextBase> {
     await this.registry.stop();
     this.discoveryPubSub.unsubscribeAll();
     this.eventPubSub.unsubscribeAll();
-    this.eventSubscriptionMap.clear();
-    this.batchingPoolMap.clear();
     await this.delegator.stop();
     this.props.logger.info(`service broker has been stopped`);
   }
@@ -150,25 +147,54 @@ export class ServiceBroker<Context extends ContextBase = ContextBase> {
     }
   }
 
-  /* context */
-  public createContext(base: ContextBase): Context {
-    return this.delegator.createContext(base);
+  /* context resource management */
+  private getDelegatorContext(context: APIRequestContext): DelegatorContext {
+    let delegatorContext: DelegatorContext | undefined = context.get(this.delegatorSymbol);
+    if (!delegatorContext) {
+      delegatorContext = this.delegator.createContext(context);
+      context.set(this.delegatorSymbol, delegatorContext, ctx => this.delegator.clearContext(ctx));
+    }
+    return delegatorContext;
   }
 
-  public clearContext(context: Context): void {
-    this.batchingPoolMap.delete(context);
-    this.unsubscribeEvent(context);
+  private static EventSubscriptionSymbol = Symbol("BrokerEventSubscriptions");
+
+  private getEventSubscriptions(context: APIRequestContext): Array<number | AsyncIterator<EventPacket>> {
+    let subscriptions: Array<number | AsyncIterator<EventPacket>> | undefined = context.get(ServiceBroker.EventSubscriptionSymbol);
+    if (!subscriptions) {
+      subscriptions = [];
+      context.set(ServiceBroker.EventSubscriptionSymbol, subscriptions, subs => {
+        for (const sub of subs) {
+          this.unsubscribeEvent(sub);
+        }
+      });
+    }
+    return subscriptions;
+  }
+
+  private static BatchingPoolSymbol = Symbol("BrokerBatchingPool");
+
+  private getBatchingPool(context: APIRequestContext): BatchingPool {
+    let batchingPool: BatchingPool | undefined = context.get(ServiceBroker.BatchingPoolSymbol);
+    if (!batchingPool) {
+      batchingPool = new BatchingPool(this.opts.batching);
+      context.set(ServiceBroker.BatchingPoolSymbol, batchingPool, pool => {
+        pool.clear();
+      });
+    }
+    return batchingPool;
   }
 
   /* action call */
-  public async call(context: Context, args: CallArgs): Promise<any> {
+  public async call(context: APIRequestContext, args: CallArgs): Promise<any> {
+    const ctx = this.getDelegatorContext(context);
     const {action, params, batchingParams, disableCache} = args;
-    const node = this.delegator.selectActionTargetNode(context, action)!;
+    const node = this.delegator.selectActionTargetNode(ctx, action)!;
     console.assert(node && action, "there are no available nodes to call the action");
 
     // do batching
     if (batchingParams) {
-      const batchingPool = this.batchingPoolMap.get(context)!;
+      const batchingPool = this.getBatchingPool(context);
       const batchingParamNames = Object.keys(batchingParams);
       const batchingKey = batchingPool.getBatchingKey({action: action.id, params, batchingParamNames});
 
@@ -189,7 +215,7 @@ export class ServiceBroker<Context extends ContextBase = ContextBase> {
           }
 
           // do batching call
-          const response = await this.delegator.call(context, {action, node, params: mergedParams, disableCache});
+          const response = await this.delegator.call(ctx, {action, node, params: mergedParams, disableCache});
           this.registry.addActionExample({action, params: mergedParams, response});
           return response;
         });
@@ -201,7 +227,7 @@ export class ServiceBroker<Context extends ContextBase = ContextBase> {
     } else {
 
       // normal request
-      const response = await this.delegator.call(context, {action, node, params, disableCache});
+      const response = await this.delegator.call(ctx, {action, node, params, disableCache});
       this.registry.addActionExample({action, params, response});
       return response;
     }
@@ -227,12 +253,8 @@ export class ServiceBroker<Context extends ContextBase = ContextBase> {
   }
 
   /* event pub/sub */
-  public async subscribeEvent<Listener extends EventListener | null>(context: Context, eventNamePattern: string, listener: Listener): Promise<Listener extends EventListener ? void : AsyncIterator<Readonly<EventPacket>>> {
-    let subscriptions = this.eventSubscriptionMap.get(context);
-    if (!subscriptions) {
-      subscriptions = [];
-      this.eventSubscriptionMap.set(context, subscriptions);
-    }
+  public async subscribeEvent<Listener extends EventListener | null>(context: APIRequestContext, eventNamePattern: string, listener: Listener): Promise<Listener extends EventListener ? void : AsyncIterator<Readonly<EventPacket>>> {
+    const subscriptions = this.getEventSubscriptions(context);
 
     if (listener) {
       subscriptions.push(...(await this.eventPubSub.subscribe(eventNamePattern, listener!)));
@@ -245,22 +267,17 @@ export class ServiceBroker<Context extends ContextBase = ContextBase> {
     return iterator as any;
   }
 
-  public async unsubscribeEvent(context: Context): Promise<void> {
-    const subscriptions = this.eventSubscriptionMap.get(context);
-    if (subscriptions) {
-      for (const subscription of subscriptions) {
-        if (typeof subscription === "number") {
-          this.eventPubSub.unsubscribe(subscription);
-        } else if (subscription.return) {
-          await subscription.return();
-        }
-      }
-      this.eventSubscriptionMap.delete(context);
+  public async unsubscribeEvent(subscription: number | AsyncIterator<EventPacket>): Promise<void> {
+    if (typeof subscription === "number") {
+      this.eventPubSub.unsubscribe(subscription);
+    } else if (subscription.return) {
+      await subscription.return();
     }
   }
 
-  public async publishEvent(context: Context, args: EventPublishArgs): Promise<void> {
-    const packet = await this.delegator.publish(context, args);
+  public async publishEvent(context: APIRequestContext, args: EventPublishArgs): Promise<void> {
+    const ctx = this.getDelegatorContext(context);
+    const packet = await this.delegator.publish(ctx, args);
     this.registry.addEventExample(this.resolveEventName(args.event), packet);
   }
 

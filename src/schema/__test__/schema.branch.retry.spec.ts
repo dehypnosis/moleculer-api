@@ -19,6 +19,7 @@ const remote = getMoleculerServiceBroker({
   logger: {level: "error", label: "remote"},
   moleculer: {...moleculer, nodeID: "remote"},
   services: [
+    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "master-c", {
       protocol: {
         GraphQL: {
@@ -33,6 +34,7 @@ const remote = getMoleculerServiceBroker({
         },
       },
     }),
+    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "master-b", {
       protocol: {
         GraphQL: {
@@ -47,6 +49,7 @@ const remote = getMoleculerServiceBroker({
         },
       },
     }),
+    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "master-a", {
       protocol: {
         GraphQL: {

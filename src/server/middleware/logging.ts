@@ -75,7 +75,7 @@ export class LoggingMiddleware extends ServerMiddleware {
 
     // ws connection logger; be noted that it is a trick
     const wsLogger = morgan(wsFormat, opts);
-    modules.ws.on("connection", (ws, req) => {
+    modules.ws.on("connection", (socket, req) => {
       wsLogger(req as any, {} as any, () => {
       });
     });

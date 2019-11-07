@@ -79,11 +79,6 @@ export abstract class Route {
     });
   }
 
-  public parsePathToParams(path: string) {
-    console.log(path, this.paramKeys);
-    return {};
-  }
-
   public get handler() {
     return this.props.handler;
   }

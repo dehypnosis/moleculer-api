@@ -1,6 +1,6 @@
 import { CallConnectorCatalog, CallConnectorSchema } from "./schema";
 
-// TODO: [catalog] catalog for each connectors scheme....
+// TODO: Catalog for each connectors scheme....
 export const ConnectorDescriber = {
   call(schema: Readonly<CallConnectorSchema>): CallConnectorCatalog {
     return {

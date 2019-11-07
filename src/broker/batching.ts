@@ -17,32 +17,6 @@ const defaultOptions: BatchingPoolOptions = {
   entriesLimit: 100,
 };
 
-export class BatchingPoolMap<KEY> {
-  private readonly poolMap = new Map<KEY, BatchingPool>();
-  private readonly opts: BatchingPoolOptions;
-
-  constructor(opts?: RecursivePartial<BatchingPoolOptions>) {
-    this.opts = _.defaultsDeep(opts || {}, defaultOptions);
-  }
-
-  public get(key: KEY): BatchingPool {
-    let pool = this.poolMap.get(key);
-    if (!pool) {
-      pool = new BatchingPool(this.opts);
-      this.poolMap.set(key, pool);
-    }
-    return pool;
-  }
-
-  public delete(key: KEY): void {
-    this.poolMap.delete(key);
-  }
-
-  public clear(): void {
-    this.poolMap.clear();
-  }
-}
-
 export class BatchingPool {
   private readonly loaderMap = new Map<any, DataLoader<any, any>>();
   private readonly opts: BatchingPoolOptions;
@@ -67,7 +41,7 @@ export class BatchingPool {
             if (this.opts.failedEntryCheck(entry)) {
               // wrap entry as Error, ref: https://github.com/graphql/dataloader/blob/master/src/index.js#L175
               const err = new Error("failed batching entry"); // TODO: normalize error
-              for (const [k,v] of Object.entries(entry)) {
+              for (const [k, v] of Object.entries(entry)) {
                 // @ts-ignore
                 err[k] = v;
               }
@@ -85,9 +59,13 @@ export class BatchingPool {
     this.loaderMap.set(key, loader);
   }
 
-  public async batch(key: any, batchingParams: any): Promise<any|Error> {
+  public async batch(key: any, batchingParams: any): Promise<any | Error> {
     const loader = this.loaderMap.get(key)!;
     console.assert(loader, "cannot find batching handler with given key");
     return loader.load(batchingParams);
+  }
+
+  public clear() {
+    this.loaderMap.clear();
   }
 }

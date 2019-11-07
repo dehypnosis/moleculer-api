@@ -20,6 +20,7 @@ const remote1 = getMoleculerServiceBroker({
   moleculer: {...moleculer, nodeID: "remote"},
   services: [
     MoleculerServiceSchemaFactory.echo("master", "master-a"),
+    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "conflict-a", {
       protocol: {
         REST: {
@@ -75,6 +76,7 @@ const remote2 = getMoleculerServiceBroker({
   logger: {level: "error", label: "remote2"},
   moleculer: {...moleculer, nodeID: "remote2"},
   services: [
+    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("dev", "conflict-a", {
       protocol: {
         REST: {

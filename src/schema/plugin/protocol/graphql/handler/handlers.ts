@@ -1,21 +1,21 @@
 import * as path from "path";
-import { convertNodeHttpToRequest, HttpQueryError, runHttpQuery, processFileUploads, formatApolloErrors } from "apollo-server-core";
+import { convertNodeHttpToRequest, HttpQueryError, runHttpQuery, processFileUploads, formatApolloErrors, GraphQLOptions } from "apollo-server-core";
 import { SubscriptionServerOptions } from "apollo-server-core/src/types";
 import { ApolloServer, Config as ApolloServerConfig, makeExecutableSchema } from "apollo-server-express";
 import { execute, subscribe } from "graphql";
-import { HTTPRouteHandler, WebSocketRouteHandler } from "../../../../../server";
+import { APIRequestContext, HTTPRouteHandler, WebSocketRouteHandler } from "../../../../../server";
 import { GraphQLSubscriptionHandler } from "./subscription";
 
-export type GraphQLHandlersOptions = Omit<ApolloServerConfig, "subscriptions"|"playgrounds"|"schema"|"typeDefs"> & {
+export type GraphQLHandlersOptions = Omit<ApolloServerConfig, "subscriptions" | "playgrounds" | "schema" | "typeDefs" | "context"> & {
   typeDefs?: string | string[];
-  subscriptions?: Omit<SubscriptionServerOptions, "path"|"onConnect"|"onDisconnect"> | false;
+  subscriptions?: Omit<SubscriptionServerOptions, "path" | "onConnect" | "onDisconnect"> | false;
   playgrounds?: false;
 };
 
 // ref: https://github.com/apollographql/apollo-server/blob/master/packages/apollo-server-core/src/ApolloServer.ts
 export class GraphQLHandlers extends ApolloServer {
-  constructor(onMessage: (message: string|Error) => void, opts: GraphQLHandlersOptions) {
-    const { typeDefs, resolvers, schemaDirectives, parseOptions, subscriptions, uploads, playground, ...restOptions } = opts;
+  constructor(onMessage: (message: string | Error) => void, opts: GraphQLHandlersOptions) {
+    const {typeDefs, resolvers, schemaDirectives, parseOptions, subscriptions, uploads, playground, ...restOptions} = opts;
     const schema = makeExecutableSchema({
       typeDefs: typeDefs || [],
       resolvers,
@@ -38,14 +38,19 @@ export class GraphQLHandlers extends ApolloServer {
     super({
       schema,
       ...restOptions,
+
       // below features are handled separately
       subscriptions: false,
       playground: false,
       uploads: false,
+
+      // context injection
+      context: ({ context }: any) => context, // { context, req, res}
     });
 
     // create graphql request handler
     const uploadsConfig = typeof uploads !== "object" ? {} : uploads;
+    const optionsFactory = this.createGraphQLServerOptionsWithContext.bind(this);
     const handler: HTTPRouteHandler = async (context, req, res) => {
       try {
         // process upload
@@ -54,7 +59,9 @@ export class GraphQLHandlers extends ApolloServer {
           try {
             req.body = await processFileUploads!(req, res, uploadsConfig);
           } catch (error) {
-            if (error.status && error.expose) res.status(error.status);
+            if (error.status && error.expose) {
+              res.status(error.status);
+            }
 
             throw formatApolloErrors([error], {
               formatter: this.requestOptions.formatError,
@@ -64,9 +71,9 @@ export class GraphQLHandlers extends ApolloServer {
         }
 
         // run query
-        const {graphqlResponse, responseInit} = await runHttpQuery([req, res], {
+        const {graphqlResponse, responseInit} = await runHttpQuery([context, req, res], {
+          options: optionsFactory, // invoked with { context, req, res }
           method: req.method,
-          options: await this.createGraphQLServerOptions(req, res),
           query: req.body,
           request: convertNodeHttpToRequest(req),
         });
@@ -113,6 +120,10 @@ export class GraphQLHandlers extends ApolloServer {
         res.sendFile(playgroundPath);
       };
     }
+  }
+
+  public async createGraphQLServerOptionsWithContext(context: APIRequestContext, req: any, res: any): Promise<GraphQLOptions> {
+    return super.graphQLServerOptions({context, req, res});
   }
 
   public readonly handler: HTTPRouteHandler;

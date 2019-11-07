@@ -39,7 +39,7 @@ function recSanitizeObject(obj: any, opts: SanitizeObjectOptions): any {
   if (obj !== null && typeof obj === "object") {
     // array
     if (Array.isArray(obj)) {
-      return obj.map((o: any) => recSanitizeObject(o, opts));
+      return obj.map((item: any) => recSanitizeObject(item, opts));
     }
 
     // object

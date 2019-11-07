@@ -36,13 +36,13 @@ export function proxyMoleculerServiceDiscovery(node: Moleculer.BrokerNode): Serv
     // add actions
     for (const action of Object.values(service.actions) as any) {
       // tslint:disable-next-line:no-shadowed-variable
-      const {name, rawName, description = null, deprecated = false, params = null, cache = null, handler, stream = false, meta = null, ...others } = action;
-      const streaming = meta && typeof meta === "object"; // TODO: [discovery] about support streaming in moleculer broker
+      const {name, rawName, description = null, deprecated = false, params = null, cache = null, handler, meta = null, ...others } = action;
       foundService.addAction({
         id: name,
         displayName: rawName,
         description,
         deprecated,
+        // TODO: streaming support for params schema generation
         paramsSchema: meta && typeof meta === "object" ? {
           stream: {
             type: "any",

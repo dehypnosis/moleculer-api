@@ -3,8 +3,8 @@ import _ from "lodash";
 import { RecursivePartial } from "../interface";
 import { Logger } from "../logger";
 import { SchemaRegistry } from "../schema";
-import { ServerApplication, ServerApplicationOptions, ContextFactoryConstructors, ContextFactoryConstructorOptions, defaultContextFactoryConstructorOptions, ContextFactory } from "./application";
-import { ServerMiddleware, ServerMiddlewareConstructorOptions, defaultServerMiddlewareConstructorOptions, ServerMiddlewareConstructors } from "./middleware";
+import { ServerApplication, ServerApplicationOptions, APIRequestContextFactoryConstructors, APIRequestContextFactoryConstructorOptions, defaultAPIRequestContextFactoryConstructorOptions, APIRequestContextFactory } from "./application";
+import { ServerMiddlewareConstructorOptions, defaultServerMiddlewareConstructorOptions, ServerMiddlewareConstructors } from "./middleware";
 import { ServerProtocol, ServerProtocolConstructorOptions, defaultServerProtocolConstructorOptions, ServerProtocolConstructors } from "./protocol";
 
 export type APIServerProps = {
@@ -22,7 +22,7 @@ export type APIServerOptions = {
   application: ServerApplicationOptions;
   middleware: ServerMiddlewareConstructorOptions;
   protocol: ServerProtocolConstructorOptions;
-  context: ContextFactoryConstructorOptions;
+  context: APIRequestContextFactoryConstructorOptions;
 };
 
 export class APIServer {
@@ -38,8 +38,8 @@ export class APIServer {
         maxDebouncedSeconds: 5,
       },
       application: {},
-      context: defaultContextFactoryConstructorOptions,
-      middleware: defaultServerMiddlewareConstructorOptions,
+      context: defaultAPIRequestContextFactoryConstructorOptions,
+      middleware: [],
       protocol: defaultServerProtocolConstructorOptions,
     });
     this.opts.update.debouncedSeconds = isNaN(this.opts.update.debouncedSeconds) ? 2 : Math.max(this.opts.update.debouncedSeconds, 0);
@@ -48,16 +48,16 @@ export class APIServer {
     // create context factory
     const contextFactories = Object.entries(this.opts.context)
       .reduce((factories, [k, options]) => {
-        const key = k as keyof ContextFactoryConstructorOptions;
+        const key = k as keyof APIRequestContextFactoryConstructorOptions;
         if (options !== false) {
           factories.push(
-            new (ContextFactoryConstructors[key])({
+            new (APIRequestContextFactoryConstructors[key])({
               logger: this.props.logger.getChild(`context/${key}`),
             }, options),
           );
         }
         return factories;
-      }, [] as Array<ContextFactory<any>>);
+      }, [] as Array<APIRequestContextFactory<any>>);
     this.props.logger.info(`gateway context factories have been applied ${contextFactories.join(", ")}`);
 
     // create application
@@ -65,6 +65,19 @@ export class APIServer {
       logger: this.props.logger.getChild(`application`),
       contextFactories,
     }, this.opts.application);
+
+    // override middleware options
+    const middlewareOptions: ServerMiddlewareConstructorOptions = [];
+    for (const item of defaultServerMiddlewareConstructorOptions) {
+      const key = Object.keys(item)[0];
+      const overriding = this.opts.middleware.find(it => Object.keys(it)[0] === key);
+      if (overriding) {
+        middlewareOptions.push(_.defaultsDeep(overriding, item));
+      } else {
+        middlewareOptions.push(item);
+      }
+    }
+    this.opts.middleware = middlewareOptions;
 
     // create middleware
     const middleware = this.opts.middleware
@@ -75,8 +88,7 @@ export class APIServer {
       })
       .map(obj => {
         const key = Object.keys(obj)[0] as keyof typeof ServerMiddlewareConstructors;
-        // @ts-ignore: cannot infer key of union typed objects
-        const options = obj[key];
+        const options = (obj as any)[key];
         return new (ServerMiddlewareConstructors[key])({
           logger: this.props.logger.getChild(`middleware/${key}`),
         }, options);

@@ -1,4 +1,4 @@
-import { composeAsyncIterators } from "./async-iterator";
+import { composeAsyncIterators } from "./iterable";
 
 async function* range(a=0, b=5, sleepModifier=1) {
   for (let i=a; i<b; i++) {

@@ -4,14 +4,14 @@ import http2 from "http2";
 import ws from "ws";
 
 export type WebSocketHTTPRequest = (http.IncomingMessage | http2.Http2ServerRequest) & { path: string, params: any, query: any };
-export type WebSocketRouteHandler<Context = any> = (context: Context, ws: ws, req: WebSocketHTTPRequest) => void;
+export type WebSocketRouteHandler<Context = any> = (context: Context, socket: ws, req: WebSocketHTTPRequest) => void;
 
 /*
   WebSocketRouteInternalHandler will be attached to `wsServer.on("connection", ...)`
   But "connection" event handlers will not invoked by `wsServer.emit("connection", wsSocket)` of EventEmitter.
   To make isolated connection handling, only matched handlers by own paths will be called directly.
  */
-export type WebSocketRouteInternalHandler = (ws: ws, req: WebSocketHTTPRequest) => void;
+export type WebSocketRouteInternalHandler = (socket: ws, req: WebSocketHTTPRequest) => void;
 
 export type WebSocketRouteProps<Context = any> = Omit<RouteProps, "handler"> & {
   handler: WebSocketRouteHandler<Context>;

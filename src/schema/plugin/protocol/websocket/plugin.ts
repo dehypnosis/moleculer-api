@@ -3,11 +3,12 @@ import { RecursivePartial, ValidationError } from "../../../../interface";
 import { ServiceAPIIntegration } from "../../../integration";
 import { Route } from "../../../../server";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
+import { WebSocketProtocolPluginSchema, WebSocketProtocolPluginCatalog } from "./schema";
 
 export type WebSocketProtocolPluginOptions = {
 };
 
-export class WebSocketProtocolPlugin extends ProtocolPlugin<any, any> {
+export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPluginSchema, WebSocketProtocolPluginCatalog> {
   public static readonly key = "WebSocket";
   public static readonly autoLoadOptions: WebSocketProtocolPluginOptions = {
   };
@@ -24,18 +25,16 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<any, any> {
   public async stop(): Promise<void> {
   }
 
-  // TODO: [websocket] design websocket schema
-  public validateSchema(schema: Readonly<any>): ValidationError[] {
+  // TODO: WebSocket plugin
+  public validateSchema(schema: Readonly<WebSocketProtocolPluginSchema>): ValidationError[] {
     return [];
   }
 
-  // TODO: [websocket] websocket compile
   public compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Array<Readonly<ServiceAPIIntegration>>): Array<{ hash: string; route: Readonly<Route>; }> {
     return [];
   }
 
-  // TODO: [websocket] websocket catalog
-  public describeSchema(schema: Readonly<any>): any {
-    return {};
+  public describeSchema(schema: Readonly<WebSocketProtocolPluginSchema>): WebSocketProtocolPluginCatalog {
+    return {} as WebSocketProtocolPluginCatalog;
   }
 }

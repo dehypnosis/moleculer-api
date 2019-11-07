@@ -1,7 +1,7 @@
 import * as http from "http";
 import * as _ from "lodash";
 import { RecursivePartial } from "../../interface";
-import { ContextFactory, ServerApplicationComponentModules } from "../application";
+import { ServerApplicationComponentModules } from "../application";
 import { listeningURI, ServerProtocol, ServerProtocolProps } from "./protocol";
 
 export type ServerHTTPProtocolOptions = {

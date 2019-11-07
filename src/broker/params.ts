@@ -200,6 +200,7 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
         err.paramNames = implicitMappableParamNames;
         reporter.warn(err);
 
+        // tslint:disable-next-line:no-shadowed-variable
         const prevMapper = mapper;
         mapper = args => {
           const params = prevMapper(args);

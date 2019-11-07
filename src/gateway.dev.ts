@@ -50,13 +50,16 @@ const gateway = new APIGateway({
                     routes: [
                       {
                         method: "GET",
-                        path: "/",
-                        map: `() => "foo"`,
+                        path: "/bar",
+                        map: `() => { throw new Error("what an error"); }`,
                       },
                       {
                         method: "GET",
-                        path: "/bar",
-                        map: `() => { throw new Error("what an error"); }`,
+                        path: "/:id",
+                        call: {
+                          action: "foo.get",
+                          params: {},
+                        },
                       },
                       {
                         method: "GET",
@@ -131,9 +134,10 @@ const gateway = new APIGateway({
                 handler(ctx) {
                   const id = ctx.params!.id;
                   if (Array.isArray(id)) { // batching
-                    return id.map(id => ({ id }));
+                    // tslint:disable-next-line:no-shadowed-variable
+                    return id.map(id => ({id}));
                   }
-                  return { id }; // single
+                  return {id}; // single
                 },
               },
               noop(ctx) {
@@ -145,7 +149,11 @@ const gateway = new APIGateway({
     },
   ],
   schema: {
-    protocol: {},
+    protocol: {
+      GraphQL: {
+        subscriptions: {},
+      },
+    },
     branch: {
       maxVersions: 1,
     },
@@ -159,6 +167,15 @@ const gateway = new APIGateway({
         port: 8080,
       },
     },
+    middleware: [
+      {
+        cors: {
+          origin: [
+            "https://www.google.com",
+          ],
+        },
+      },
+    ],
   },
   logger: {
     winston: {level: "info"},

@@ -1,38 +1,46 @@
-import * as http from "http";
-import * as http2 from "http2";
-import { Pluggable } from "../../../interface";
-import { Logger } from "../../../logger";
+import { APIRequestContextFactory, APIRequestContextProps, APIRequestContextSource } from "./index";
 
-export type ContextFactorySource = Readonly<http.IncomingMessage | http2.Http2ServerRequest>;
+export type APIRequestContextConstructor = (source: APIRequestContextSource) => Promise<APIRequestContext>;
 
-export type ContextFactoryProps = {
-  logger: Logger;
-};
+export interface APIRequestContext extends APIRequestContextProps {}
 
-export type ContextFactoryFn = (source: ContextFactorySource) => Promise<any>;
-
-export abstract class ContextFactory<T> extends Pluggable {
-  constructor(protected readonly props: ContextFactoryProps, opts?: any) {
-    super();
+type APIRequestContextStore = Map<symbol, APIRequestContextStoreItemClearer>;
+type APIRequestContextStoreItemClearer = [any, (value: any) => void];
+export class APIRequestContext {
+  protected constructor(props: APIRequestContextProps) {
+    Object.assign(this, props);
+    Object.defineProperty(this, APIRequestContext.StoreSymbol, { value: new Map(), enumerable: true, configurable: false, writable: false }); // should be enumerable, ... for plugins which adjust given context
   }
 
-  private static contextParsedSymbol = Symbol("contextParsed");
+  private static SourceContextSymbol = Symbol("APIRequestContext");
+  private static StoreSymbol = Symbol("APIRequestContextStore");
 
-  public static merge(factories: ReadonlyArray<ContextFactory<any>>, hooks?: { before?: (source: ContextFactorySource) => void, after?: (source: ContextFactorySource, context: any) => void }): ContextFactoryFn {
+  public static createConstructor(
+    factories: ReadonlyArray<APIRequestContextFactory<any>>,
+    hooks?: {
+      before?: (source: APIRequestContextSource) => void;
+      after?: (source: APIRequestContextSource, context: APIRequestContext) => void;
+    },
+  ): APIRequestContextConstructor {
     return async source => {
-      // mark source as parsed
-      console.assert(!source.hasOwnProperty(ContextFactory.contextParsedSymbol), "cannot call context factory more than once from a request: check ApplicationComponent.unmountRoutes/mountRoutes methods");
-      Object.defineProperty(source, ContextFactory.contextParsedSymbol, {value: true});
+      console.assert(!source.hasOwnProperty(APIRequestContext.SourceContextSymbol), "cannot call context factory more than once from a request: check ApplicationComponent.unmountRoutes/mountRoutes methods");
 
       if (hooks && hooks.before) {
         hooks.before(source);
       }
 
-      const context: { [key: string]: any } = {};
-      const entries = await Promise.all(factories.map(async factory => [factory.key, await factory.create(source)] as [string, any]));
-      for (const [k, v] of entries) {
-        context[k] = v;
+      // create props
+      const props: APIRequestContextProps = {};
+      const propEntries = await Promise.all(factories.map(async factory => [factory.key, await factory.create(source)] as [string, any]));
+      for (const [k, v] of propEntries) {
+        props[k as keyof APIRequestContextProps] = v;
       }
+
+      // create context
+      const context = new APIRequestContext(props);
+
+      // add reference to source
+      Object.defineProperty(source, APIRequestContext.SourceContextSymbol, {value: context});
 
       if (hooks && hooks.after) {
         hooks.after(source, context);
@@ -42,9 +50,30 @@ export abstract class ContextFactory<T> extends Pluggable {
     };
   }
 
-  public static parsed(source: ContextFactorySource): boolean {
-    return source.hasOwnProperty(ContextFactory.contextParsedSymbol);
+  public static find(source: APIRequestContextSource): APIRequestContext | null {
+    if (source.hasOwnProperty(APIRequestContext.SourceContextSymbol)) {
+      return (source as any)[APIRequestContext.SourceContextSymbol];
+    }
+    return null;
   }
 
-  public abstract create(source: ContextFactorySource): Promise<T> | T;
+  /* internal store for broker delegator and plugins */
+  public set<T>(symbol: symbol, value: T, clear: (value: T) => void): void {
+    const store: APIRequestContextStore = (this as any)[APIRequestContext.StoreSymbol];
+    store.set(symbol, [value, clear]);
+  }
+
+  public get(symbol: symbol): any {
+    const store: APIRequestContextStore = (this as any)[APIRequestContext.StoreSymbol];
+    const item = store.get(symbol);
+    return item ? item[0] : undefined;
+  }
+
+  public clear() {
+    const store: APIRequestContextStore = (this as any)[APIRequestContext.StoreSymbol];
+    for (const [value, clear] of store.values()) {
+      clear(value);
+    }
+    store.clear();
+  }
 }

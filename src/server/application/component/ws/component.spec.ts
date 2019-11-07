@@ -1,7 +1,6 @@
 import http from "http";
 import ws from "ws";
 import { getLogger, sleep } from "../../../../test";
-import { ContextFactory } from "../../context";
 import { ServerWebSocketApplication } from "./component";
 import { WebSocketRoute } from "./route";
 
@@ -9,16 +8,7 @@ const wsApp = new ServerWebSocketApplication({
   logger: getLogger(),
 });
 const httpServer = http.createServer()
-  .on("upgrade", (req, socket, head) => {
-    wsApp.module.handleUpgrade(req, socket, head, ws => {
-      wsApp.module.emit("connection", ws, req);
-      setTimeout(() => {
-        if (!ContextFactory.parsed(req.headers)) {
-          ws.close();
-        }
-      }, 1000);
-    });
-  });
+  .on("upgrade", wsApp.module.upgradeEventHandler);
 
 beforeAll(async () => {
   await wsApp.start();
@@ -33,13 +23,13 @@ describe("websocket application should work with routes", () => {
     new WebSocketRoute({
       path: "/chat",
       description: null,
-      handler: (context, ws, req) => {
+      handler: (context, socket, req) => {
         createdContext = context;
-        ws.send(message, err => err && console.error(err));
-        ws.close();
+        socket.send(message, err => err && console.error(err));
+        socket.close();
       },
     }),
-  ], ["/", "/~master"], mocks.createContext);
+  ], ["/", "/~master"], mocks.createContext as any);
 
   const wsClient = new ws("ws://localhost:8888/chat");
   wsClient.once("open", mocks.open);

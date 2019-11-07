@@ -1,14 +1,23 @@
 import { ServiceAPIIntegration } from "../../integration";
 import { Route } from "../../../server";
 import { Plugin, PluginProps } from "../plugin";
-import { PolicyPlugin } from "..";
-import { ProtocolPluginCatalog } from "../connector";
+import { PolicyPlugin } from "../policy";
+
+export interface IProtocolPluginCatalog {
+  schema: any;
+  description: string;
+  entries: any[];
+}
+
+export interface IProtocolPluginSchema {
+  description: string;
+}
 
 export type ProtocolPluginProps = PluginProps & {
   policyPlugins: Array<Readonly<PolicyPlugin<any, any>>>;
 };
 
-export abstract class ProtocolPlugin<PluginSchema, PluginCatalog extends ProtocolPluginCatalog> extends Plugin<PluginSchema, PluginCatalog> {
+export abstract class ProtocolPlugin<PluginSchema extends IProtocolPluginSchema, PluginCatalog extends IProtocolPluginCatalog> extends Plugin<PluginSchema, PluginCatalog> {
   constructor(protected readonly props: ProtocolPluginProps, opts?: any) {
     super(props);
   }

@@ -1,9 +1,14 @@
 import { ParamsMappingInfo, ServiceStatus, EventPacket, EventListener } from "../../../broker";
+import { PolicyCatalog } from "../policy";
 
 /* Connectors */
 export type CallConnector<MappableArgs extends { [key: string]: any } = any> = (context: any, mappableArgs: MappableArgs) => Promise<any>;
 export type PublishConnector<MappableArgs extends { [key: string]: any } = any> = (context: any, mappableArgs: MappableArgs) => Promise<any>;
-export type SubscribeConnector<MappableArgs extends { [key: string]: any } = any, Listener extends EventListener | null = EventListener> = (context: any, mappableArgs: MappableArgs, listener: Listener) => Promise<Listener extends EventListener ? void : AsyncIterator<any>>;
+export type SubscribeConnector<MappableArgs extends { [key: string]: any } = any, Listener extends EventListener | null = EventListener> = (
+  context: any,
+  mappableArgs: MappableArgs,
+  listener: Listener,
+) => Promise<Listener extends EventListener ? void : AsyncIterator<any>>;
 export type SubscribeConnectorForAsyncIterator<MappableArgs extends { [key: string]: any } = any> = (context: any, mappableArgs: MappableArgs) => AsyncIterator<EventPacket>;
 export type MapConnector<MappableArgs extends { [key: string]: any } = any> = (mappableArgs: MappableArgs) => any;
 export type Connector = CallConnector | PublishConnector | SubscribeConnector | SubscribeConnectorForAsyncIterator | MapConnector;
@@ -84,7 +89,7 @@ export type CallConnectorCatalog = {
   type: "call";
   map: string | null;
   status: () => ServiceStatus;
-  policies: PolicyPluginCatalog[];
+  policies: PolicyCatalog[];
   action: string;
   params: ParamsMappingInfo;
 };
@@ -93,7 +98,7 @@ export type PublishConnectorCatalog = {
   type: "publish";
   map: string | null;
   status: () => ServiceStatus;
-  policies: PolicyPluginCatalog[];
+  policies: PolicyCatalog[];
   event: string | MapConnectorSchema<(args: { [key: string]: any }) => string>;
   params: ParamsMappingInfo;
   groups: string[];
@@ -104,7 +109,7 @@ export type SubscribeConnectorCatalog = {
   type: "subscribe";
   map: string | null;
   status: () => ServiceStatus;
-  policies: PolicyPluginCatalog[];
+  policies: PolicyCatalog[];
   events: string[] | MapConnectorSchema<(args: { [key: string]: any }) => string[]>;
 };
 
@@ -115,25 +120,7 @@ export type MapConnectorCatalog = {
 
 export type ConnectorCatalog = CallConnectorCatalog | PublishConnectorCatalog | SubscribeConnectorCatalog | MapConnectorCatalog;
 
-/* Plugins Catalog Interface */
-export interface PolicyPluginCatalog {
-  type: string;
-  description: string | null;
-}
-
-export interface ProtocolPluginCatalog {
-  schema: any;
-  description: string;
-  entries: any[];
-}
-
 /* Policy */
-export type PolicySchema = {
-  call?: CallPolicySchema[];
-  publish?: PublishPolicySchema[];
-  subscribe?: SubscribePolicySchema[];
-};
-
 export type CallPolicyArgs = Omit<CallConnectorResponseMappableArgs, "response">;
 export type CallPolicySchema = {
   description: string;

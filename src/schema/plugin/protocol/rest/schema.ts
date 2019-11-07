@@ -1,7 +1,8 @@
 import { CallConnectorSchema, ConnectorCatalog, MapConnectorSchema, PublishConnectorSchema } from "../../connector/schema";
+import { IProtocolPluginSchema, IProtocolPluginCatalog } from "../plugin";
 
 /* REST Protocol Plugin */
-export type RESTProtocolPluginSchema = {
+export type RESTProtocolPluginSchema = IProtocolPluginSchema & {
   description: string;
   basePath: string;
   routes: RESTRouteSchema[];
@@ -21,7 +22,7 @@ export type RESTCallableRouteResolverSchema = { call: CallConnectorSchema; ignor
 export type RESTPublishableRouteResolverSchema = { publish: PublishConnectorSchema; };
 export type RESTMappableRouteResolverSchema = { map: MapConnectorSchema<(obj: { path: any, query: any, body: any, context: any }) => any>; };
 
-export type RESTProtocolPluginCatalog = {
+export type RESTProtocolPluginCatalog = IProtocolPluginCatalog & {
   schema: RESTProtocolPluginSchema;
   description: string;
   entries: Array<{

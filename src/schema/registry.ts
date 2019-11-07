@@ -9,7 +9,7 @@ import { Logger } from "../logger";
 import { ServiceAPIIntegrationSource } from "./integration";
 import { ServiceAPISchema, ServiceMetaSchema } from "./index";
 import { Branch, BranchOptions } from "./branch";
-import { ProtocolPlugin, PolicyPlugin, pluginConstructors, PluginConstructorOptions, defaultPluginConstructorOptions } from "./plugin";
+import { ProtocolPlugin, PolicyPlugin, SchemaPluginConstructors, SchemaPluginConstructorOptions, defaultSchemaPluginConstructorOptions } from "./plugin";
 
 export type SchemaRegistryProps = {
   brokers: Array<Readonly<ServiceBroker>>,
@@ -18,7 +18,7 @@ export type SchemaRegistryProps = {
 
 export type SchemaRegistryOptions = {
   branch: BranchOptions,
-} & PluginConstructorOptions;
+} & SchemaPluginConstructorOptions;
 
 export type SchemaRegistryListeners = {
   updated: (branch: Branch) => void,
@@ -42,7 +42,7 @@ export class SchemaRegistry {
     // adjust options
     this.branchOptions = opts && opts.branch;
     const { protocol = {}, policy = {} } = opts || {};
-    const pluginConstructorOptions: PluginConstructorOptions = _.defaultsDeep({protocol, policy}, defaultPluginConstructorOptions);
+    const pluginConstructorOptions: SchemaPluginConstructorOptions = _.defaultsDeep({protocol, policy}, defaultSchemaPluginConstructorOptions);
 
     // initiate all plugins
     this.plugin = {protocol: [], policy: []};
@@ -51,7 +51,7 @@ export class SchemaRegistry {
       if (pluginOptions === false) {
         continue;
       }
-      const PluginConstructor = pluginConstructors.policy[pluginKey as keyof PluginConstructorOptions["policy"]];
+      const PluginConstructor = SchemaPluginConstructors.policy[pluginKey as keyof SchemaPluginConstructorOptions["policy"]];
       if (!PluginConstructor) {
         continue;
       }
@@ -64,7 +64,7 @@ export class SchemaRegistry {
       if (pluginOptions === false) {
         continue;
       }
-      const PluginConstructor = pluginConstructors.protocol[pluginKey as keyof PluginConstructorOptions["protocol"]];
+      const PluginConstructor = SchemaPluginConstructors.protocol[pluginKey as keyof SchemaPluginConstructorOptions["protocol"]];
       if (!PluginConstructor) {
         continue;
       }

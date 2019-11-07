@@ -57,15 +57,12 @@ export class GraphQLSubscriptionHandler {
       const connectionContext: ConnectionContext = Object.create(null);
       connectionContext.initPromise = Promise.resolve(true);
       connectionContext.isLegacy = false;
-      // @ts-ignore
-      connectionContext.socket = socket;
-      // @ts-ignore
-      connectionContext.request = request;
+      connectionContext.socket = socket as any;
+      connectionContext.request = request as any;
       connectionContext.operations = {};
 
       const connectionClosedHandler = (error: any) => {
         if (error) {
-          // @ts-ignore
           this.sendError(
             connectionContext,
             "",
@@ -78,12 +75,9 @@ export class GraphQLSubscriptionHandler {
             connectionContext.socket.close(1011);
           }, 10);
         }
-        // @ts-ignore
         this.onClose(connectionContext);
 
-        // @ts-ignore
         if (this.onDisconnect) {
-          // @ts-ignore
           this.onDisconnect(socket, connectionContext);
         }
       };
@@ -93,7 +87,6 @@ export class GraphQLSubscriptionHandler {
       socket.on("message", this.onMessage(connectionContext));
     };
 
-    // @ts-ignore
     this.handler = connectionHandler.bind(this);
   }
 

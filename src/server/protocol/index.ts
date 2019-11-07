@@ -5,14 +5,9 @@ import { ServerProtocol } from "./protocol";
 
 export { ServerProtocol };
 
-type ServerProtocolClass = typeof ServerProtocol;
-
-interface ServerProtocolInterface extends ServerProtocolClass {
-}
-
 export const ServerProtocolConstructors = {
-  [ServerHTTPProtocol.key]: ServerHTTPProtocol as ServerProtocolInterface,
-  [ServerHTTP2Protocol.key]: ServerHTTP2Protocol as ServerProtocolInterface,
+  [ServerHTTPProtocol.key]: ServerHTTPProtocol,
+  [ServerHTTP2Protocol.key]: ServerHTTP2Protocol,
 };
 
 export type ServerProtocolConstructorOptions = {

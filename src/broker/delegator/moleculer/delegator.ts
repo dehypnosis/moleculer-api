@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import * as Moleculer from "moleculer";
+import { APIRequestContext } from "../../../server";
 import { isReadableStream } from "../../../interface";
-import { ContextBase } from "../../context";
 import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../../registry";
 import { Report } from "../../reporter";
 import { EventPacket } from "../../pubsub";
@@ -68,17 +68,20 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
   }
 
   /* create context for request */
-  public createContext(base: ContextBase): Context {
-    const ctx = Moleculer.Context.create(this.broker);
-    ctx.requestID = base.requestId;
-    Object.assign(ctx, base);
-    return ctx as Context;
+  public createContext(base: APIRequestContext): Context {
+    const context = Moleculer.Context.create(this.broker);
+    context.requestID = base.id || null; // copy request id
+    this.props.logger.debug(`${context.requestID} moleculer context created`);
+    return context;
+  }
+
+  public clearContext(context: Context): void {
+    this.props.logger.debug(`${context.requestID} moleculer context cleared`);
   }
 
   /* call action */
   public selectActionTargetNode(context: Context, action: Readonly<ServiceAction>): Readonly<ServiceNode> | null {
-    // @ts-ignore
-    const epList = this.broker.registry.getActionEndpoints(action.id);
+    const epList = (this.broker.registry as any).getActionEndpoints(action.id);
     if (!epList) {
       return null;
     }
@@ -98,9 +101,6 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
   }
 
   public async call(context: Context, args: DelegatedCallArgs): Promise<any> {
-    // TODO: handle context flow...
-    context = this.createContext({requestId: "blablabla"});
-
     const {action, node, params, disableCache} = args;
     if (disableCache) {
       context.meta.$cache = false;
@@ -146,7 +146,7 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
     packet.from = {
       nodeId: this.broker.nodeID,
       serviceId: this.service.name,
-      serviceHash: this.service.name, // TODO: [publish] about published event packet from field
+      serviceHash: this.service.name, // TODO: Checkout Publish ..... and from information
     };
     return packet;
   }

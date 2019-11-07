@@ -4,11 +4,11 @@ import { RecursivePartial } from "../../interface";
 import { Logger } from "../../logger";
 import { Branch, Version } from "../../schema";
 import { BranchHandlerMap, Route, RouteHandlerMap, ServerApplicationComponent, ServerApplicationComponentConstructorOptions, ServerApplicationComponentConstructors, ServerApplicationComponentModules } from "./component";
-import { ContextFactory } from "./context";
+import { APIRequestContext, APIRequestContextFactory } from "./context";
 
 export type ServerApplicationProps = {
   logger: Logger;
-  contextFactories: ReadonlyArray<ContextFactory<any>>;
+  contextFactories: ReadonlyArray<APIRequestContextFactory<any>>;
 };
 
 export type ServerApplicationOptions = {} & ServerApplicationComponentConstructorOptions;
@@ -81,8 +81,8 @@ export class ServerApplication {
           }
         }
 
-        // prepare context factory
-        const createContext = ContextFactory.merge(this.props.contextFactories, {
+        // prepare context creation
+        const createContext = APIRequestContext.createConstructor(this.props.contextFactories, {
           before(source) {
             branch.touch();
             // console.log("create context with ", source);
@@ -164,7 +164,7 @@ export class ServerApplication {
   }
 
   public get routes() {
-    const items: { branch: Readonly<Branch>, version: Readonly<Version>, route: Readonly<Route> }[] = [];
+    const items: Array<{ branch: Readonly<Branch>, version: Readonly<Version>, route: Readonly<Route> }> = [];
     for (const branchHandlerMap of this.componentBranchHandlerMap.values()) {
       for (const [branch, versionHandlerMap] of branchHandlerMap.entries()) {
         for (const [version, routeHandlerMap] of versionHandlerMap.entries()) {

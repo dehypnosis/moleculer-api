@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import express from "express";
 import { RecursivePartial } from "../../../../interface";
-import { ContextFactoryFn } from "../../context";
+import { APIRequestContextConstructor } from "../../context";
 import { RouteHandlerMap } from "../route";
 import { ServerApplicationComponent, ServerApplicationComponentProps } from "../component";
 import { HTTPRoute, HTTPRouteInternalHandler } from "./route";
@@ -51,7 +51,7 @@ export class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute>
     this.routeHandlerExpressRouterMap.clear();
   }
 
-  public mountRoutes(routes: ReadonlyArray<Readonly<HTTPRoute>>, pathPrefixes: string[], createContext: ContextFactoryFn): Readonly<RouteHandlerMap<HTTPRoute>> {
+  public mountRoutes(routes: ReadonlyArray<Readonly<HTTPRoute>>, pathPrefixes: string[], createContext: APIRequestContextConstructor): Readonly<RouteHandlerMap<HTTPRoute>> {
 
     // create new express.Router for given routes and mount to express.Application
     const expressRouter = express.Router();
@@ -93,6 +93,7 @@ export class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute>
         try {
           // create context
           const context = await createContext(req);
+          res.once("finish", () => context.clear());
 
           // req.params
           req.params = route.paramKeys.reduce((obj, key, i) => {

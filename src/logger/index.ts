@@ -3,14 +3,9 @@ import { WinstonLogger, WinstonLoggerOptions } from "./winston";
 
 export { Logger, LogLevel, WinstonLogger };
 
-type LoggerClass = typeof Logger;
-
-interface LoggerInterface extends LoggerClass {
-}
-
 export const LoggerConstructors = {
-  [WinstonLogger.key]: WinstonLogger as LoggerInterface,
-  // [OtherLogger.key]: OtherLogger as LoggerInterface,
+  [WinstonLogger.key]: WinstonLogger,
+  // [OtherLogger.key]: OtherLogger,
 };
 
 export type LoggerConstructorOptions = {

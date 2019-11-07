@@ -111,8 +111,7 @@ export function compileValidationSchema(schema: ValidationSchema, opts?: Recursi
   }
 
   // apply strict option
-  // @ts-ignore
-  schema.$$strict = !options.strict;
+  schema.$$strict = !options.strict as any;
 
   // create checker
   const check = validator.compile(schema);
@@ -146,8 +145,7 @@ export function compileValidationRule(rule: ValidationRule | ValidationRule[], o
   const schema = { [options.field]: rule } as ValidationSchema;
 
   // apply strict option
-  // @ts-ignore
-  schema.$$strict = !options.strict;
+  schema.$$strict = !options.strict as any;
 
   // create checker
   const check = validator.compile(schema);
@@ -170,7 +168,6 @@ export function validateInlineFunction(fnString: string): boolean {
     return false;
   }
 }
-
 
 /*
 // transform back OneOf rules to []

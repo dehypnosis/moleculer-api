@@ -1,4 +1,3 @@
-// @ts-ignore
 import objectHash from "object-hash";
 
 export function hash(v: any, respectArrayOrders: boolean = false): string {

@@ -44,12 +44,12 @@ export class ErrorMiddleware extends ServerMiddleware {
       console.assert(errorHandlerIndex !== -1, "where the http error handler gone?");
       layers.push(...layers.splice(errorHandlerIndex, 1));
     };
-    modules.http.on("update", arrangeHTTPErrorHandlers);
 
     // mount handlers
     modules.http.use(httpNotFoundHandler);
     modules.http.use(httpErrorHandler);
     arrangeHTTPErrorHandlers();
+    modules.http.on("update", arrangeHTTPErrorHandlers);
 
     /* WebSocket Server Error handling */
     modules.ws.on("error", this.handleWebSocketError.bind(this));

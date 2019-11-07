@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import { PickOptions as PickLanguageOptions, pick as pickLanguage } from "accept-language-parser";
-import { RecursivePartial } from "../../../interface";
-import { ContextFactory, ContextFactorySource, ContextFactoryProps } from "./context";
+import { RecursivePartial } from "../../../../interface";
+import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFactoryProps } from "./factory";
 
 export type LocaleContextFactoryOptions = {
   supported: string[];
@@ -14,7 +14,7 @@ export type LocaleContextFactoryOptions = {
     language: https://github.com/opentable/accept-language-parser
 */
 
-export class LocaleContextFactory extends ContextFactory<{
+export class LocaleContextFactory extends APIRequestContextFactory<{
   language: string; // en, ko
   region: string | null; // US, KR
 }> {
@@ -26,12 +26,12 @@ export class LocaleContextFactory extends ContextFactory<{
   };
   private readonly opts: LocaleContextFactoryOptions;
 
-  constructor(protected readonly props: ContextFactoryProps, opts?: RecursivePartial<LocaleContextFactoryOptions>) {
+  constructor(protected readonly props: APIRequestContextFactoryProps, opts?: RecursivePartial<LocaleContextFactoryOptions>) {
     super(props);
     this.opts = _.defaultsDeep(opts || {}, LocaleContextFactory.autoLoadOptions);
   }
 
-  public create({ headers }: ContextFactorySource) {
+  public create({ headers }: APIRequestContextSource) {
     const { fallback, supported, ...pickOpts } = this.opts;
     let locale: string | null = null;
     if (headers["accept-language"]) {

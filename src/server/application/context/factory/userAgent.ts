@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import { parse as parseUserAgent, Details as UserAgent } from "express-useragent";
-import { RecursivePartial } from "../../../interface";
-import { ContextFactory, ContextFactorySource, ContextFactoryProps } from "./context";
+import { RecursivePartial } from "../../../../interface";
+import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFactoryProps } from "./factory";
 
 export type UserAgentContextFactoryOptions = {};
 
@@ -10,17 +10,17 @@ export type UserAgentContextFactoryOptions = {};
   ref: https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/express-useragent/index.d.ts#L18
 */
 
-export class UserAgentContextFactory extends ContextFactory<UserAgent> {
+export class UserAgentContextFactory extends APIRequestContextFactory<UserAgent> {
   public static readonly key = "userAgent";
   public static readonly autoLoadOptions: UserAgentContextFactoryOptions = {};
   private readonly opts: UserAgentContextFactoryOptions;
 
-  constructor(protected readonly props: ContextFactoryProps, opts?: RecursivePartial<UserAgentContextFactoryOptions>) {
+  constructor(protected readonly props: APIRequestContextFactoryProps, opts?: RecursivePartial<UserAgentContextFactoryOptions>) {
     super(props);
     this.opts = _.defaultsDeep(opts || {}, UserAgentContextFactory.autoLoadOptions);
   }
 
-  public create({headers}: ContextFactorySource) {
+  public create({headers}: APIRequestContextSource) {
     return parseUserAgent(headers["user-agent"] || "");
   }
 }

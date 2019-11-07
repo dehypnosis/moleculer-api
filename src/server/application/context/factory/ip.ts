@@ -1,7 +1,6 @@
 import * as _ from "lodash";
-import * as uuid from "uuid";
-import { RecursivePartial } from "../../../interface";
-import { ContextFactory, ContextFactorySource, ContextFactoryProps } from "./context";
+import { RecursivePartial } from "../../../../interface";
+import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFactoryProps } from "./factory";
 
 export type IPContextFactoryOptions = {
   forwardedHeaderName: string;
@@ -11,7 +10,7 @@ export type IPContextFactoryOptions = {
   IP Address Context Factory
 */
 
-export class IPContextFactory extends ContextFactory<string | undefined> {
+export class IPContextFactory extends APIRequestContextFactory<string | undefined> {
   public static readonly key = "ip";
   public static readonly autoLoadOptions: IPContextFactoryOptions = {
     forwardedHeaderName: "X-Forwarded-For",
@@ -19,13 +18,13 @@ export class IPContextFactory extends ContextFactory<string | undefined> {
 
   private readonly opts: IPContextFactoryOptions;
 
-  constructor(protected readonly props: ContextFactoryProps, opts?: RecursivePartial<IPContextFactoryOptions>) {
+  constructor(protected readonly props: APIRequestContextFactoryProps, opts?: RecursivePartial<IPContextFactoryOptions>) {
     super(props);
     this.opts = _.defaultsDeep(opts || {}, IPContextFactory.autoLoadOptions);
     this.opts.forwardedHeaderName = this.opts.forwardedHeaderName.toLowerCase();
   }
 
-  public create(source: ContextFactorySource) {
+  public create(source: APIRequestContextSource) {
     const {forwardedHeaderName} = this.opts;
     if (typeof source.headers[forwardedHeaderName] === "string") {
       return source.headers[forwardedHeaderName] as string;

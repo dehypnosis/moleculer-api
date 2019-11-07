@@ -1,6 +1,6 @@
+import { APIRequestContext } from "../../server";
 import { HasStaticKey } from "../../interface";
 import { Logger } from "../../logger";
-import { ContextBase } from "../context";
 import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../registry";
 import { Report } from "../reporter";
 import { EventPacket } from "../pubsub";
@@ -30,7 +30,9 @@ export abstract class ServiceBrokerDelegator<Context> extends HasStaticKey {
   public abstract stop(): Promise<void>;
 
   /* create context for request */
-  public abstract createContext(base: ContextBase): Context;
+  public abstract createContext(base: APIRequestContext): Context;
+
+  public abstract clearContext(context: Context): void;
 
   /* call action */
   public abstract selectActionTargetNode(context: Context, action: Readonly<ServiceAction>): Readonly<ServiceNode> | null;

@@ -1,13 +1,8 @@
-export type RecursivePartial<T> = {
-  [P in keyof T]?:
-  T[P] extends (infer U)[] ? Array<RecursivePartial<U>> :
-    T[P] extends object ? RecursivePartial<T[P]> :
-      T[P];
-};
-
+export * from "./ts";
 export * from "./hash";
 export * from "./serialization";
 export * from "./stream";
 export * from "./validation";
+export * from "./keyed";
 export * from "./pluggable";
-export * from "./async-iterator";
+export * from "./iterable";

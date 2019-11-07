@@ -1,8 +1,10 @@
 import { GraphQLResolveInfo } from "graphql";
-import { CallConnectorSchema, ConnectorCatalog, MapConnectorSchema, PublishConnectorSchema, SubscribeConnectorSchema } from "../../connector/schema";
+export { GraphQLResolveInfo } from "graphql";
+import { CallConnectorSchema, ConnectorCatalog, MapConnectorSchema, PublishConnectorSchema, SubscribeConnectorSchema } from "../../connector";
+import { IProtocolPluginCatalog, IProtocolPluginSchema } from "../plugin";
 
 /* GraphQL Protocol Plugin */
-export type GraphQLProtocolPluginSchema = {
+export type GraphQLProtocolPluginSchema = IProtocolPluginSchema & {
   description: string;
   typeDefs: string;
   resolvers: GraphQLProtocolResolversSchema;
@@ -42,7 +44,7 @@ export type GraphQLSubscribableFieldResolverSchema =  { subscribe: SubscribeConn
 export type GraphQLMappableFieldResolverSchema = MapConnectorSchema<(obj: { source: any, args: any, info: GraphQLResolveInfo, context: any }) => any>;
 export type GraphQLIsTypeOfFieldResolverSchema = MapConnectorSchema<(obj: { source: any, info: GraphQLResolveInfo, context: any }) => boolean>;
 
-export type GraphQLProtocolPluginCatalog = {
+export type GraphQLProtocolPluginCatalog = IProtocolPluginCatalog & {
   schema: GraphQLProtocolPluginSchema;
   description: string;
   entries: Array<{

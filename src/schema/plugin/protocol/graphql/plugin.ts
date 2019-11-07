@@ -17,7 +17,7 @@ import {
   GraphQLProtocolPluginSchema,
   GraphQLProtocolResolversSchema,
   GraphQLPublishableFieldResolverSchema,
-  GraphQLSubscribableFieldResolverSchema
+  GraphQLSubscribableFieldResolverSchema,
 } from "./schema";
 
 export type GraphQLProtocolPluginOptions = GraphQLHandlersOptions;
@@ -320,7 +320,7 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
     /* calculate integrated hash to fetch cached handlers */
     const hashes: string[] = [];
     for (const integration of integrations) {
-      const schema: GraphQLProtocolPluginSchema = integration.schema.protocol[this.key];
+      const schema: GraphQLProtocolPluginSchema = (integration.schema.protocol as any)[this.key];
 
       // the source object below hash contains properties which can make this route unique
       hashes.push(hash([schema.typeDefs, schema.resolvers, integration.service.hash], true));
@@ -359,10 +359,11 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
     if (playgroundRoute) {
       items.push({hash: playgroundRouteHash, route: playgroundRoute});
     }
+
     return items;
   }
 
-  // TODO: [graphql] graphql catalog
+  // TODO: GraphQL Plugin catalog
   public describeSchema(schema: Readonly<GraphQLProtocolPluginSchema>): GraphQLProtocolPluginCatalog {
     return {} as GraphQLProtocolPluginCatalog;
   }
@@ -372,7 +373,7 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
     const typeDefs: string[] = [];
     let resolvers: IResolvers = {};
     for (const integration of integrations) {
-      const schema: GraphQLProtocolPluginSchema = integration.schema.protocol[this.key];
+      const schema: GraphQLProtocolPluginSchema = (integration.schema.protocol as any)[this.key];
       typeDefs.push(schema.typeDefs);
       resolvers = _.merge<IResolvers, IResolvers>(resolvers, this.createGraphQLResolvers(schema.resolvers, integration));
     }
@@ -388,18 +389,18 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
     return {
       route: new HTTPRoute({
         method: "POST",
-        path: "/graphql/:test/:blabla?",
+        path: "/graphql",
         description: "GraphQL HTTP operation endpoint",
         handler,
       }),
       subscriptionRoute: subscriptionHandler ? new WebSocketRoute({
-        path: "/graphql/:test/:blabla?",
+        path: "/graphql",
         description: "GraphQL WebSocket operation endpoint",
         handler: subscriptionHandler,
       }) : undefined,
       playgroundRoute: playgroundHandler ? new HTTPRoute({
         method: "GET",
-        path: "/graphql/:test/:blabla?",
+        path: "/graphql",
         description: "GraphQL Playground endpoint",
         handler: playgroundHandler,
       }) : undefined,

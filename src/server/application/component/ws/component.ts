@@ -6,12 +6,15 @@ import ws from "ws";
 import url from "url";
 import qs from "qs";
 import { RecursivePartial } from "../../../../interface";
-import { ContextFactory, ContextFactoryFn } from "../../context";
+import { APIRequestContext, APIRequestContextConstructor } from "../../context";
 import { RouteHandlerMap } from "../route";
 import { ServerApplicationComponent, ServerApplicationComponentProps } from "../component";
 import { WebSocketRoute, WebSocketRouteInternalHandler } from "./route";
 
-export type ServerWebSocketApplicationOptions = Omit<ws.ServerOptions, "host" | "port" | "server" | "path" | "noServer">;
+export type ServerWebSocketApplicationOptions = Omit<ws.ServerOptions, "host" | "port" | "server" | "path" | "noServer"> & {
+  contextCreationTimeout: number;
+  pingPongCheckInterval: number;
+};
 
 type WebSocketUpgradeEventHandler = (req: Readonly<http.IncomingMessage> | Readonly<http2.Http2ServerRequest>, socket: net.Socket, head: Buffer) => void;
 
@@ -21,34 +24,69 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
   public readonly module: ws.Server & { upgradeEventHandler: WebSocketUpgradeEventHandler };
   private readonly opts: ServerWebSocketApplicationOptions;
   private readonly routeHandlerConnectionHandlersMap = new Map<Readonly<RouteHandlerMap<WebSocketRoute>>, ReadonlyArray<WebSocketRouteInternalHandler>>();
+  private pingPongCheckIntervalTimer?: NodeJS.Timeout;
 
   constructor(props: ServerApplicationComponentProps, opts?: RecursivePartial<ServerWebSocketApplicationOptions>) {
     super(props);
     this.opts = _.defaultsDeep(opts || {
       perMessageDeflate: false,
+      clientTracking: true,
+      contextCreationTimeout: 5000,
+      pingPongCheckInterval: 5000,
     }, {});
 
+    const {contextCreationTimeout, pingPongCheckInterval, ...serverOpts} = this.opts;
+
     // create WebSocket.Server without http.Server instance
-    const wsServer = new ws.Server({...this.opts, noServer: true});
+    const server = new ws.Server({...serverOpts, noServer: true});
 
     // attach upgrade handler which will be mounted as server protocols "upgrade" event handler
-    const upgradeEventHandler: WebSocketUpgradeEventHandler = (req, socket, head) => {
+    const upgradeEventHandler: WebSocketUpgradeEventHandler = (req, tcpSocket, head) => {
       // handle upgrade with ws module and emit connection to web socket
-      // tslint:disable-next-line:no-shadowed-variable
-      wsServer.handleUpgrade(req as any, socket, head, ws => {
-        wsServer.emit("connection", ws, req);
+      server.handleUpgrade(req as any, tcpSocket, head, socket => {
+        // emit CONNECTION
+        server.emit("connection", socket, req);
 
-        // trick for route websocket handlers: if context not parsed yet, assume it there are no matched handler
+        // determine FOUND or NOT FOUND: trick for route websocket handlers: if context not created yet, assume it there are no matched handler
         setTimeout(() => {
-          if (!ContextFactory.parsed(req)) {
-            wsServer.emit("error", new Error("not found websocket route")); // TODO: normalize error
-            ws.close();
+          const context = APIRequestContext.find(req);
+
+          // route matched, start ping-pong
+          if (context) {
+            (socket as any).__isAlive = true;
+            (socket as any).__context = context;
+            socket.on("pong", () => {
+              (socket as any).__isAlive = true;
+            });
+          } else {
+            // route not matched
+            server.emit("error", new Error("not found websocket route")); // TODO: normalize error
+            socket.close();
           }
-        }, 1000);
+        }, contextCreationTimeout);
       });
+
+      // TERMINATE dangling sockets
+      if (this.pingPongCheckIntervalTimer) {
+        clearInterval(this.pingPongCheckIntervalTimer);
+      }
+      this.pingPongCheckIntervalTimer = setInterval(() => {
+        server.clients.forEach(socket => {
+          const context = (socket as any).__context;
+          if ((socket as any).__isAlive === true) {
+            (socket as any).__isAlive = false;
+            socket.ping();
+          } else if ((socket as any).__isAlive === false) {
+            this.props.logger.error(`${context ? context.id : "unknown"} socket terminated due to not send no pong for ping`);
+            socket.terminate();
+          } else {
+            // do nothing when __isAlive is undefined yet
+          }
+        });
+      }, pingPongCheckInterval);
     };
 
-    this.module = Object.assign(wsServer, {upgradeEventHandler});
+    this.module = Object.assign(server, {upgradeEventHandler});
   }
 
   public async start(): Promise<void> {
@@ -56,11 +94,14 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
   }
 
   public async stop(): Promise<void> {
+    if (this.pingPongCheckIntervalTimer) {
+      clearInterval(this.pingPongCheckIntervalTimer);
+    }
     this.module.removeAllListeners();
     this.routeHandlerConnectionHandlersMap.clear();
   }
 
-  public mountRoutes(routes: ReadonlyArray<Readonly<WebSocketRoute>>, pathPrefixes: string[], createContext: ContextFactoryFn): Readonly<RouteHandlerMap<WebSocketRoute>> {
+  public mountRoutes(routes: ReadonlyArray<Readonly<WebSocketRoute>>, pathPrefixes: string[], createContext: APIRequestContextConstructor): Readonly<RouteHandlerMap<WebSocketRoute>> {
     // create new array to store connection handlers
     const connectionHandlers: WebSocketRouteInternalHandler[] = [];
 
@@ -75,7 +116,7 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
       // internal handler should extract context and pass context to external handler
       const pathRegExps = route.getPathRegExps(pathPrefixes);
       // tslint:disable-next-line:no-shadowed-variable
-      const routeHandler: WebSocketRouteInternalHandler = async (ws, req) => {
+      const routeHandler: WebSocketRouteInternalHandler = async (socket, req) => {
         const {pathname, query} = url.parse(req.url || "/");
 
         for (const regExp of pathRegExps) {
@@ -83,6 +124,7 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
           if (match) {
             // create context
             const context = await createContext(req);
+            socket.once("close", () => context.clear());
 
             // req.params
             req.params = route.paramKeys.reduce((obj, key, i) => {
@@ -98,7 +140,7 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
             req.query = query ? qs.parse(query, {allowPrototypes: true}) : {};
 
             // call handler
-            route.handler(context, ws, req);
+            route.handler(context, socket, req);
             break;
           }
         }

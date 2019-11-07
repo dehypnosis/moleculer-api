@@ -1,11 +1,10 @@
 import * as _ from "lodash";
-import Busboy from "busboy";
 import { RecursivePartial, hash, validateObject, validateValue, ValidationError, ValidationRule } from "../../../../interface";
 import { ServiceAPIIntegration } from "../../../integration";
-import { Route, HTTPRoute, HTTPRouteHandler, HTTPRouteRequest } from "../../../../server";
+import { Route, HTTPRoute, HTTPRouteHandler } from "../../../../server";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
-import { MultipartFormDataHandler } from "./multipart";
-import { RESTProtocolPluginSchema, RESTProtocolPluginCatalog, RESTCallableRouteResolverSchema, RESTMappableRouteResolverSchema, RESTPublishableRouteResolverSchema, RESTRouteSchema, RESTRouteResolverSchema } from "./schema";
+import { MultipartFormDataHandler } from "./handler";
+import { RESTProtocolPluginSchema, RESTProtocolPluginCatalog, RESTCallableRouteResolverSchema, RESTMappableRouteResolverSchema, RESTPublishableRouteResolverSchema, RESTRouteSchema } from "./schema";
 import { ConnectorCompiler, ConnectorValidator } from "../../connector";
 
 export type RESTProtocolPluginOptions = {
@@ -221,7 +220,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
     const items = new Array<{ hash: string, route: Readonly<Route> }>();
 
     for (const integration of integrations) {
-      const schema: RESTProtocolPluginSchema = integration.schema.protocol[this.key];
+      const schema: RESTProtocolPluginSchema = (integration.schema.protocol as any)[this.key];
       for (const routeSchema of schema.routes) {
 
         // the source object below hash contains properties which can make this route unique
@@ -307,7 +306,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
         const mappableArgs = {context, path, params, query, body};
         const result = await connector(context, mappableArgs);
 
-        // TODO: [rest] suport { meta.headers } http header transformation
+        // TODO: REST support { meta.headers } http header transformation
         // if (result && result.meta && result.meta.headers && typeof result.meta.headers === "object") {
         //   const headers = result.meta.headers;
         //   for (const k of headers) {
@@ -315,7 +314,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
         //   }
         // }
 
-        // TODO: [rest] support { stream } streaming response
+        // TODO: REST support { stream } streaming response
         // if (result && result.stream && isReadableStream(result.stream)) {
         //   res.setHeader("Transfer-Encoding", "chunked");
         //   res.send(result.stream);
@@ -327,7 +326,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
       } catch (error) {
         if (ignoreError) {
           // integration.reporter.debug("error has been ignored for call request", error);
-          res.json(null); // TODO: [format] normalize response
+          res.json(null); // TODO: normalize response
         } else {
           throw error;
         }
@@ -364,7 +363,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
     });
   }
 
-  // TODO: [rest] REST catalog
+  // TODO: REST plugin catalog
   public describeSchema(schema: Readonly<RESTProtocolPluginSchema>): RESTProtocolPluginCatalog {
     return {} as RESTProtocolPluginCatalog;
   }

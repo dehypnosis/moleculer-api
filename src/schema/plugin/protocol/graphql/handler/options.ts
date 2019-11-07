@@ -8,6 +8,8 @@ import { GraphQLUpload } from "graphql-upload";
 import { GraphQLJSON } from "graphql-type-json";
 import { GraphQLDate, GraphQLDateTime, GraphQLTime } from "graphql-iso-date";
 
+// TODO: as preset
+
 delete GraphQLUpload.description;
 delete GraphQLJSON.description;
 delete GraphQLDate.description;

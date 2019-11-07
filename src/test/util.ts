@@ -24,11 +24,13 @@ export function getLogger(props?: getLoggerProps) {
   return new WinstonLogger({label}, {level, silent});
 }
 
+let i = 0;
 export function getServiceBroker(props?: {
   logger?: getLoggerProps;
   delegator?: ServiceBrokerDelegatorConstructorOptions;
 }) {
   const broker = new ServiceBroker({
+    id: (i++).toString(),
     logger: getLogger(props && props.logger),
   }, props && props.delegator);
   return broker;

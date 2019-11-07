@@ -1,18 +1,51 @@
-import { PolicySchema } from "./plugin";
-export { SchemaRegistry, SchemaRegistryOptions } from "./schema";
+import { PolicySchema, ProtocolSchema } from "./plugin";
+
+export { SchemaRegistry, SchemaRegistryOptions } from "./registry";
 export { Branch } from "./branch";
 export { Version } from "./version";
-export * from "./plugin/protocol/graphql/handler/options";
 
-/* base Service API schema */
+/* remote services' meta data */
+export interface ServiceMetaSchema {
+  api?: ServiceAPISchema;
+
+  [key: string]: any;
+}
+
+/* start from parsing given remote services' API schema */
 export type ServiceAPISchema = {
   branch: string;
-  protocol: any;
+  protocol: ProtocolSchema;
   policy: PolicySchema;
 };
 
-/* derived from remote services' meta data */
-export interface ServiceMetaSchema {
-  api?: ServiceAPISchema;
-  [key: string]: any;
-}
+/*
+const example: ServiceAPISchema = {
+  branch: "master",
+  protocol: {
+    GraphQL: {
+      description: "hello world",
+      typeDefs: `
+        extend type Query {
+          hello: String!
+        }
+      `,
+      resolvers: {
+        Query: {
+          hello: `() => "world"`,
+        },
+      },
+    },
+    REST: {
+      description: "...",
+      basePath: "/foo",
+      routes: [],
+    },
+    WebSocket: {
+      description: "....",
+      basePath: "/chat",
+      routes: [],
+    },
+  },
+  policy: {},
+};
+*/

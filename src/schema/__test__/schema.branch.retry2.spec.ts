@@ -23,6 +23,7 @@ const remoteWrong = getMoleculerServiceBroker({
   logger: {level: "error", label: "remote-wrong"},
   moleculer: {...moleculer, nodeID: "remote-wrong"},
   services: [
+    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "master-c", {
       protocol: {
         GraphQL: {
@@ -44,6 +45,7 @@ const remote = getMoleculerServiceBroker({
   logger: {level: "error", label: "remote"},
   moleculer: {...moleculer, nodeID: "remote"},
   services: [
+    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "master-b", {
       protocol: {
         GraphQL: {
@@ -58,6 +60,7 @@ const remote = getMoleculerServiceBroker({
         },
       },
     }), // failed then succeed in retry
+    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "master-a", {
       protocol: {
         GraphQL: {

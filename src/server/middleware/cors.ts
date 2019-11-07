@@ -26,6 +26,7 @@ export class CORSMiddleware extends ServerMiddleware {
   }
 
   public apply(modules: ServerApplicationComponentModules): void {
-    modules.http.use(cors(this.opts));
+    const corsHandler = cors(this.opts);
+    modules.http.use(corsHandler);
   }
 }

@@ -53,6 +53,7 @@ export class APIGateway {
     }
     this.brokers = brokerOptionsList.map((brokerOpts, index) => {
       return new ServiceBroker({
+        id: index.toString(),
         logger: this.logger.getChild(`broker[${index}]`),
       }, brokerOpts);
     });
