@@ -164,7 +164,7 @@ export class ServiceBroker<Context extends ContextBase = ContextBase> {
   public async call(context: Context, args: CallArgs): Promise<any> {
     const {action, params, batchingParams, disableCache} = args;
     const node = this.delegator.selectActionTargetNode(context, action)!;
-    console.assert(node && action, "there are no available nodes to call the action"); // TODO: [call/discovery] no node to call, can be happen?
+    console.assert(node && action, "there are no available nodes to call the action");
 
     // do batching
     if (batchingParams) {

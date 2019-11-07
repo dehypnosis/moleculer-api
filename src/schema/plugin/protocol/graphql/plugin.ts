@@ -388,18 +388,18 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
     return {
       route: new HTTPRoute({
         method: "POST",
-        path: "/graphql",
+        path: "/graphql/:test/:blabla?",
         description: "GraphQL HTTP operation endpoint",
         handler,
       }),
       subscriptionRoute: subscriptionHandler ? new WebSocketRoute({
-        path: "/graphql",
+        path: "/graphql/:test/:blabla?",
         description: "GraphQL WebSocket operation endpoint",
         handler: subscriptionHandler,
       }) : undefined,
       playgroundRoute: playgroundHandler ? new HTTPRoute({
         method: "GET",
-        path: "/graphql",
+        path: "/graphql/:test/:blabla?",
         description: "GraphQL Playground endpoint",
         handler: playgroundHandler,
       }) : undefined,

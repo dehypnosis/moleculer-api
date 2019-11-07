@@ -366,22 +366,23 @@ export class Branch {
         integration.setSucceed(this, version, updates);
       }
 
-      // forget old parent versions if need
-      const versions = this.versions;
-      while (versions.length > this.opts.maxVersions) {
-        for (let i = versions.length - 1; i >= this.opts.maxVersions - 1; i--) {
-          const v = versions[i];
-          if (v.parentVersion) {
-            for (const integration of v.parentVersion.integrations) {
-              integration.reportRemoved(this, v);
-            }
-            v.forgetParentVersion(); // report removed version
-          }
-        }
-      }
-
       // log
       this.props.logger.info(`${this} branch succeeded ${parentVersion} -> ${version} version compile:\n${[...requiredIntegrations, ...updates].join("\n")}`);
+
+      // forget old parent versions if need
+      for (let cur = this.$latestVersion, parent = cur.parentVersion, i = 1; parent; cur = parent, parent = cur.parentVersion, i++) {
+        // v1 / v2 / 1
+        // v2 / v3 / 2
+        // v3 / null / 3
+        if (i >= this.opts.maxVersions) {
+          for (const integration of parent.integrations) {
+            integration.reportRemoved(this, cur);
+          }
+          cur.forgetParentVersion();
+          this.props.logger.info(`${this} branch have forgotten versions older than ${cur}`);
+          break;
+        }
+      }
 
       // emit routes update event
       this.emitter.emit(Branch.Event.Updated);

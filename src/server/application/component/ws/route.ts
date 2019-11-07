@@ -3,7 +3,7 @@ import http from "http";
 import http2 from "http2";
 import ws from "ws";
 
-export type WebSocketHTTPRequest = http.IncomingMessage | http2.Http2ServerRequest;
+export type WebSocketHTTPRequest = (http.IncomingMessage | http2.Http2ServerRequest) & { path: string, params: any, query: any };
 export type WebSocketRouteHandler<Context = any> = (context: Context, ws: ws, req: WebSocketHTTPRequest) => void;
 
 /*

@@ -27,22 +27,10 @@ export class ServerHTTPProtocol extends ServerProtocol {
     // mount http module
     this.server = http.createServer(modules.http);
 
-    // handle upgrade with ws module and emit connection to web socket
-    this.server.on("upgrade", (req, socket, head) => {
-      modules.ws.handleUpgrade(req, socket, head, ws => {
-        modules.ws.emit("connection", ws, req);
+    // mount ws module
+    this.server.on("upgrade", modules.ws.upgradeEventHandler);
 
-        /* trick for route websocket handlers:
-        * if context not parsed yet, assume it there are no matched handler
-        */
-        setTimeout(() => {
-          if (!ContextFactory.parsed(req.headers)) {
-            ws.close();
-          }
-        }, 1000);
-      });
-    });
-
+    // listen
     this.server.listen(this.opts.port, this.opts.hostname);
     return [
       `http://${this.opts.hostname}:${this.opts.port}`,

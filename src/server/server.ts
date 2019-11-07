@@ -45,7 +45,6 @@ export class APIServer {
     this.opts.update.debouncedSeconds = isNaN(this.opts.update.debouncedSeconds) ? 2 : Math.max(this.opts.update.debouncedSeconds, 0);
     this.opts.update.maxDebouncedSeconds = isNaN(this.opts.update.maxDebouncedSeconds) ? 5 : Math.max(this.opts.update.maxDebouncedSeconds, this.opts.update.debouncedSeconds, 1);
 
-
     // create context factory
     const contextFactories = Object.entries(this.opts.context)
       .reduce((factories, [k, options]) => {
@@ -59,6 +58,7 @@ export class APIServer {
         }
         return factories;
       }, [] as Array<ContextFactory<any>>);
+    this.props.logger.info(`gateway context factories have been applied ${contextFactories.join(", ")}`);
 
     // create application
     this.app = new ServerApplication({
@@ -86,7 +86,7 @@ export class APIServer {
     for (const middle of middleware) {
       middle.apply(this.app.componentModules);
     }
-    this.props.logger.info(`gateway server middleware has been applied: ${middleware.join(", ")}`);
+    this.props.logger.info(`gateway server middleware have been applied: ${middleware.join(", ")}`);
 
     // create protocol
     this.protocols = Object.entries(this.opts.protocol)

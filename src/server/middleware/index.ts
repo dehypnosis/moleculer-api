@@ -5,6 +5,7 @@ import { HelmetMiddleware, HelmetMiddlewareOptions } from "./helmet";
 import { ServeStaticMiddleware, ServeStaticMiddlewareOptions } from "./serve-static";
 import { BodyParserMiddleware, BodyParserMiddlewareOptions } from "./body-parser";
 import { LoggingMiddleware, LoggingMiddlewareOptions } from "./logging";
+import { ErrorMiddleware, ErrorMiddlewareOptions } from "./error";
 
 export const ServerMiddlewareConstructors = {
   [HelmetMiddleware.key]: HelmetMiddleware,
@@ -13,6 +14,7 @@ export const ServerMiddlewareConstructors = {
   [BodyParserMiddleware.key]: BodyParserMiddleware,
   [LoggingMiddleware.key]: LoggingMiddleware,
   // [OtherMiddleware.key]: OtherMiddleware,
+  [ErrorMiddleware.key]: ErrorMiddleware,
 };
 
 export type ServerMiddlewareConstructorOptions = Array<{
@@ -28,6 +30,8 @@ export type ServerMiddlewareConstructorOptions = Array<{
 }/* | {
   [OtherMiddleware.key]: RecursivePartial<OtherMiddlewareOptions> | false,
 }*/ | {
+  [ErrorMiddleware.key]: RecursivePartial<ErrorMiddlewareOptions> | false,
+} | {
   [key: string]: never,
 }>;
 
@@ -39,4 +43,5 @@ export const defaultServerMiddlewareConstructorOptions: ServerMiddlewareConstruc
   {[BodyParserMiddleware.key]: BodyParserMiddleware.autoLoadOptions},
   {[LoggingMiddleware.key]: LoggingMiddleware.autoLoadOptions},
   // { [OtherMiddleware.key]: OtherMiddleware.autoLoadOptions },
+  {[ErrorMiddleware.key]: ErrorMiddleware.autoLoadOptions},
 ];

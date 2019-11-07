@@ -60,16 +60,28 @@ export abstract class Route {
     return "/" + paths.join("/").split("/").filter(p => !!p).join("/");
   }
 
+  public readonly paramKeys: pathToRegExp.Key[] = [];
+  private paramKeysCollected = false;
   public getPathRegExps(prefixes: string[]): RegExp[] {
     return prefixes.map(prefix => {
       const path = Route.mergePaths(prefix, this.path);
-      return pathToRegExp(path, undefined, {
+      let paramKeys: pathToRegExp.Key[] | undefined;
+      if (!this.paramKeysCollected) {
+        this.paramKeysCollected = true;
+        paramKeys = this.paramKeys;
+      }
+      return pathToRegExp(path, paramKeys, {
         sensitive: false,
         strict: false,
         end: true,
         start: true,
       });
     });
+  }
+
+  public parsePathToParams(path: string) {
+    console.log(path, this.paramKeys);
+    return {};
   }
 
   public get handler() {

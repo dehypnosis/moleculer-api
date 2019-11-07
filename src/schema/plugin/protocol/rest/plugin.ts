@@ -265,11 +265,13 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
 
   private createRouteFromMapConnectorScheme(path: string, method: "GET", schema: RESTMappableRouteResolverSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<HTTPRoute> {
     const connector = ConnectorCompiler.map(schema.map, integration, {
-      mappableKeys: ["context", "path", "query", "body"],
+      mappableKeys: ["context", "path", "params", "query", "body"],
     });
 
     const handler: HTTPRouteHandler = (context, req, res) => {
-      const mappableArgs = {path: req.path, query: req.query, body: req.body, context};
+      // tslint:disable-next-line:no-shadowed-variable
+      const { path, params, query, body } = req;
+      const mappableArgs = {context, path, params, query, body};
       const result = connector(mappableArgs);
       res.json(result);
     };
@@ -285,8 +287,8 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
   private createRouteFromCallConnectorScheme(path: string, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
                                              schema: RESTCallableRouteResolverSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<HTTPRoute> {
     const connector = ConnectorCompiler.call(schema.call, integration, this.props.policyPlugins, {
-      explicitMappableKeys: ["context", "path", "query", "body"],
-      implicitMappableKeys: ["path", "query", "body"],
+      explicitMappableKeys: ["context", "path", "params", "query", "body"],
+      implicitMappableKeys: ["path", "params", "query", "body"],
       batchingEnabled: false,
       disableCache: false,
     });
@@ -300,7 +302,9 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
           req.body = Object.assign(req.body || {}, uploads);
         }
 
-        const mappableArgs = {context, path: req.path, query: req.query, body: req.body};
+        // tslint:disable-next-line:no-shadowed-variable
+        const { path, params, query, body } = req;
+        const mappableArgs = {context, path, params, query, body};
         const result = await connector(context, mappableArgs);
 
         // TODO: [rest] suport { meta.headers } http header transformation
@@ -341,11 +345,13 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
   private createRouteFromPublishConnectorScheme(path: string, method: "POST" | "PUT" | "PATCH" | "DELETE",
                                                 schema: RESTPublishableRouteResolverSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<HTTPRoute> {
     const connector = ConnectorCompiler.publish(schema.publish, integration, this.props.policyPlugins, {
-      mappableKeys: ["context", "path", "query", "body"],
+      mappableKeys: ["context", "path", "params", "query", "body"],
     });
 
     const handler: HTTPRouteHandler = async (context, req, res) => {
-      const mappableArgs = {context, path: req.path, query: req.query, body: req.body};
+      // tslint:disable-next-line:no-shadowed-variable
+      const { path, params, query, body } = req;
+      const mappableArgs = {context, path, params, query, body};
       const result = await connector(context, mappableArgs);
       res.json(result);
     };

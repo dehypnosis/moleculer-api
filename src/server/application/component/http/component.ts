@@ -32,6 +32,14 @@ export class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute>
       "trust proxy": this.opts.trustProxy,
       "x-powered-by": false,
     });
+
+    // modify use method to emit mount event
+    const originalUse = this.module.use.bind(this.module);
+    this.module.use = (subApp: any) => {
+      const result = originalUse(subApp);
+      this.module.emit("update", subApp);
+      return result;
+    };
   }
 
   /* lifecycle */
@@ -83,7 +91,16 @@ export class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute>
       // internal handler should extract context and pass context to external handler
       const routeHandler: HTTPRouteInternalHandler = async (req, res, next) => {
         try {
+          // create context
           const context = await createContext(req);
+
+          // req.params
+          req.params = route.paramKeys.reduce((obj, key, i) => {
+            obj[key.name] = req.params[i];
+            return obj;
+          }, {} as any);
+
+          // call handler
           await route.handler(context, req, res);
         } catch (error) {
           next(error);
@@ -91,7 +108,6 @@ export class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute>
       };
 
       // mount handler into router
-      // TODO: how about req.params...?
       const pathRegExps = route.getPathRegExps(pathPrefixes);
       for (const regExp of pathRegExps) {
         expressRouterMount(regExp, routeHandler);

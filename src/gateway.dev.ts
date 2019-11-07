@@ -56,7 +56,12 @@ const gateway = new APIGateway({
                       {
                         method: "GET",
                         path: "/bar",
-                        map: `() => "bar"`,
+                        map: `() => { throw new Error("what an error"); }`,
+                      },
+                      {
+                        method: "GET",
+                        path: "/:a/:b/:c?",
+                        map: `(args) => args`,
                       },
                     ],
                   },
@@ -142,7 +147,7 @@ const gateway = new APIGateway({
   schema: {
     protocol: {},
     branch: {
-      // maxVersions: 2,
+      maxVersions: 1,
     },
   },
   server: {

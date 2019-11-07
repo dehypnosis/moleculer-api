@@ -96,6 +96,28 @@ type Subscription {
 }
 `);
 
+resolvers.Query = {
+  _: () => "dummy",
+};
+
+resolvers.Mutation = {
+  _: () => "dummy",
+};
+
+async function* dummyGenerator(count = 10, sleep = 1000) {
+  let i = 0;
+  while(i < count) {
+    await new Promise(resolve => setTimeout(resolve, sleep));
+    yield i++;
+  }
+}
+resolvers.Subscription = {
+  _: {
+    subscribe: () => dummyGenerator(),
+    resolve: (source: any) => source,
+  },
+};
+
 export const defaultGraphQLTypeDefs = typeDefs;
 export const defaultGraphQLResolvers = resolvers;
 
