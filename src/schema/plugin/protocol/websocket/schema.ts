@@ -14,6 +14,7 @@ export type WebSocketRouteSchema = {
   deprecated?: boolean;
   subscribe: SubscribeConnectorSchema;
   publish: PublishConnectorSchema;
+  publishRawMessage?: boolean;
   ignoreError?: boolean;
 };
 

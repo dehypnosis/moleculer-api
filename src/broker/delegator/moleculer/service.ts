@@ -24,11 +24,9 @@ export function createMoleculerServiceSchema(props: ServiceBrokerDelegatorProps)
 
         let from;
         const nodeId = ctx.nodeID;
-        const serviceId = ctx.service ? ctx.service.fullName : null;
-        const serviceHash = ctx.service ? ctx.service.hash : null;
-        if (nodeId && serviceId && serviceHash) {
-          // TODO: [subscribe] received event, add from information to event packet
-          from = {nodeId, serviceId, serviceHash};
+        const serviceId = ctx.service && (ctx.service.fullName || ctx.service.name || ctx.service.id);
+        if (nodeId && serviceId) {
+          from = `${nodeId}@${serviceId}`;
         }
 
         // broker event

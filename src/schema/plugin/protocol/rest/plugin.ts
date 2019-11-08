@@ -36,7 +36,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
   }
 
   public validateSchema(schema: Readonly<RESTProtocolPluginSchema>): ValidationError[] {
-    const routeSigs: string[] = [];
+    const routeMethodAndPaths: string[] = [];
     return validateObject(schema, {
       description: {
         type: "string",
@@ -108,17 +108,17 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
 
             if (errors.length === 0) {
               // check duplicate path
-              const routeSig = `${method} ${path}`;
-              if (routeSigs.includes(routeSig)) {
+              const routePathAndMethod = `${method} ${path}`;
+              if (routeMethodAndPaths.includes(routePathAndMethod)) {
                 return [{
                   field: `routes[${idx}].path`,
                   type: "routePathDuplicate",
-                  actual: routeSig,
+                  actual: routePathAndMethod,
                   expected: undefined,
                   message: `a pair of route method and path should be unique"`,
                 }];
               }
-              routeSigs.push(routeSig);
+              routeMethodAndPaths.push(routePathAndMethod);
             }
 
             // validate method and each connector

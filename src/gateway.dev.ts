@@ -11,6 +11,37 @@ const gateway = new APIGateway({
         },
         services: [
           {
+            name: "chat",
+            metadata: {
+              api: {
+                branch: "master",
+                policy: {},
+                protocol: {
+                  WebSocket: {
+                    basePath: "/chat",
+                    description: "...",
+                    routes: [
+                      {
+                        path: "/:roomId",
+                        subscribe: {
+                          events: `({ params }) => ["chat.root." + params.roomId]`,
+                        },
+                        publish: {
+                          event: `({ params }) => ["chat.root." + params.roomId]`,
+                          params: {
+                            userId: "@context.id",
+                            roomId: "@params.roomId",
+                            message: "@message",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          {
             name: "file",
             metadata: {
               api: {

@@ -238,7 +238,7 @@ export const ConnectorCompiler = {
       mappableKeys: Array<Extract<keyof MappableArgs, string>>;
       getAsyncIterator?: GetAsyncIterator,
     },
-  ): SubscribeConnector<MappableArgs, GetAsyncIterator extends true ? null : EventListener> {
+  ): SubscribeConnector<MappableArgs, GetAsyncIterator extends true ? null : (packet: any) => void> {
     const broker = integration.service.broker!;
 
     // find path of connector schema from whole service schema
@@ -281,7 +281,7 @@ export const ConnectorCompiler = {
 
     const policies = integration.schema.policy && Array.isArray(integration.schema.policy.subscribe) ? integration.schema.policy.subscribe : [];
 
-    const connector: SubscribeConnector<MappableArgs, GetAsyncIterator extends true ? null : EventListener> = async (context, mappableArgs, listener) => {
+    const connector: SubscribeConnector<MappableArgs, GetAsyncIterator extends true ? null : (packet: any) => void> = async (context, mappableArgs, listener) => {
       const eventNames = Array.isArray(eventNamesOrFn) ? eventNamesOrFn : eventNamesOrFn(mappableArgs);
       const asyncIteratorComposeItems: Array<AsyncIteratorComposeItem<EventPacket>> = [];
 

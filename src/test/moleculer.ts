@@ -2,12 +2,12 @@ import * as _ from "lodash";
 import * as Moleculer from "moleculer";
 import { createMoleculerLoggerOptions } from "../broker/delegator/moleculer/logger";
 import { RecursivePartial } from "../interface";
-import { ServiceAPISchema, ServiceMetaSchema } from "../schema";
+import { ServiceAPISchema, ServiceMetaDataSchema } from "../schema";
 import { getLogger } from "./util";
 
 export function getMoleculerServiceBroker(props?: {
   logger?: { label?: string, level?: "info" | "warn" | "debug" | "error" };
-  services?: Array<Moleculer.ServiceSchema & { metadata?: ServiceMetaSchema }>;
+  services?: Array<Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema }>;
   moleculer?: Moleculer.BrokerOptions
 }) {
   const broker = new Moleculer.ServiceBroker(_.defaultsDeep({
@@ -22,9 +22,9 @@ export function getMoleculerServiceBroker(props?: {
   return broker;
 }
 
-export const MoleculerServiceSchemaFactory: { [key: string]: (branch: string | null, name: string, schemaAdjust?: RecursivePartial<ServiceAPISchema>) => Moleculer.ServiceSchema & { metadata?: ServiceMetaSchema } } = {
+export const MoleculerServiceSchemaFactory: { [key: string]: (branch: string | null, name: string, schemaAdjust?: RecursivePartial<ServiceAPISchema>) => Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema } } = {
   echo: (branch: string | null, name: string, schemaAdjust?: RecursivePartial<ServiceAPISchema>) => {
-    const schema: Moleculer.ServiceSchema & { metadata?: ServiceMetaSchema } = {
+    const schema: Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema } = {
       name,
       metadata: {
         api: branch ? _.defaultsDeep(schemaAdjust || {}, {

@@ -7,7 +7,7 @@ import { RecursivePartial, hash, validateObject, ValidationSchema, ValidationErr
 import { Reporter, Service, ServiceBroker } from "../broker";
 import { Logger } from "../logger";
 import { ServiceAPIIntegrationSource } from "./integration";
-import { ServiceAPISchema, ServiceMetaSchema } from "./index";
+import { ServiceAPISchema, ServiceMetaDataSchema } from "./index";
 import { Branch, BranchOptions } from "./branch";
 import { ProtocolPlugin, PolicyPlugin, SchemaPluginConstructors, SchemaPluginConstructorOptions, defaultSchemaPluginConstructorOptions } from "./plugin";
 
@@ -149,7 +149,7 @@ export class SchemaRegistry {
       this.serviceReporterMap.set(service, reporter);
 
       let integration: ServiceAPIIntegrationSource | null = null;
-      const meta = service.meta as ServiceMetaSchema | null;
+      const meta = service.meta as ServiceMetaDataSchema | null;
 
       // if has published service API
       if (meta && meta.api) {

@@ -8,7 +8,7 @@ export type SubscribeConnector<MappableArgs extends { [key: string]: any } = any
   context: any,
   mappableArgs: MappableArgs,
   listener: Listener,
-) => Promise<Listener extends EventListener ? void : AsyncIterator<any>>;
+) => Promise<Listener extends null ? AsyncIterator<any> : void>;
 export type SubscribeConnectorForAsyncIterator<MappableArgs extends { [key: string]: any } = any> = (context: any, mappableArgs: MappableArgs) => AsyncIterator<EventPacket>;
 export type MapConnector<MappableArgs extends { [key: string]: any } = any> = (mappableArgs: MappableArgs) => any;
 export type Connector = CallConnector | PublishConnector | SubscribeConnector | SubscribeConnectorForAsyncIterator | MapConnector;

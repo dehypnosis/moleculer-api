@@ -5,7 +5,7 @@ export { Branch } from "./branch";
 export { Version } from "./version";
 
 /* remote services' meta data */
-export interface ServiceMetaSchema {
+export interface ServiceMetaDataSchema {
   api?: ServiceAPISchema;
 
   [key: string]: any;

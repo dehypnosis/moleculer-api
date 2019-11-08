@@ -1,4 +1,4 @@
-export { ServiceMetaSchema, ServiceAPISchema } from "./schema";
+export { ServiceMetaDataSchema, ServiceAPISchema } from "./schema";
 import { APIGateway, APIGatewayOptions } from "./gateway";
 
 export { APIGateway, APIGatewayOptions };

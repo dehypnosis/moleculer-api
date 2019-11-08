@@ -1,5 +1,6 @@
 import * as _ from "lodash";
 import * as Moleculer from "moleculer";
+import { ServiceMetaDataSchema } from "../../../schema";
 import { APIRequestContext } from "../../../server";
 import { isReadableStream } from "../../../interface";
 import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../../registry";
@@ -12,7 +13,7 @@ import { createMoleculerLoggerOptions } from "./logger";
 import { createMoleculerServiceSchema } from "./service";
 
 export type MoleculerServiceBrokerDelegatorOptions = Moleculer.BrokerOptions & {
-  services?: Moleculer.ServiceSchema[];
+  services?: Array<Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema }>;
 };
 
 type Context = Moleculer.Context;
@@ -111,10 +112,10 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
 
     // TODO: can handle stream request by { stream: ReadableStream, meta: object } params
     if (params && params.stream && isReadableStream(params.stream)) {
-      response = await context.call(action.id, params.stream, {nodeID: node.id, meta: params.meta || {}});
+      response = await this.broker.call(action.id, params.stream, {nodeID: node.id, meta: params.meta || {}, parentCtx: context });
     } else {
       // normal request
-      response = context.call(action.id, params, {nodeID: node.id});
+      response = await this.broker.call(action.id, params, {nodeID: node.id, parentCtx: context });
     }
 
     // can handle stream response
@@ -132,23 +133,10 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
   }
 
   /* publish event */
-  public async publish(context: Context, args: DelegatedEventPublishArgs): Promise<EventPacket> {
+  public async publish(context: Context, args: DelegatedEventPublishArgs): Promise<void> {
     const {event, params, groups, broadcast} = args;
-    const method = broadcast ? context.broadcast : context.emit;
-    if (groups && groups.length > 0) {
-      method(event, params, groups);
-    } else {
-      method(event, params);
-    }
-
-    // add from information to original packet
-    const packet = args as EventPacket;
-    packet.from = {
-      nodeId: this.broker.nodeID,
-      serviceId: this.service.name,
-      serviceHash: this.service.name, // TODO: Checkout Publish ..... and from information
-    };
-    return packet;
+    const publish = broadcast ? this.broker.broadcast : this.broker.emit;
+    publish(event, params, { groups: groups && groups.length > 0 ? groups : undefined, parentCtx: context });
   }
 
   /* cache management */

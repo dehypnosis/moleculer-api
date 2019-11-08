@@ -40,7 +40,7 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
     - [x] Helmet (disabled by default), CORS (enabled), Serve Static (disabled), Body Parser (enabled), Logging (enabled), Error (enabled) middleware
     - [X] ID (enabled), User Agent (enabled), Cookie Parser (enabled), Locale (enabled), Auth (enabled) context factory
     - [] Schema Registry plugins
-        - [] WebSocket protocol plugin
+        - [x] WebSocket protocol plugin
         - [] Filter access control policy plugin
         - [] Scope access control policy plugin
     - [] Normalized errors

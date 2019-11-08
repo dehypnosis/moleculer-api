@@ -28,7 +28,7 @@ export class ServiceAction {
   }
 
   public toString(): string {
-    return kleur.green(this.props.id);
+    return kleur.blue(this.props.id);
   }
 
   public get id() {

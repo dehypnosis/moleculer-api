@@ -1,4 +1,5 @@
 import * as kleur from "kleur";
+import * as _ from "lodash";
 import { RecursivePartial } from "../interface";
 import { Logger } from "../logger";
 import { APIRequestContext } from "../server";
@@ -15,6 +16,10 @@ export type ServiceBrokerOptions = {
   batching: BatchingPoolOptions;
   function: InlineFunctionOptions;
   reporter: ReporterOptions;
+  log: {
+    event: boolean;
+    call: boolean;
+  },
 } & ServiceBrokerDelegatorConstructorOptions;
 
 export type ServiceBrokerProps = {
@@ -43,7 +48,12 @@ export class ServiceBroker<DelegatorContext = any> {
 
   constructor(protected readonly props: ServiceBrokerProps, opts?: RecursivePartial<ServiceBrokerOptions>) {
     // save options
-    this.opts = opts || {};
+    this.opts = _.defaultsDeep(opts || {}, {
+      log: {
+        event: true,
+        call: true,
+      },
+    });
 
     // create delegator from options
     const delegatorKeys = Object.keys(ServiceBrokerDelegatorConstructors);
@@ -106,9 +116,13 @@ export class ServiceBroker<DelegatorContext = any> {
     if (!this.working) {
       return;
     }
-    this.props.logger.info(`${kleur.green(packet.event)} event from ${kleur.yellow(packet.from ? `${packet.from.serviceId}:${packet.from.serviceHash}@${packet.from.nodeId}` : "unknown")} with ${Object.keys(packet.params || {}).join(", ") || "(empty)"} params`);
+
+    // publish and store
     await this.eventPubSub.publish(packet.event, packet);
     this.registry.addEventExample(this.resolveEventName(packet.event), packet);
+
+    // log
+    this.props.logger[this.opts.log!.event! ? "info" : "debug"](`received ${kleur.green(packet.event)} ${packet.broadcast ? "broadcast " : ""}event from ${kleur.yellow(packet.from || "unknown")}`);
   }
 
   protected async emitServiceConnected(service: Service): Promise<void> {
@@ -214,6 +228,9 @@ export class ServiceBroker<DelegatorContext = any> {
             }
           }
 
+          // log in advance
+          this.props.logger[this.opts.log!.call! ? "info" : "debug"](`call ${action}${kleur.cyan("@")}${node} ${kleur.cyan(batchingParamsList.length)} times in a batch from ${kleur.yellow((context.id || "unknown") + "@" + (context.ip || "unknown"))}`);
+
           // do batching call
           const response = await this.delegator.call(ctx, {action, node, params: mergedParams, disableCache});
           this.registry.addActionExample({action, params: mergedParams, response});
@@ -225,6 +242,8 @@ export class ServiceBroker<DelegatorContext = any> {
       return batchingPool.batch(batchingKey, batchingParams);
 
     } else {
+      // log in advance
+      this.props.logger[this.opts.log!.call! ? "info" : "debug"](`call ${action}${kleur.cyan("@")}${node} from ${kleur.yellow((context.id || "unknown") + "@" + (context.ip || "unknown"))}`);
 
       // normal request
       const response = await this.delegator.call(ctx, {action, node, params, disableCache});
@@ -277,8 +296,15 @@ export class ServiceBroker<DelegatorContext = any> {
 
   public async publishEvent(context: APIRequestContext, args: EventPublishArgs): Promise<void> {
     const ctx = this.getDelegatorContext(context);
-    const packet = await this.delegator.publish(ctx, args);
+    await this.delegator.publish(ctx, args);
+
+    // add from information to original packet and store as example
+    const packet: EventPacket = args;
+    packet.from = `${context.id || "unknown"}@${context.ip || "unknown"}`;
     this.registry.addEventExample(this.resolveEventName(args.event), packet);
+
+    // log
+    this.props.logger[this.opts.log!.event! ? "info" : "debug"](`published ${kleur.green(packet.event)} ${packet.broadcast ? "broadcast " : ""}event from ${kleur.yellow(packet.from!)}`);
   }
 
   /* params mapper */
@@ -294,7 +320,8 @@ export class ServiceBroker<DelegatorContext = any> {
   /* service reporter */
   public createReporter(service: Readonly<Service>): Reporter {
     return new Reporter({
-      logger: this.props.logger.getChild(`${service}`),
+      logger: this.props.logger.getChild(`${service}
+`),
       service,
       props: null,
       send: (messages, table) => this.delegator.report(service, messages, table),

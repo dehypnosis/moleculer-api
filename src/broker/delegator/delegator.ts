@@ -40,7 +40,7 @@ export abstract class ServiceBrokerDelegator<Context> extends HasStaticKey {
   public abstract call(context: Context, args: DelegatedCallArgs): Promise<any>;
 
   /* publish event */
-  public abstract publish(context: Context, args: DelegatedEventPublishArgs): Promise<EventPacket>;
+  public abstract publish(context: Context, args: DelegatedEventPublishArgs): Promise<void>;
 
   /* send reporter to service */
   public abstract report(service: Readonly<Service>, messages: Array<Readonly<Report>>, table: string): Promise<void>;
