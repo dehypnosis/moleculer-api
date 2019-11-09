@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { RecursivePartial, ValidationError, validateObject, validateValue, ValidationRule, hash } from "../../../../interface";
+import { RecursivePartial, ValidationError, validateObject, validateValue, ValidationRule, hashObject } from "../../../../interface";
 import { ServiceAPIIntegration } from "../../../integration";
 import { Route, HTTPRoute, WebSocketRoute } from "../../../../server";
 import { ConnectorCompiler, ConnectorValidator } from "../../connector";
@@ -323,10 +323,10 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
       const schema: GraphQLProtocolPluginSchema = (integration.schema.protocol as any)[this.key];
 
       // the source object below hash contains properties which can make this route unique
-      hashes.push(hash([schema.typeDefs, schema.resolvers, integration.service.hash], true));
+      hashes.push(hashObject([schema.typeDefs, schema.resolvers, integration.service.hash], true));
     }
 
-    const routeHash = hash(hashes, false);
+    const routeHash = hashObject(hashes, false);
     const subscriptionRouteHash = `${routeHash}@subscription`;
     const playgroundRouteHash = `static@graphql-playground`;
 

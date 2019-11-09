@@ -33,7 +33,7 @@ export type ServiceBrokerListeners = {
   nodePoolUpdated: (service: Readonly<Service>) => void;
 };
 
-export type CallArgs = { action: Readonly<ServiceAction>, params: any, disableCache: boolean, batchingParams?: any };
+export type CallArgs = { action: Readonly<ServiceAction>, params?: any, batchingParams?: any, disableCache: boolean};
 export type EventPublishArgs = Omit<EventPacket, "from">;
 export type DelegatedCallArgs = Omit<CallArgs, "batchingParams"> & { node: Readonly<ServiceNode> };
 export type DelegatedEventPublishArgs = EventPublishArgs;

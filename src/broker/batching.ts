@@ -1,7 +1,7 @@
 // tslint:disable:max-classes-per-file
 import * as _ from "lodash";
 import DataLoader from "dataloader";
-import { RecursivePartial, hash } from "../interface";
+import { RecursivePartial, hashObject } from "../interface";
 
 export type BatchingPoolOptions = {
   batchingKey: (...args: any[]) => any;
@@ -11,8 +11,8 @@ export type BatchingPoolOptions = {
 };
 
 const defaultOptions: BatchingPoolOptions = {
-  batchingKey: (...args: any[]) => hash(args, true),
-  entryKey: (batchingParams: any) => hash(batchingParams, true),
+  batchingKey: (...args: any[]) => hashObject(args, true),
+  entryKey: (batchingParams: any) => hashObject(batchingParams, true),
   failedEntryCheck: (entry: any) => !!(entry && entry.batchingError),
   entriesLimit: 100,
 };

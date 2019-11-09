@@ -105,7 +105,7 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
                 err.paramName = paramName;
                 err.paramMapping = paramMapping;
                 err.paramPath = paramPath;
-                reporter.warn(err);
+                reporter.error(err);
               }
             }
             // => body, body.foo, body@, body..., body.bar:boolean, body.zzz:number, body:number, body.id
@@ -135,7 +135,7 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
                   err.paramMapping = paramMapping;
                   err.paramPath = paramPath;
                   err.args = args;
-                  reporter.error(err);
+                  reporter.warn(err);
                 } else {
                   switch (typecasting) {
                     case "boolean":
@@ -150,7 +150,7 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
                         err.paramPath = paramPath;
                         err.paramValue = paramValue;
                         err.args = args;
-                        reporter.error(err);
+                        reporter.warn(err);
                       } else {
                         paramValue = castedParamValue;
                       }
@@ -248,7 +248,7 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
     this.mapper = mapper;
   }
 
-  public map(args: MappableArgs): { params: object | null, batchingParams: object | null } {
+  public map(args: MappableArgs): { params?: any, batchingParams?: any } {
     // map args to params
     const params = this.mapper(args);
 

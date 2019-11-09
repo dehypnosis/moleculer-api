@@ -1,5 +1,5 @@
 import * as kleur from "kleur";
-import { normalizeValidationSchema, NormalizedValidationSchema, hash } from "../../interface";
+import { normalizeValidationSchema, NormalizedValidationSchema, hashObject } from "../../interface";
 import { Service } from "./index";
 
 export type ServiceActionCachePolicy = { ttl: number, [key: string]: any };
@@ -60,7 +60,7 @@ export class ServiceAction {
   }
 
   public addExample(example: ActionExample, limit: number): void {
-    example.hash = hash(example);
+    example.hash = hashObject(example);
     if (this.examples.some(eg => eg.hash === example.hash)) {
       return;
     }

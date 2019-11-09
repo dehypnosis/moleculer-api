@@ -37,13 +37,23 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
         - [x] HTTP, WebSocket components (express, ws modules)
         - [x] HTTP protocol which mounts HTTP/WS components' modules
 - [] 0.2.x Alpha
-    - [x] Helmet (disabled by default), CORS (enabled), Serve Static (disabled), Body Parser (enabled), Logging (enabled), Error (enabled) middleware
-    - [X] ID (enabled), User Agent (enabled), Cookie Parser (enabled), Locale (enabled), Auth (enabled) context factory
+    - [x] Middleware
+      - Helmet (disabled by default)
+      - CORS (enabled, including WebSocket)
+      - Serve Static (disabled)
+      - Body Parser (enabled)
+      - Logging (enabled, including WebSocket)
+      - Error Handler (enabled, including WebSocket)
+    - [X] Context Factory
+      - ID (enabled; request id generation)
+      - User Agent (enabled)
+      - Cookie Parser (enabled)
+      - Locale (enabled)
+      - Auth (enabled)
     - [x] Schema Registry plugins
         - [x] WebSocket protocol plugin
     - [x] Streaming support for GraphQL/REST plugin multipart/form-data request
     - [x] Streaming support for WebSocket stream
-    - [] Normalized errors
 - [] 0.3.x Beta
     - [] I18N (disabled by default) middleware
     - [] Schema Registry plugins
@@ -53,6 +63,7 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
         - [] Service Catalog and API Catalog in GraphQL
         - [] Health Check endpoints in REST
     - [] Integration example with `moleculer-iam`
+    - [] Normalized errors
 - [] 1.0.x First Stable release
     - [] API Server extensions
         - [] HTTPS, HTTP2, HTTP2S extension

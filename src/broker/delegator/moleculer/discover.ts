@@ -1,6 +1,6 @@
 import * as Moleculer from "moleculer";
 import { Service, ServiceNode } from "../../";
-import { hash } from "../../../interface";
+import { hashObject } from "../../../interface";
 
 export function proxyMoleculerServiceDiscovery(node: Moleculer.BrokerNode): Service[] {
   const id = node.id;
@@ -30,7 +30,7 @@ export function proxyMoleculerServiceDiscovery(node: Moleculer.BrokerNode): Serv
       description,
       meta,
       nodes: [foundNode],
-      hash: hash([serviceId, meta, service.actions, service.events], true),
+      hash: hashObject([serviceId, meta, service.actions, service.events], true),
     });
 
     // add actions

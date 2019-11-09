@@ -1,5 +1,5 @@
 import * as kleur from "kleur";
-import { hash } from "../../interface";
+import { hashObject } from "../../interface";
 import { EventPacket } from "../pubsub";
 import { Service } from "./index";
 
@@ -49,7 +49,7 @@ export class ServiceEvent {
   }
 
   public addExample(example: EventExample, limit: number): void {
-    example.hash = hash(example);
+    example.hash = hashObject(example);
     if (this.examples.some(eg => eg.hash === example.hash)) {
       return;
     }

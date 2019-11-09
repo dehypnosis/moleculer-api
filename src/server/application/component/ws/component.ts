@@ -44,9 +44,6 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
     const upgradeEventHandler: WebSocketUpgradeEventHandler = (req, tcpSocket, head) => {
       // handle upgrade with ws module and emit connection to web socket
       server.handleUpgrade(req as any, tcpSocket, head, socket => {
-        // emit CONNECTION
-        server.emit("connection", socket, req);
-
         // proxy socket error to server
         socket.on("error", error => {
           if (server.listenerCount("error") > 0) {
@@ -55,6 +52,12 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
             this.props.logger.error(error);
           }
         });
+
+        // emit CONNECTION
+        server.emit("connection", socket, req);
+        if (socket.readyState !== socket.OPEN) { // close by middleware or somewhere
+          return;
+        }
 
         // trick: if context not being created yet, assume it there are no matched handler
         if (APIRequestContext.isCreating(req)) {

@@ -4,7 +4,7 @@ import { RecursivePartial } from "../../interface";
 import { ServerApplicationComponentModules } from "../application/component";
 import { ServerMiddleware, ServerMiddlewareProps } from "./middleware";
 
-export type CORSMiddlewareOptions = CorsOptions;
+export type CORSMiddlewareOptions = CorsOptions & { disableForWebSocket: boolean };
 
 /*
   CORS middleware
@@ -17,6 +17,7 @@ export class CORSMiddleware extends ServerMiddleware {
     origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    disableForWebSocket: false,
   };
   private readonly opts: CORSMiddlewareOptions;
 
@@ -26,7 +27,33 @@ export class CORSMiddleware extends ServerMiddleware {
   }
 
   public apply(modules: ServerApplicationComponentModules): void {
-    const corsHandler = cors(this.opts);
+    const {disableForWebSocket, ...opts} = this.opts;
+    const corsHandler = cors(opts);
     modules.http.use(corsHandler);
+
+    // tricky way to mimic CORS for websocket
+    if (disableForWebSocket !== true) {
+      modules.ws.on("connection", (socket, req) => {
+        let allowed = false;
+        let failed = false;
+        corsHandler(req as any, {
+          setHeader(key: string) {
+            if (key === "Access-Control-Allow-Origin") {
+              allowed = true;
+            }
+          },
+          getHeader() {},
+        } as any, (error?: any) => {
+          if (error) {
+            socket.emit("error", error);
+            failed = true;
+          }
+        });
+        if (!failed && !allowed) {
+          socket.emit("error", new Error("not allowed origin for websocket connection")); // TODO: normalize error
+          socket.close();
+        }
+      });
+    }
   }
 }

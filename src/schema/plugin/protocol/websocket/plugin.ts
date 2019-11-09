@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { hash, RecursivePartial, validateObject, ValidationError } from "../../../../interface";
+import { hashObject, RecursivePartial, validateObject, ValidationError } from "../../../../interface";
 import { ServiceAPIIntegration } from "../../../integration";
 import { WebSocketRoute, Route, WebSocketRouteHandler } from "../../../../server";
 import { ConnectorCompiler, ConnectorValidator } from "../../connector";
@@ -85,10 +85,6 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
               },
               subscribe: ConnectorValidator.subscribe,
               publish: ConnectorValidator.publish,
-              publishRawMessage: {
-                type: "boolean",
-                optional: true,
-              },
               ignoreError: {
                 type: "boolean",
                 optional: true,
@@ -129,7 +125,7 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
       for (const routeSchema of schema.routes) {
 
         // the source object below hash contains properties which can make this route unique
-        const routeHash = hash([schema.basePath, routeSchema, integration.service.hash], true);
+        const routeHash = hashObject([schema.basePath, routeSchema, integration.service.hash], true);
 
         // cache hit
         const cachedRoute = routeHashMapCache.get(routeHash);
@@ -179,13 +175,18 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
       });
 
       // publish received messages
-      socket.on("message", async (message) => {
-        if (schema.publishRawMessage !== true && typeof message === "string") {
+      socket.on("message", async (message: any) => {
+        // cannot receive binary message
+        if (Buffer.isBuffer(message) || typeof message !== "string") {
+          throw new Error("unexpected message type"); // TODO: normalize error
+        } else {
+          // parse text message
           try {
             message = JSON.parse(message);
           } catch {
           }
         }
+
         const mappableArgs = {context, path: params, query, message};
         try {
           await publishConnector(context, mappableArgs);

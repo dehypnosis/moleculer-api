@@ -1,5 +1,5 @@
 import * as kleur from "kleur";
-import { hash } from "../interface";
+import { hashObject } from "../interface";
 import { Route } from "../server";
 import { ServiceAPIIntegration } from "./integration";
 
@@ -23,7 +23,7 @@ export class Version {
   private readonly $integrations: Array<Readonly<ServiceAPIIntegration>> = [];
 
   constructor(protected readonly props: VersionProps) {
-    this.hash = hash([...props.schemaHashMap.keys(), ...props.routeHashMap.keys()], false);
+    this.hash = hashObject([...props.schemaHashMap.keys(), ...props.routeHashMap.keys()], false);
     this.shortHash = this.hash.substr(0, 8);
   }
 

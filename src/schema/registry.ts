@@ -3,7 +3,7 @@ import AsyncLock from "async-lock";
 import * as kleur from "kleur";
 import _ from "lodash";
 import { FatalError } from "tslint/lib/error";
-import { RecursivePartial, hash, validateObject, ValidationSchema, ValidationError, validateInlineFunction } from "../interface";
+import { RecursivePartial, hashObject, validateObject, ValidationSchema, ValidationError, validateInlineFunction } from "../interface";
 import { Reporter, Service, ServiceBroker } from "../broker";
 import { Logger } from "../logger";
 import { ServiceAPIIntegrationSource } from "./integration";
@@ -318,7 +318,7 @@ export class SchemaRegistry {
           return value;
       }
     });
-    return hash(obj, true);
+    return hashObject(obj, true);
   }
 
   /* branch management */

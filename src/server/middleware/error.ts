@@ -70,7 +70,6 @@ export class ErrorMiddleware extends ServerMiddleware {
   }
 
   private handleWebSocketError(error: any, socket?: WebSocket, req?: WebSocketHTTPRequest): void {
-    this.props.logger.error(error);
     if (socket) {
       socket.send(JSON.stringify({error: this.formatError(error)})); // TODO: normalize error
     }

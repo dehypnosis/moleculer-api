@@ -70,15 +70,11 @@ const services = getMoleculerServiceBroker({
                 {
                   path: "/:roomId",
                   subscribe: {
-                    events: `({ params }) => ["chat.root." + params.roomId]`,
+                    events: `({ path }) => ["chat.root." + path.roomId]`,
                   },
                   publish: {
-                    event: `({ params }) => "chat.root." + params.roomId`,
-                    params: {
-                      userId: "@context.id",
-                      roomId: "@path.roomId",
-                      message: "@message",
-                    },
+                    event: `({ path }) => "chat.root." + path.roomId`,
+                    params: "@message",
                   },
                 },
               ],
@@ -124,11 +120,12 @@ const services = getMoleculerServiceBroker({
       actions: {
         upload(ctx) {
           return new Promise((resolve, reject) => {
+            if (!ctx.params || !ctx.params.pipe) throw new Error("no file to upload");
             const meta = ctx.meta;
             const saveStream = fs.createWriteStream(path.join(__dirname, "..", "tmp." + (meta.filename || "unknown-file")));
-            ctx.params!.pipe(saveStream);
-            ctx.params!.on("end", () => resolve(meta));
-            ctx.params!.on("error", reject);
+            ctx.params.pipe(saveStream);
+            ctx.params.on("end", () => resolve(meta));
+            ctx.params.on("error", reject);
           });
         },
         get: {

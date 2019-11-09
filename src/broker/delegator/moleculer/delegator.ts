@@ -113,7 +113,7 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
     const ctx = Moleculer.Context.create(this.broker);
 
     // streaming request
-    if (typeof params.createReadStream === "function") {
+    if (params && typeof params.createReadStream === "function") {
       const { createReadStream, ...meta } = params;
       const stream = params.createReadStream();
       if (!isReadStream(stream)) {

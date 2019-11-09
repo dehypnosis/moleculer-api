@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { RecursivePartial, hash, validateObject, validateValue, ValidationError, ValidationRule, isReadStream } from "../../../../interface";
+import { RecursivePartial, hashObject, validateObject, validateValue, ValidationError, ValidationRule, isReadStream } from "../../../../interface";
 import { ServiceAPIIntegration } from "../../../integration";
 import { Route, HTTPRoute, HTTPRouteHandler, HTTPRouteResponse } from "../../../../server";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
@@ -225,7 +225,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
       for (const routeSchema of schema.routes) {
 
         // the source object below hash contains properties which can make this route unique
-        const routeHash = hash([schema.basePath, routeSchema, integration.service.hash], true);
+        const routeHash = hashObject([schema.basePath, routeSchema, integration.service.hash], true);
 
         // cache hit
         const cachedRoute = routeHashMapCache.get(routeHash);
