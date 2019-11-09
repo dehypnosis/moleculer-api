@@ -54,6 +54,8 @@ GraphQL protocol plugin will delegate action call with params as below.
 }
 ```
 
+For WebSocket protocol, see 4.
+
 ## 2. Streaming Response
 
 Handling streaming response is up to protocol plugins.
@@ -67,7 +69,7 @@ For REST protocol, any response from delegator like below will be handled as str
 
 For GraphQL protocol, above features just ignored.
 
-For WebSocket protocol, above feature is handled as stream. TODO
+For WebSocket protocol, see 4.
 
 ## 3. Modify Response Header/Status
 Also for REST protocol, can modify response with `$headers`, `status` properties in delegator response.
@@ -93,3 +95,7 @@ It is not only for the streaming response. below delegator response will also mo
 
 For GraphQL protocol, this feature is just ignored.
 For WebSocket protocol, this feature is just ignored.
+
+## 4. Bidirectional Streaming
+WebSocket protocol supports bidirectional streaming.
+// TODO: documentation

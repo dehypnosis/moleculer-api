@@ -1,10 +1,15 @@
+import { ValidationRule } from "fastest-validator";
 import * as _ from "lodash";
-import { hashObject, RecursivePartial, validateObject, ValidationError } from "../../../../interface";
+import { hashObject, isReadStream, RecursivePartial, validateObject, validateValue, ValidationError } from "../../../../interface";
 import { ServiceAPIIntegration } from "../../../integration";
 import { WebSocketRoute, Route, WebSocketRouteHandler } from "../../../../server";
 import { ConnectorCompiler, ConnectorValidator } from "../../connector";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
-import { WebSocketProtocolPluginSchema, WebSocketProtocolPluginCatalog, WebSocketRouteSchema } from "./schema";
+import { WebSocketProtocolPluginSchema, WebSocketProtocolPluginCatalog, WebSocketRouteSchema, WebSocketPubSubRouteSchema, WebSocketStreamingRouteSchema } from "./schema";
+import ReadableStream = NodeJS.ReadableStream;
+// @ts-ignore ref: https://github.com/maxogden/websocket-stream
+import createWebSocketStream from "websocket-stream/stream";
+import ReadWriteStream = NodeJS.ReadWriteStream;
 
 export type WebSocketProtocolPluginOptions = {};
 
@@ -61,7 +66,7 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
               }];
             }
 
-            const {path, ...restProps} = value;
+            const {path, description, deprecated, ...restProps} = value;
 
             // path: string;
             if (!WebSocketRoute.isNonRootDynamicPath(path) && !WebSocketRoute.isRootStaticPath(path)) {
@@ -83,12 +88,6 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
                 type: "boolean",
                 optional: true,
               },
-              subscribe: ConnectorValidator.subscribe,
-              publish: ConnectorValidator.publish,
-              ignoreError: {
-                type: "boolean",
-                optional: true,
-              },
             }, {
               strict: true,
               field: `routes[${idx}]`,
@@ -107,6 +106,55 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
               }
               routePaths.push(path);
             }
+
+            // validate streaming route / pub-sub route
+            let rule: ValidationRule | ValidationRule[];
+            if (typeof restProps.call !== "undefined") {
+              rule = {
+                type: "object",
+                strict: true,
+                props: {
+                  call: ConnectorValidator.call,
+                  // binary: {
+                  //   type: "boolean",
+                  //   optional: true,
+                  // },
+                },
+                messages: {
+                  objectStrict: "WebSocketStreamingRouteSchema cannot be with other connectors",
+                },
+              };
+            } else if (typeof restProps.subscribe !== "undefined" || typeof restProps.publish !== "undefined") {
+              rule = {
+                type: "object",
+                strict: true,
+                props: {
+                  subscribe: ConnectorValidator.subscribe,
+                  publish: ConnectorValidator.publish,
+                  ignoreError: {
+                    type: "boolean",
+                    optional: true,
+                  },
+                },
+                messages: {
+                  objectStrict: "WebSocketPubSubRouteSchema cannot be with other connectors",
+                },
+              };
+            } else {
+              errors.push({
+                type: "routeInvalid",
+                field: `routes[${idx}]`,
+                message: `WebSocket should have either publish/subscribe or call property`,
+                expected: "WebSocketPubSubRouteSchema | WebSocketStreamingRouteSchema",
+              });
+            }
+
+            errors.push(...validateValue(restProps,
+              // @ts-ignore
+              rule, {
+                strict: true,
+                field: `routes[${idx}]`,
+              }));
 
             return errors;
           },
@@ -136,7 +184,10 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
 
         // compile new route
         const path = WebSocketRoute.mergePaths(schema.basePath, routeSchema.path);
-        const route: Readonly<Route> = this.createRouteFromWebSocketRouteScheme(path, routeSchema, integration);
+        const route: Readonly<Route> = typeof (routeSchema as WebSocketStreamingRouteSchema).call !== "undefined"
+          ? this.createRouteFromWebSocketStreamingRouteScheme(path, routeSchema as WebSocketStreamingRouteSchema, integration)
+          : this.createRouteFromWebSocketPubSubRouteScheme(path, routeSchema as WebSocketPubSubRouteSchema, integration);
+
         items.push({hash: routeHash, route});
       }
     }
@@ -144,7 +195,7 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
     return items;
   }
 
-  private createRouteFromWebSocketRouteScheme(path: string, schema: WebSocketRouteSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<WebSocketRoute> {
+  private createRouteFromWebSocketPubSubRouteScheme(path: string, schema: WebSocketPubSubRouteSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<WebSocketRoute> {
     const subscribeConnector = ConnectorCompiler.subscribe(schema.subscribe, integration, this.props.policyPlugins, {
       mappableKeys: ["context", "path", "query"],
       getAsyncIterator: false,
@@ -153,6 +204,8 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
     const publishConnector = ConnectorCompiler.publish(schema.publish, integration, this.props.policyPlugins, {
       mappableKeys: ["context", "path", "query", "message"],
     });
+
+    const ignoreError = schema.ignoreError;
 
     const handler: WebSocketRouteHandler = async (context, socket, req) => {
       const {params, query} = req;
@@ -168,7 +221,7 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
         }
 
         socket.send(message, error => {
-          if (error && schema.ignoreError !== true) {
+          if (error && ignoreError !== true) {
             socket.emit("error", error);
           }
         });
@@ -176,7 +229,7 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
 
       // publish received messages
       socket.on("message", async (message: any) => {
-        // cannot receive binary message
+        // pub/sub route cannot receive binary message
         if (Buffer.isBuffer(message) || typeof message !== "string") {
           throw new Error("unexpected message type"); // TODO: normalize error
         } else {
@@ -191,11 +244,68 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
         try {
           await publishConnector(context, mappableArgs);
         } catch (error) {
-          if (schema.ignoreError !== true) {
+          if (ignoreError !== true) {
             socket.emit("error", error);
           }
         }
       });
+    };
+
+    return new WebSocketRoute({
+      path,
+      description: (schema as WebSocketRouteSchema).description || null,
+      handler,
+    });
+  }
+
+  private createRouteFromWebSocketStreamingRouteScheme(path: string, schema: WebSocketStreamingRouteSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<WebSocketRoute> {
+    const callConnector = ConnectorCompiler.call(schema.call, integration, this.props.policyPlugins, {
+      explicitMappableKeys: ["context", "path", "query"],
+      implicitMappableKeys: ["path"],
+      batchingEnabled: false,
+      disableCache: true,
+    });
+
+    // const binary = schema.binary !== false;
+
+    const handler: WebSocketRouteHandler = async (context, socket, req) => {
+      const errorListeners = socket.listeners("error");
+      try {
+        // create websocket stream
+        const clientStream: ReadableStream = createWebSocketStream(socket as any, {
+          binary: false,
+        });
+
+        // proxy stream error to socket error handler
+        for (const listener of errorListeners) {
+          clientStream.on("error", (evt) => {
+            delete evt.target; // send except socket prop
+            listener(evt);
+          });
+        }
+
+        // call endpoint with client stream (client -> server)
+        const {params, query} = req;
+        const mappableArgs = {context, path: params, query};
+        const result = await callConnector(context, mappableArgs, {
+          // inject client websocket stream to broker delegator
+          createReadStream: () => clientStream,
+        });
+
+        // for bidirectional stream support (client <- server)
+        if (result && typeof result.createReadStream === "function") {
+          const serverStream = result.createReadStream() as ReadableStream;
+          if (!isReadStream(serverStream)) {
+            throw new Error("invalid stream response"); // TODO: normalize error
+          }
+          // read server stream then write to socket
+          serverStream.on("data", data => socket.send(data));
+        }
+
+        // other result props ignored
+      } catch (error) {
+        socket.emit("error", error);
+      }
     };
 
     return new WebSocketRoute({

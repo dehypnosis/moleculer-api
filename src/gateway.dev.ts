@@ -1,8 +1,9 @@
 import { APIGateway } from "./gateway";
 import { getMoleculerServiceBroker } from "./test";
-import ReadableStream = NodeJS.ReadableStream;
 import fs from "fs";
 import path from "path";
+import { ReadableStream as ReadableMemoryStream } from "memory-streams";
+import ReadableStream = NodeJS.ReadableStream;
 
 const gateway = new APIGateway({
   brokers: [
@@ -77,8 +78,30 @@ const services = getMoleculerServiceBroker({
                     params: "@message",
                   },
                 },
+                {
+                  path: "/streaming/:roomId",
+                  call: {
+                    action: "chat.streaming",
+                    params: {
+                      roomId: "@path.roomId",
+                    },
+                  },
+                },
               ],
             },
+          },
+        },
+      },
+      actions: {
+        streaming: {
+          handler(ctx) {
+            const serverStream = new ReadableMemoryStream("---initial-content-from-server---");
+            const clientStream = ctx.params! as ReadableStream;
+            clientStream.on("data", data => {
+              // @ts-ignore
+              serverStream.append("---remote service received data and echo: " + data.toString() + "---");
+            });
+            return serverStream;
           },
         },
       },
@@ -107,7 +130,7 @@ const services = getMoleculerServiceBroker({
                   call: {
                     action: "file.get",
                     params: {
-                     filename: "@path.filename",
+                      filename: "@path.filename",
                     },
                   },
                 },
@@ -120,7 +143,9 @@ const services = getMoleculerServiceBroker({
       actions: {
         upload(ctx) {
           return new Promise((resolve, reject) => {
-            if (!ctx.params || !ctx.params.pipe) throw new Error("no file to upload");
+            if (!ctx.params || !ctx.params.pipe) {
+              throw new Error("no file to upload");
+            }
             const meta = ctx.meta;
             const saveStream = fs.createWriteStream(path.join(__dirname, "..", "tmp." + (meta.filename || "unknown-file")));
             ctx.params.pipe(saveStream);
@@ -133,13 +158,15 @@ const services = getMoleculerServiceBroker({
             filename: "string",
           },
           handler(ctx) {
-              const filepath = path.join(__dirname, "..", "tmp." + ctx.params!.filename);
-              if (!fs.statSync(filepath).isFile()) throw new Error("no such file");
-              // ctx.meta.$headers = {
-              //   Location: "https://google.com",
-              // };
-              // ctx.meta.$status = 302;
-              return fs.createReadStream(filepath);
+            const filepath = path.join(__dirname, "..", "tmp." + ctx.params!.filename);
+            if (!fs.statSync(filepath).isFile()) {
+              throw new Error("no such file");
+            }
+            // ctx.meta.$headers = {
+            //   Location: "https://google.com",
+            // };
+            // ctx.meta.$status = 302;
+            return fs.createReadStream(filepath);
           },
         },
       },
@@ -247,7 +274,7 @@ const services = getMoleculerServiceBroker({
           },
         },
         noop(ctx) {
-          console.log(ctx.params);
+          console.log("foo.noop got:", ctx.params);
         },
       },
     },

@@ -2,7 +2,7 @@ import { ParamsMappingInfo, ServiceStatus, EventPacket, EventListener } from "..
 import { PolicyCatalog } from "../policy";
 
 /* Connectors */
-export type CallConnector<MappableArgs extends { [key: string]: any } = any> = (context: any, mappableArgs: MappableArgs) => Promise<any>;
+export type CallConnector<MappableArgs extends { [key: string]: any } = any> = (context: any, mappableArgs: MappableArgs, injectedParams?: {[key: string]: any}) => Promise<any>;
 export type PublishConnector<MappableArgs extends { [key: string]: any } = any> = (context: any, mappableArgs: MappableArgs) => Promise<any>;
 export type SubscribeConnector<MappableArgs extends { [key: string]: any } = any, Listener extends EventListener | null = EventListener> = (
   context: any,

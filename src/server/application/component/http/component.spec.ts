@@ -1,5 +1,6 @@
 import * as http from "http";
 import { getLogger, fetch } from "../../../../test";
+import { APIRequestContext } from "../../context";
 import { ServerHTTPApplication } from "./component";
 import { HTTPRoute } from "./route";
 
@@ -15,8 +16,8 @@ beforeAll(async () => {
 });
 
 describe("http application should work with routes", () => {
+  const createContext = jest.fn(APIRequestContext.createConstructor([]));
   const message = {data: Math.random() * 1000};
-  const createContext = jest.fn();
   httpApp.mountRoutes([
     new HTTPRoute({
       method: "GET",

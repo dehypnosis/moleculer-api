@@ -53,7 +53,8 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
     - [x] Schema Registry plugins
         - [x] WebSocket protocol plugin
     - [x] Streaming support for GraphQL/REST plugin multipart/form-data request
-    - [x] Streaming support for WebSocket stream
+    - [x] Streaming support for REST plugin response
+    - [x] Bidirectional streaming support for WebSocket plugin
 - [] 0.3.x Beta
     - [] I18N (disabled by default) middleware
     - [] Schema Registry plugins

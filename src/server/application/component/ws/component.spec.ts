@@ -1,6 +1,7 @@
 import http from "http";
 import ws from "ws";
 import { getLogger, sleep } from "../../../../test";
+import { APIRequestContext } from "../../context";
 import { ServerWebSocketApplication } from "./component";
 import { WebSocketRoute } from "./route";
 
@@ -16,7 +17,19 @@ beforeAll(async () => {
 });
 
 describe("websocket application should work with routes", () => {
-  const mocks = {open: jest.fn(), message: jest.fn(), close: jest.fn(), createContext: jest.fn(async () => "dummy")};
+  const mocks = {
+    open: jest.fn(),
+    message: jest.fn(),
+    close: jest.fn(),
+    createContext: jest.fn(APIRequestContext.createConstructor(
+      [],
+      {
+        after: (source, context) => {
+          // @ts-ignore
+          context.dummy = 12345;
+        },
+      })),
+  };
   let createdContext: any;
   const message = JSON.stringify({data: Math.random() * 1000});
   wsApp.mountRoutes([
@@ -29,7 +42,7 @@ describe("websocket application should work with routes", () => {
         socket.close();
       },
     }),
-  ], ["/", "/~master"], mocks.createContext as any);
+  ], ["/", "/~master"], mocks.createContext);
 
   const wsClient = new ws("ws://localhost:8888/chat");
   wsClient.once("open", mocks.open);
@@ -43,7 +56,7 @@ describe("websocket application should work with routes", () => {
 
   beforeAll(() => sleep(1));
 
-  it("context should be created", () => expect(createdContext).toEqual("dummy"));
+  it("context should be created as constructor description", () => expect(createdContext).toHaveProperty("dummy", 12345));
 
   it("handler should have been called twice", () => {
     expect(mocks.createContext).toBeCalledTimes(2);

@@ -80,7 +80,7 @@ export const ConnectorCompiler = {
 
     const baseArgs = {action: actionId};
 
-    const connector: CallConnector<MappableArgs> = async (context, mappableArgs): Promise<any> => {
+    const connector: CallConnector<MappableArgs> = async (context, mappableArgs, injectedParams): Promise<any> => {
       // dynamically load action before first call
       if (!action) {
         action = integration.findAction(actionId)!;
@@ -113,7 +113,12 @@ export const ConnectorCompiler = {
       }
 
       // call
-      const response = await broker.call(context, {action, params, batchingParams, disableCache: opts.disableCache});
+      const response = await broker.call(context, {
+        action,
+        params: injectedParams ? Object.assign(params, injectedParams) : params,
+        batchingParams,
+        disableCache: opts.disableCache,
+      });
 
       // map response
       return responseMapper ? responseMapper({...args, response}) : response;

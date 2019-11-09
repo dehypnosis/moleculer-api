@@ -264,14 +264,14 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
   }
 
   private createRouteFromMapConnectorScheme(path: string, method: "GET", schema: RESTMappableRouteResolverSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<HTTPRoute> {
-    const connector = ConnectorCompiler.map(schema.map, integration, {
+    const mapConnector = ConnectorCompiler.map(schema.map, integration, {
       mappableKeys: ["context", "path", "query", "body"],
     });
 
     const handler: HTTPRouteHandler = (context, req, res) => {
       const {params, query, body} = req;
       const mappableArgs = {context, path: params, query, body};
-      const result = connector(mappableArgs);
+      const result = mapConnector(mappableArgs);
       this.sendResponse(res, result);
     };
 
@@ -285,14 +285,16 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
 
   private createRouteFromCallConnectorScheme(path: string, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
                                              schema: RESTCallableRouteResolverSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<HTTPRoute> {
-    const connector = ConnectorCompiler.call(schema.call, integration, this.props.policyPlugins, {
+    const callConnector = ConnectorCompiler.call(schema.call, integration, this.props.policyPlugins, {
       explicitMappableKeys: ["context", "path", "query", "body"],
-      implicitMappableKeys: ["path", "path", "query", "body"],
+      implicitMappableKeys: ["path"],
       batchingEnabled: false,
       disableCache: false,
     });
+
     const {ignoreError} = schema;
     const multipart = new MultipartFormDataHandler(this.opts.uploads);
+
     const handler: HTTPRouteHandler = async (context, req, res) => {
       try {
         // process multipart/form-data
@@ -303,7 +305,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
 
         const {params, query, body} = req;
         const mappableArgs = {context, path: params, query, body};
-        const result = await connector(context, mappableArgs);
+        const result = await callConnector(context, mappableArgs);
         this.sendResponse(res, result);
 
       } catch (error) {
@@ -325,14 +327,14 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
 
   private createRouteFromPublishConnectorScheme(path: string, method: "POST" | "PUT" | "PATCH" | "DELETE",
                                                 schema: RESTPublishableRouteResolverSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<HTTPRoute> {
-    const connector = ConnectorCompiler.publish(schema.publish, integration, this.props.policyPlugins, {
+    const publishConnector = ConnectorCompiler.publish(schema.publish, integration, this.props.policyPlugins, {
       mappableKeys: ["context", "path", "query", "body"],
     });
 
     const handler: HTTPRouteHandler = async (context, req, res) => {
       const {params, query, body} = req;
       const mappableArgs = {context, path: params, query, body};
-      const result = await connector(context, mappableArgs);
+      const result = await publishConnector(context, mappableArgs);
       this.sendResponse(res, result);
     };
 

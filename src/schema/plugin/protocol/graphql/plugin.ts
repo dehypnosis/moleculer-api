@@ -465,37 +465,37 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
   }
 
   private createGraphQLFieldResolverFromMapConnectorSchema(schema: GraphQLMappableFieldResolverSchema, integration: Readonly<ServiceAPIIntegration>): IFieldResolver<any, any> {
-    const connector = ConnectorCompiler.map(schema, integration, {
+    const mapConnector = ConnectorCompiler.map(schema, integration, {
       mappableKeys: ["context", "source", "args", "info"],
     });
 
-    return (source, args, context, info) => connector({context, source, args, info});
+    return (source, args, context, info) => mapConnector({context, source, args, info});
   }
 
   private createGraphQLIsTypeOfFnFromMapConnectorSchema(schema: GraphQLIsTypeOfFieldResolverSchema, integration: Readonly<ServiceAPIIntegration>): GraphQLIsTypeOfFn<any, any> {
-    const connector = ConnectorCompiler.map(schema, integration, {
+    const mapConnector = ConnectorCompiler.map(schema, integration, {
       mappableKeys: ["context", "source", "info"],
     });
 
-    return (source, context, info) => connector({context, source, info});
+    return (source, context, info) => mapConnector({context, source, info});
   }
 
   private createGraphQLFieldResolverFromCallConnectorSchema(schema: GraphQLCallableFieldResolverSchema, integration: Readonly<ServiceAPIIntegration>): IFieldResolver<any, any> {
-    const connector = ConnectorCompiler.call(schema.call, integration, this.props.policyPlugins, {
+    const callConnector = ConnectorCompiler.call(schema.call, integration, this.props.policyPlugins, {
       explicitMappableKeys: ["context", "source", "args", "info"],
       implicitMappableKeys: ["source", "args"],
       batchingEnabled: true,
       disableCache: false,
     });
+
     const {ignoreError} = schema;
 
     return (source, args, context, info) => {
       try {
         const mappableArgs = {source, args, context, info};
-        return connector(context, mappableArgs);
+        return callConnector(context, mappableArgs);
       } catch (error) {
         if (ignoreError) {
-          // integration.reporter.debug("error has been ignored for call request", error);
           return null;
         } else {
           throw error;
@@ -505,21 +505,21 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
   }
 
   private createGraphQLFieldResolverFromPublishConnectorSchema(schema: GraphQLPublishableFieldResolverSchema, integration: Readonly<ServiceAPIIntegration>): IFieldResolver<any, any> {
-    const connector = ConnectorCompiler.publish(schema.publish, integration, this.props.policyPlugins, {
+    const publishConnector = ConnectorCompiler.publish(schema.publish, integration, this.props.policyPlugins, {
       mappableKeys: ["context", "source", "args", "info"],
     });
 
-    return (source, args, context, info) => connector(context, {context, source, args, info});
+    return (source, args, context, info) => publishConnector(context, {context, source, args, info});
   }
 
   private createGraphQLFieldResolverFromSubscribeConnectorSchema(schema: GraphQLSubscribableFieldResolverSchema, integration: Readonly<ServiceAPIIntegration>): IResolverOptions<any, any> {
-    const connector = ConnectorCompiler.subscribe(schema.subscribe, integration, this.props.policyPlugins, {
+    const subscribeConnector = ConnectorCompiler.subscribe(schema.subscribe, integration, this.props.policyPlugins, {
       mappableKeys: ["context", "source", "args", "info"],
       getAsyncIterator: true,
     });
 
     return {
-      subscribe: (source, args, context, info) => connector(context, {context, source, args, info}, null),
+      subscribe: (source, args, context, info) => subscribeConnector(context, {context, source, args, info}, null),
     };
   }
 }

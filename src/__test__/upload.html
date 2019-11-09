@@ -6,7 +6,7 @@
 <h3>Gateway Host</h3>
 <input id="host" type="text" style="display:block" value="http://localhost:8080" />
 
-<h3>Multipart sync request to REST endpoint</h3>
+<h3>Multipart sync request to REST endpoint (~/file)</h3>
 <form method="post" enctype="multipart/form-data" onsubmit="setFormActionTarget(this)">
   <input type="file" name="file" />
   <input type="submit" value="Submit" />
@@ -14,7 +14,7 @@
 
 <hr />
 
-<h3>Multipart async request to REST endpoint</h3>
+<h3>Multipart async request to REST endpoint (~/file)</h3>
 
 <input id="ajax-file" type="file" name="file" />
 <input type="button" id="ajax-submit" value="Submit (AJAX)" />
@@ -36,7 +36,7 @@ document.getElementById("ajax-submit").addEventListener("click", () => {
 
 <hr>
 
-<h3>Multipart async request to GraphQL endpoint</h3>
+<h3>Multipart async request to GraphQL endpoint (~/graphql)</h3>
 <textarea id="gql-query" style="display: block; width: 300px; height: 200px">
 mutation($file: Upload!) {
   uploadFile(file: $file) {
