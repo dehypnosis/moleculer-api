@@ -39,18 +39,20 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
 - [] 0.2.x Alpha
     - [x] Helmet (disabled by default), CORS (enabled), Serve Static (disabled), Body Parser (enabled), Logging (enabled), Error (enabled) middleware
     - [X] ID (enabled), User Agent (enabled), Cookie Parser (enabled), Locale (enabled), Auth (enabled) context factory
-    - [] Schema Registry plugins
+    - [x] Schema Registry plugins
         - [x] WebSocket protocol plugin
+    - [x] Streaming support for GraphQL/REST plugin multipart/form-data request
+    - [x] Streaming support for WebSocket stream
+    - [] Normalized errors
+- [] 0.3.x Beta
+    - [] I18N (disabled by default) middleware
+    - [] Schema Registry plugins
         - [] Filter access control policy plugin
         - [] Scope access control policy plugin
-    - [] Normalized errors
-    - [] Integration example with `moleculer-iam`
-- [] 0.3.x Beta
     - [] Gateway schema presets
         - [] Service Catalog and API Catalog in GraphQL
         - [] Health Check endpoints in REST
-    - [] Streaming support
-    - [] I18N (disabled by default) middleware
+    - [] Integration example with `moleculer-iam`
 - [] 1.0.x First Stable release
     - [] API Server extensions
         - [] HTTPS, HTTP2, HTTP2S extension

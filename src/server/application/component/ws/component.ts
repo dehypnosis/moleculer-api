@@ -31,7 +31,7 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
     this.opts = _.defaultsDeep(opts || {
       perMessageDeflate: false,
       clientTracking: true,
-      contextCreationTimeout: 5000,
+      contextCreationTimeout: 100,
       pingPongCheckInterval: 5000,
     }, {});
 
@@ -47,23 +47,32 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
         // emit CONNECTION
         server.emit("connection", socket, req);
 
-        // determine FOUND or NOT FOUND: trick for route websocket handlers: if context not created yet, assume it there are no matched handler
-        setTimeout(() => {
-          const context = APIRequestContext.find(req);
-
-          // route matched, start ping-pong
-          if (context) {
-            (socket as any).__isAlive = true;
-            (socket as any).__context = context;
-            socket.on("pong", () => {
-              (socket as any).__isAlive = true;
-            });
+        // proxy socket error to server
+        socket.on("error", error => {
+          if (server.listenerCount("error") > 0) {
+            server.emit("error", error, socket, req);
           } else {
-            // route not matched
-            server.emit("error", new Error("not found websocket route")); // TODO: normalize error
-            socket.close();
+            this.props.logger.error(error);
           }
-        }, contextCreationTimeout);
+        });
+
+        // trick: if context not being created yet, assume it there are no matched handler
+        if (APIRequestContext.isCreating(req)) {
+          // route matched, start ping-pong
+          (socket as any).__isAlive = true;
+          socket.on("pong", () => {
+            (socket as any).__isAlive = true;
+          });
+        } else {
+          // route not matched throw error
+          const error = new Error("not found websocket route"); // TODO: normalize error
+          if (server.listenerCount("error") > 0) {
+            server.emit("error", error, socket, req);
+          } else {
+            this.props.logger.error(error);
+          }
+          socket.close();
+        }
       });
 
       // TERMINATE dangling sockets
@@ -72,12 +81,10 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
       }
       this.pingPongCheckIntervalTimer = setInterval(() => {
         server.clients.forEach(socket => {
-          const context = (socket as any).__context;
           if ((socket as any).__isAlive === true) {
             (socket as any).__isAlive = false;
             socket.ping();
           } else if ((socket as any).__isAlive === false) {
-            this.props.logger.error(`${context ? context.id : "unknown"} socket terminated due to not send no pong for ping`);
             socket.terminate();
           } else {
             // do nothing when __isAlive is undefined yet

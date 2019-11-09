@@ -150,20 +150,19 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
 
   private createRouteFromWebSocketRouteScheme(path: string, schema: WebSocketRouteSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<WebSocketRoute> {
     const subscribeConnector = ConnectorCompiler.subscribe(schema.subscribe, integration, this.props.policyPlugins, {
-      mappableKeys: ["context", "path", "params", "query"],
+      mappableKeys: ["context", "path", "query"],
       getAsyncIterator: false,
     });
 
     const publishConnector = ConnectorCompiler.publish(schema.publish, integration, this.props.policyPlugins, {
-      mappableKeys: ["context", "path", "params", "query", "message"],
+      mappableKeys: ["context", "path", "query", "message"],
     });
 
     const handler: WebSocketRouteHandler = async (context, socket, req) => {
-      // tslint:disable-next-line:no-shadowed-variable
-      const {path, params, query} = req;
+      const {params, query} = req;
 
       // subscribe and proxy message to socket
-      const mappableSubscriptionArgs = {context, path, params, query};
+      const mappableSubscriptionArgs = {context, path: params, query};
       await subscribeConnector(context, mappableSubscriptionArgs, (message) => {
         if (typeof message !== "string") {
           try {
@@ -172,14 +171,11 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
           }
         }
 
-        try {
-          socket.send(message);
-        } catch (error) {
-          if (schema.ignoreError !== true) {
-            socket.send({error: error.message}); // TODO: normalize error
+        socket.send(message, error => {
+          if (error && schema.ignoreError !== true) {
+            socket.emit("error", error);
           }
-          this.props.logger.error(error);
-        }
+        });
       });
 
       // publish received messages
@@ -190,14 +186,13 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
           } catch {
           }
         }
-        const mappableArgs = {context, path, params, query, message};
+        const mappableArgs = {context, path: params, query, message};
         try {
           await publishConnector(context, mappableArgs);
         } catch (error) {
           if (schema.ignoreError !== true) {
-            socket.send({error: error.message}); // TODO: normalize error
+            socket.emit("error", error);
           }
-          this.props.logger.error(error);
         }
       });
     };

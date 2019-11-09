@@ -16,7 +16,7 @@ export type Connector = CallConnector | PublishConnector | SubscribeConnector | 
 /* Connectors Schema */
 export type ParamsConnectorSchema<MappableArgs extends { [key: string]: any } = any> = {
   [key: string]: any;
-};
+} | string;
 
 export type MapConnectorSchema<Fn extends (mappableArgs: any) => any = (mappableArgs: { [key: string]: any }) => any> = string;
 

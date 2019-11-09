@@ -21,7 +21,7 @@ export type ParamsMappingInfo = {
 
 export type ParamsMapperProps = {
   reporter: Reporter;
-  explicitMapping: { [paramName: string]: any };
+  explicitMapping: { [paramName: string]: any } | string; // object like { a: "@params.a", ... } or string like "@params.a"
   explicitMappableKeys: string[];
   implicitMappableKeys: string[] | null;
   paramsSchema: NormalizedValidationSchema | null;
@@ -30,14 +30,29 @@ export type ParamsMapperProps = {
 
 export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
   public static readonly mappablePrefix = "@";
+  private static readonly rootObjectKey = "__root__";
   public readonly info: ParamsMappingInfo;
   private readonly mapper: (args: MappableArgs) => { [key: string]: any };
   private readonly batchingParamNames: string[] | null;
 
   constructor(protected readonly props: ParamsMapperProps) {
-    const {reporter, batchingEnabled, explicitMappableKeys, explicitMapping, implicitMappableKeys, paramsSchema} = props;
+    const {reporter, batchingEnabled, explicitMappableKeys, implicitMappableKeys, paramsSchema} = props;
+    let explicitMapping: { [key: string]: any };
+    let rootObjectMapping = false;
+    if (typeof props.explicitMapping === "string") {
+      if (props.explicitMapping) {
+        rootObjectMapping = true;
+        explicitMapping = {[ParamsMapper.rootObjectKey]: props.explicitMapping};
+      } else {
+        explicitMapping = {};
+      }
+    } else {
+      explicitMapping = props.explicitMapping;
+    }
+
     const info: ParamsMappingInfo = this.info = {};
     const batchingParamNames: string[] | null = this.batchingParamNames = batchingEnabled ? [] : null;
+
     let mapper: (args: MappableArgs) => { [key: string]: any } = () => ({});
 
     // apply explicit mapping options
@@ -223,6 +238,13 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
       }
     }
 
+    // bring out root object mapping
+    if (rootObjectMapping) {
+      // tslint:disable-next-line:no-shadowed-variable
+      const prevMapper = mapper;
+      mapper = args => prevMapper(args)[ParamsMapper.rootObjectKey];
+    }
+
     this.mapper = mapper;
   }
 
@@ -250,6 +272,7 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
     if (Object.keys(result.batchingParams).length === 0) {
       result.batchingParams = null;
     }
+
     return result;
   }
 }

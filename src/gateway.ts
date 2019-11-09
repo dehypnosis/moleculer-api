@@ -79,13 +79,13 @@ export class APIGateway {
       }
     }
 
-    // catch uncaught error
-    process.on("unhandledRejection", this.handleError);
+    // catch error
+    process.on("unhandledRejection", this.handleUncaughtError);
 
     try {
       await this.server.start();
     } catch (error) {
-      await this.handleError(error);
+      await this.handleUncaughtError(error);
     }
   }
 
@@ -95,7 +95,7 @@ export class APIGateway {
         process.removeListener(signal as any, this.handleShutdown);
       }
     }
-    process.removeListener("unhandledRejection", this.handleError);
+    process.removeListener("unhandledRejection", this.handleUncaughtError);
     await this.server.stop();
   }
 
@@ -106,9 +106,9 @@ export class APIGateway {
     return this.stop();
   }).bind(this);
 
-  private handleError = ((reason: {} | null | undefined, promise?: Promise<any>) => {
-    this.logger.error(reason);
-    if (reason instanceof FatalError) {
+  private handleUncaughtError = ((reason: any, ...args: any[]) => {
+    console.error("uncaught error:", reason, ...args);
+    if (reason instanceof FatalError) { // TODO: normalize error
       return this.stop();
     }
   }).bind(this);

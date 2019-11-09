@@ -4,14 +4,14 @@ function isStream(stream: any): boolean {
     typeof stream.pipe === "function";
 }
 
-function isWritableStream(stream: any): boolean {
+function isWriteStream(stream: any): boolean {
   return isStream(stream) &&
     stream.writable !== false &&
     typeof stream._write === "function" &&
     typeof stream._writableState === "object";
 }
 
-function isReadableStream(stream: any): boolean {
+function isReadStream(stream: any): boolean {
   return isStream(stream) &&
     stream.readable !== false &&
     typeof stream._read === "function" &&
@@ -19,13 +19,13 @@ function isReadableStream(stream: any): boolean {
 }
 
 function isDuplexStream(stream: any): boolean {
-  return isWritableStream(stream) &&
-    isReadableStream(stream);
+  return isWriteStream(stream) &&
+    isReadStream(stream);
 }
 
 export {
   isStream,
-  isReadableStream,
-  isWritableStream,
+  isReadStream,
+  isWriteStream,
   isDuplexStream,
 };

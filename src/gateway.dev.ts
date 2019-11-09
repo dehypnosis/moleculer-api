@@ -1,107 +1,185 @@
 import { APIGateway } from "./gateway";
+import { getMoleculerServiceBroker } from "./test";
+import ReadableStream = NodeJS.ReadableStream;
+import fs from "fs";
+import path from "path";
 
 const gateway = new APIGateway({
   brokers: [
     {
       moleculer: {
+        nodeID: "gateway-node",
         namespace: "dev-gateway",
         transporter: {
           type: "TCP",
           udpPeriod: 1,
         },
-        services: [
-          {
-            name: "chat",
-            metadata: {
-              api: {
-                branch: "master",
-                policy: {},
-                protocol: {
-                  WebSocket: {
-                    basePath: "/chat",
-                    description: "...",
-                    routes: [
-                      {
-                        path: "/:roomId",
-                        subscribe: {
-                          events: `({ params }) => ["chat.root." + params.roomId]`,
-                        },
-                        publish: {
-                          event: `({ params }) => ["chat.root." + params.roomId]`,
-                          params: {
-                            userId: "@context.id",
-                            roomId: "@params.roomId",
-                            message: "@message",
-                          },
-                        },
-                      },
-                    ],
+      },
+    },
+  ],
+  schema: {
+    branch: {
+      maxVersions: 1,
+    },
+  },
+  server: {
+    update: {
+      debouncedSeconds: 0,
+    },
+    protocol: {
+      http: {
+        port: 8080,
+      },
+    },
+    middleware: [
+      {
+        cors: {
+          // origin: [
+          //   "https://www.google.com",
+          // ],
+        },
+      },
+    ],
+  },
+  logger: {
+    winston: {level: "info"},
+  },
+});
+
+const services = getMoleculerServiceBroker({
+  moleculer: {
+    nodeID: "remote-node",
+    namespace: "dev-gateway",
+    transporter: {
+      type: "TCP",
+      udpPeriod: 1,
+    },
+  },
+  services: [
+    {
+      name: "chat",
+      metadata: {
+        api: {
+          branch: "master",
+          policy: {},
+          protocol: {
+            WebSocket: {
+              basePath: "/chat",
+              description: "...",
+              routes: [
+                {
+                  path: "/:roomId",
+                  subscribe: {
+                    events: `({ params }) => ["chat.root." + params.roomId]`,
+                  },
+                  publish: {
+                    event: `({ params }) => "chat.root." + params.roomId`,
+                    params: {
+                      userId: "@context.id",
+                      roomId: "@path.roomId",
+                      message: "@message",
+                    },
                   },
                 },
-              },
+              ],
             },
           },
-          {
-            name: "file",
-            metadata: {
-              api: {
-                branch: "master",
-                protocol: {
-                  REST: {
-                    description: "..",
-                    basePath: "/file",
-                    routes: [
-                      {
-                        method: "POST",
-                        path: "/",
-                        call: {
-                          action: "foo.noop",
-                          params: {
-                            file: "@body.file",
-                          },
-                          map: `({ params }) => params.file`,
-                        },
-                      },
-                    ],
+        },
+      },
+    },
+    {
+      name: "file",
+      metadata: {
+        api: {
+          branch: "master",
+          protocol: {
+            REST: {
+              description: "..",
+              basePath: "/file",
+              routes: [
+                {
+                  method: "POST",
+                  path: "/",
+                  call: {
+                    action: "file.upload",
+                    params: "@body.file",
                   },
                 },
-                policy: {},
-              },
+                {
+                  method: "GET",
+                  path: "/:filename",
+                  call: {
+                    action: "file.get",
+                    params: {
+                     filename: "@path.filename",
+                    },
+                  },
+                },
+              ],
             },
           },
-          {
-            name: "foo",
-            metadata: {
-              api: {
-                branch: "master",
-                protocol: {
-                  REST: {
-                    description: "test..",
-                    basePath: "/foo",
-                    routes: [
-                      {
-                        method: "GET",
-                        path: "/bar",
-                        map: `() => { throw new Error("what an error"); }`,
-                      },
-                      {
-                        method: "GET",
-                        path: "/:id",
-                        call: {
-                          action: "foo.get",
-                          params: {},
-                        },
-                      },
-                      {
-                        method: "GET",
-                        path: "/:a/:b/:c?",
-                        map: `(args) => args`,
-                      },
-                    ],
+          policy: {},
+        },
+      },
+      actions: {
+        upload(ctx) {
+          return new Promise((resolve, reject) => {
+            const meta = ctx.meta;
+            const saveStream = fs.createWriteStream(path.join(__dirname, "..", "tmp." + (meta.filename || "unknown-file")));
+            ctx.params!.pipe(saveStream);
+            ctx.params!.on("end", () => resolve(meta));
+            ctx.params!.on("error", reject);
+          });
+        },
+        get: {
+          params: {
+            filename: "string",
+          },
+          handler(ctx) {
+              const filepath = path.join(__dirname, "..", "tmp." + ctx.params!.filename);
+              if (!fs.statSync(filepath).isFile()) throw new Error("no such file");
+              // ctx.meta.$headers = {
+              //   Location: "https://google.com",
+              // };
+              // ctx.meta.$status = 302;
+              return fs.createReadStream(filepath);
+          },
+        },
+      },
+    },
+    {
+      name: "foo",
+      metadata: {
+        api: {
+          branch: "master",
+          protocol: {
+            REST: {
+              description: "test..",
+              basePath: "/foo",
+              routes: [
+                {
+                  method: "GET",
+                  path: "/bar",
+                  map: `() => { throw new Error("what an error"); }`,
+                },
+                {
+                  method: "GET",
+                  path: "/:id",
+                  call: {
+                    action: "foo.get",
+                    params: {},
                   },
-                  GraphQL: {
-                    description: "blablabla",
-                    typeDefs: `
+                },
+                {
+                  method: "GET",
+                  path: "/:a/:b/:c?",
+                  map: `(args) => args`,
+                },
+              ],
+            },
+            GraphQL: {
+              description: "blablabla",
+              typeDefs: `
                       interface Node {
                         id: String
                       }
@@ -120,99 +198,66 @@ const gateway = new APIGateway({
                         filename: String
                       }
                     `,
-                    resolvers: {
-                      Foo: {
-                        id: `({ source }) => source.id`,
-                        __isTypeOf: `({ source }) => source && source.__isFoo`,
+              resolvers: {
+                Foo: {
+                  id: `({ source }) => source.id`,
+                  __isTypeOf: `({ source }) => source && source.__isFoo`,
+                },
+                Query: {
+                  foo: {
+                    call: {
+                      action: "foo.get",
+                      params: {
+                        id: "@args.id[]",
                       },
-                      Query: {
-                        foo: {
-                          call: {
-                            action: "foo.get",
-                            params: {
-                              id: "@args.id[]",
-                            },
-                            map: `({ response }) => ({ ...response, __isFoo: true })`,
-                          },
-                          ignoreError: true,
-                        },
+                      map: `({ response }) => ({ ...response, __isFoo: true })`,
+                    },
+                    ignoreError: true,
+                  },
+                },
+                Mutation: {
+                  uploadFile: {
+                    call: {
+                      action: "foo.noop",
+                      params: {
+                        file: "@args.file",
                       },
-                      Mutation: {
-                        uploadFile: {
-                          call: {
-                            action: "foo.noop",
-                            params: {
-                              file: "@args.file",
-                            },
-                            map: `({ params }) => params.file`,
-                          },
-                        },
-                      },
+                      map: `({ params }) => params.file`,
                     },
                   },
                 },
-                policy: {},
-              },
-            },
-            actions: {
-              get: {
-                params: {
-                  id: ["string", {
-                    type: "array",
-                    items: "string",
-                  }],
-                },
-                handler(ctx) {
-                  const id = ctx.params!.id;
-                  if (Array.isArray(id)) { // batching
-                    // tslint:disable-next-line:no-shadowed-variable
-                    return id.map(id => ({id}));
-                  }
-                  return {id}; // single
-                },
-              },
-              noop(ctx) {
               },
             },
           },
-        ],
+          policy: {},
+        },
+      },
+      actions: {
+        get: {
+          params: {
+            id: ["string", {
+              type: "array",
+              items: "string",
+            }],
+          },
+          handler(ctx) {
+            const id = ctx.params!.id;
+            if (Array.isArray(id)) { // batching
+              // tslint:disable-next-line:no-shadowed-variable
+              return id.map(id => ({id}));
+            }
+            return {id}; // single
+          },
+        },
+        noop(ctx) {
+          console.log(ctx.params);
+        },
       },
     },
   ],
-  schema: {
-    protocol: {
-      GraphQL: {
-        subscriptions: {},
-      },
-    },
-    branch: {
-      maxVersions: 1,
-    },
-  },
-  server: {
-    update: {
-      debouncedSeconds: 0,
-    },
-    protocol: {
-      http: {
-        port: 8080,
-      },
-    },
-    middleware: [
-      {
-        cors: {
-          origin: [
-            "https://www.google.com",
-          ],
-        },
-      },
-    ],
-  },
-  logger: {
-    winston: {level: "info"},
-  },
 });
 
 (async () => {
   await gateway.start();
+  await services.start();
 })();

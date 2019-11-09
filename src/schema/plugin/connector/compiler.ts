@@ -37,7 +37,7 @@ export const ConnectorCompiler = {
       }),
     });
 
-    return withLabel(connector, `map:${field}`);
+    return withLabel(connector, `mapConnector`);
   },
 
   call<MappableArgs extends { [key: string]: any }>(
@@ -119,7 +119,7 @@ export const ConnectorCompiler = {
       return responseMapper ? responseMapper({...args, response}) : response;
     };
 
-    return withLabel(connector, `call:${field}`);
+    return withLabel(connector, `callConnector`);
   },
 
   publish<MappableArgs>(
@@ -165,9 +165,11 @@ export const ConnectorCompiler = {
         function: schema.event,
         mappableKeys: opts.mappableKeys,
         reporter: integration.reporter.getChild({
-          field: kleur.bold(kleur.cyan(field + ".map")),
-          schema: schema.map,
+          field: kleur.bold(kleur.cyan(field + ".event")),
+          schema: schema.event,
         }),
+        returnTypeCheck: value => typeof value === "string" && !!value,
+        returnTypeNotation: "string",
       });
     } catch (error) {
       eventNameOrFn = schema.event;
@@ -196,7 +198,7 @@ export const ConnectorCompiler = {
         return responseMapper ? responseMapper(args) : args.params; // just return params only if mapper has not been defined
       };
 
-      return withLabel(connector, `publish:${field}`);
+      return withLabel(connector, `publishConnector`);
     } else {
       // for dynamic event name
       const getEventName = eventNameOrFn;
@@ -210,7 +212,7 @@ export const ConnectorCompiler = {
         const {params} = paramsMapper.map(mappableArgs); // batching disabled
 
         // get event name
-        const eventName = getEventName(mappableArgs).toString();
+        const eventName = getEventName(mappableArgs);
 
         // test policy
         const args = {...baseArgs, context, event: eventName, params};
@@ -226,7 +228,7 @@ export const ConnectorCompiler = {
         return responseMapper ? responseMapper(args) : args.params; // just return params only if mapper has not been defined
       };
 
-      return withLabel(connector, `publish:${field}`);
+      return withLabel(connector, `publishConnector`);
     }
   },
 
@@ -252,6 +254,8 @@ export const ConnectorCompiler = {
         field: kleur.bold(kleur.cyan(field + ".filter")),
         schema: schema.filter,
       }),
+      returnTypeCheck: value => typeof value === "boolean",
+      returnTypeNotation: "boolean",
     }) : null;
 
     // to map response
@@ -271,9 +275,11 @@ export const ConnectorCompiler = {
         function: schema.events,
         mappableKeys: opts.mappableKeys,
         reporter: integration.reporter.getChild({
-          field: kleur.bold(kleur.cyan(field + ".map")),
-          schema: schema.map,
+          field: kleur.bold(kleur.cyan(field + ".events")),
+          schema: schema.events,
         }),
+        returnTypeCheck: value => Array.isArray(value) && value.every(name => typeof name === "string" && name),
+        returnTypeNotation: "string[]",
       });
     } else {
       eventNamesOrFn = schema.events;
@@ -329,7 +335,7 @@ export const ConnectorCompiler = {
       return undefined as any;
     };
 
-    return withLabel(connector, `subscribe:${field}`);
+    return withLabel(connector, `subscribeConnector`);
   },
 };
 

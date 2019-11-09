@@ -2,16 +2,19 @@ import { APIRequestContextFactory, APIRequestContextProps, APIRequestContextSour
 
 export type APIRequestContextConstructor = (source: APIRequestContextSource) => Promise<APIRequestContext>;
 
-export interface APIRequestContext extends APIRequestContextProps {}
+export interface APIRequestContext extends APIRequestContextProps {
+}
 
 type APIRequestContextStore = Map<symbol, APIRequestContextStoreItemClearer>;
 type APIRequestContextStoreItemClearer = [any, (value: any) => void];
+
 export class APIRequestContext {
   protected constructor(props: APIRequestContextProps) {
     Object.assign(this, props);
-    Object.defineProperty(this, APIRequestContext.StoreSymbol, { value: new Map(), enumerable: true, configurable: false, writable: false }); // should be enumerable, ... for plugins which adjust given context
+    Object.defineProperty(this, APIRequestContext.StoreSymbol, {value: new Map(), enumerable: true, configurable: false, writable: false}); // should be enumerable, ... for plugins which adjust given context
   }
 
+  private static SourceContextIsCreatingSymbol = Symbol("APIRequestContextIsCreating");
   private static SourceContextSymbol = Symbol("APIRequestContext");
   private static StoreSymbol = Symbol("APIRequestContextStore");
 
@@ -23,7 +26,10 @@ export class APIRequestContext {
     },
   ): APIRequestContextConstructor {
     return async source => {
-      console.assert(!source.hasOwnProperty(APIRequestContext.SourceContextSymbol), "cannot call context factory more than once from a request: check ApplicationComponent.unmountRoutes/mountRoutes methods");
+      console.assert(!source.hasOwnProperty(APIRequestContext.SourceContextIsCreatingSymbol), "cannot call context factory more than once from a request: check ApplicationComponent.unmountRoutes/mountRoutes methods");
+
+      // add reference to source which denote parsing context currently
+      Object.defineProperty(source, APIRequestContext.SourceContextIsCreatingSymbol, {value: true});
 
       if (hooks && hooks.before) {
         hooks.before(source);
@@ -55,6 +61,10 @@ export class APIRequestContext {
       return (source as any)[APIRequestContext.SourceContextSymbol];
     }
     return null;
+  }
+
+  public static isCreating(source: APIRequestContextSource): boolean {
+    return source.hasOwnProperty(APIRequestContext.SourceContextIsCreatingSymbol);
   }
 
   /* internal store for broker delegator and plugins */

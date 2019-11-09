@@ -3,10 +3,12 @@ import * as tslib from "tslib";
 import { RecursivePartial } from "../interface";
 import { Reporter } from "./reporter";
 
-export type InlineFunctionProps<Args> = {
+export type InlineFunctionProps<Args, Return> = {
   function: string;
   mappableKeys: Array<Extract<keyof Args, string>>;
   reporter: Reporter;
+  returnTypeCheck?: (value: Return) => boolean;
+  returnTypeNotation?: string;
 };
 
 export type InlineFunctionOptions = {
@@ -48,7 +50,7 @@ class DummyConsole implements PartialConsole {
   }
 }
 
-export function createInlineFunction<Args extends {[key: string]: any}, Return = any>(props: InlineFunctionProps<Args>, opts?: RecursivePartial<InlineFunctionOptions>): (args: Args) => Return {
+export function createInlineFunction<Args extends {[key: string]: any}, Return = any>(props: InlineFunctionProps<Args, Return>, opts?: RecursivePartial<InlineFunctionOptions>): (args: Args) => Return {
   const script = new vm.Script(`(${props.function})({ ${props.mappableKeys.join(", ")} })`, {
     displayErrors: true,
     timeout: 100,
@@ -61,6 +63,18 @@ export function createInlineFunction<Args extends {[key: string]: any}, Return =
   };
 
   return (args: Args): Return => {
-    return script.runInNewContext({...sandbox, ...args});
+    const value = script.runInNewContext({...sandbox, ...args});
+    if (props.returnTypeCheck && !props.returnTypeCheck(value)) {
+      const error = new Error("return value of inline function has invalid type"); // TODO: normalize error
+      if (props.returnTypeNotation) {
+        // @ts-ignore
+        error.expected = props.returnTypeNotation;
+      }
+      // @ts-ignore
+      error.actual = typeof value;
+      props.reporter.error(error);
+      throw error;
+    }
+    return value;
   };
 }

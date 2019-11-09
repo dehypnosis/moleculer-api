@@ -23,10 +23,15 @@ const requiredMap = {
   optional: false,
 };
 
-const params = {
-  type: "object",
-  strict: false,
-};
+const params = [
+  {
+    type: "object",
+    strict: false,
+  },
+  {
+    type: "string",
+  },
+];
 
 export const ConnectorValidator: { [connector in "call" | "params" | "publish" | "subscribe" | "map"]: ValidationRule } = {
   call: {
@@ -45,7 +50,7 @@ export const ConnectorValidator: { [connector in "call" | "params" | "publish" |
     strict: true,
     props: {
       event: [
-        { type: "string" },
+        {type: "string"},
         requiredMap,
       ],
       params,

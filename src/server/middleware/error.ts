@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 import { RecursivePartial } from "../../interface";
-import { HTTPRouteNextFn, HTTPRouteRequest, HTTPRouteResponse, ServerApplicationComponentModules } from "../application/component";
+import { HTTPRouteNextFn, HTTPRouteRequest, HTTPRouteResponse, ServerApplicationComponentModules, WebSocket, WebSocketHTTPRequest } from "../application/component";
 import { ServerMiddleware, ServerMiddlewareProps } from "./middleware";
 
 export type ErrorMiddlewareOptions = {
@@ -56,13 +56,28 @@ export class ErrorMiddleware extends ServerMiddleware {
   }
 
   private handleHTTPError(error: any, req: HTTPRouteRequest, res: HTTPRouteResponse, next: HTTPRouteNextFn): void {
-    const {responseFormat, displayErrorStack} = this.opts;
     this.props.logger.error(error);
 
     if (res.headersSent) {
       return next(error);
     }
 
+    res.status(500).json({error: this.formatError(error)}); // TODO: normalize error
+  }
+
+  private handleHTTPNotFound(req: HTTPRouteRequest, res: HTTPRouteResponse, next: HTTPRouteNextFn): void {
+    res.status(404).end();
+  }
+
+  private handleWebSocketError(error: any, socket?: WebSocket, req?: WebSocketHTTPRequest): void {
+    this.props.logger.error(error);
+    if (socket) {
+      socket.send(JSON.stringify({error: this.formatError(error)})); // TODO: normalize error
+    }
+  }
+
+  private formatError(error: any): any {
+    const {responseFormat, displayErrorStack} = this.opts;
     let value: any = error;
     if (typeof error === "object" && error !== null) {
       const obj: any = {};
@@ -82,14 +97,6 @@ export class ErrorMiddleware extends ServerMiddleware {
       }
     }
 
-    res.status(500).json(value);
-  }
-
-  private handleHTTPNotFound(req: HTTPRouteRequest, res: HTTPRouteResponse, next: HTTPRouteNextFn): void {
-    res.status(404).end();
-  }
-
-  private handleWebSocketError(error: any): void {
-    this.props.logger.error(error);
+    return value;
   }
 }

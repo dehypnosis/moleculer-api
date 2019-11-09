@@ -1,11 +1,12 @@
 import * as _ from "lodash";
-import { RecursivePartial, hash, validateObject, validateValue, ValidationError, ValidationRule } from "../../../../interface";
+import { RecursivePartial, hash, validateObject, validateValue, ValidationError, ValidationRule, isReadStream } from "../../../../interface";
 import { ServiceAPIIntegration } from "../../../integration";
-import { Route, HTTPRoute, HTTPRouteHandler } from "../../../../server";
+import { Route, HTTPRoute, HTTPRouteHandler, HTTPRouteResponse } from "../../../../server";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
 import { MultipartFormDataHandler } from "./handler";
 import { RESTProtocolPluginSchema, RESTProtocolPluginCatalog, RESTCallableRouteResolverSchema, RESTMappableRouteResolverSchema, RESTPublishableRouteResolverSchema, RESTRouteSchema } from "./schema";
 import { ConnectorCompiler, ConnectorValidator } from "../../connector";
+import ReadableStream = NodeJS.ReadableStream;
 
 export type RESTProtocolPluginOptions = {
   uploads: {
@@ -264,15 +265,14 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
 
   private createRouteFromMapConnectorScheme(path: string, method: "GET", schema: RESTMappableRouteResolverSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<HTTPRoute> {
     const connector = ConnectorCompiler.map(schema.map, integration, {
-      mappableKeys: ["context", "path", "params", "query", "body"],
+      mappableKeys: ["context", "path", "query", "body"],
     });
 
     const handler: HTTPRouteHandler = (context, req, res) => {
-      // tslint:disable-next-line:no-shadowed-variable
-      const { path, params, query, body } = req;
-      const mappableArgs = {context, path, params, query, body};
+      const {params, query, body} = req;
+      const mappableArgs = {context, path: params, query, body};
       const result = connector(mappableArgs);
-      res.json(result);
+      this.sendResponse(res, result);
     };
 
     return new HTTPRoute({
@@ -286,8 +286,8 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
   private createRouteFromCallConnectorScheme(path: string, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
                                              schema: RESTCallableRouteResolverSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<HTTPRoute> {
     const connector = ConnectorCompiler.call(schema.call, integration, this.props.policyPlugins, {
-      explicitMappableKeys: ["context", "path", "params", "query", "body"],
-      implicitMappableKeys: ["path", "params", "query", "body"],
+      explicitMappableKeys: ["context", "path", "query", "body"],
+      implicitMappableKeys: ["path", "path", "query", "body"],
       batchingEnabled: false,
       disableCache: false,
     });
@@ -301,32 +301,14 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
           req.body = Object.assign(req.body || {}, uploads);
         }
 
-        // tslint:disable-next-line:no-shadowed-variable
-        const { path, params, query, body } = req;
-        const mappableArgs = {context, path, params, query, body};
+        const {params, query, body} = req;
+        const mappableArgs = {context, path: params, query, body};
         const result = await connector(context, mappableArgs);
-
-        // TODO: REST support { meta.headers } http header transformation
-        // if (result && result.meta && result.meta.headers && typeof result.meta.headers === "object") {
-        //   const headers = result.meta.headers;
-        //   for (const k of headers) {
-        //     res.setHeader(k, headers[k]);
-        //   }
-        // }
-
-        // TODO: REST support { stream } streaming response
-        // if (result && result.stream && isReadableStream(result.stream)) {
-        //   res.setHeader("Transfer-Encoding", "chunked");
-        //   res.send(result.stream);
-        //   return;
-        // }
-
-        res.json(result);
+        this.sendResponse(res, result);
 
       } catch (error) {
         if (ignoreError) {
-          // integration.reporter.debug("error has been ignored for call request", error);
-          res.json(null); // TODO: normalize response
+          this.sendResponse(res, null);
         } else {
           throw error;
         }
@@ -344,15 +326,14 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
   private createRouteFromPublishConnectorScheme(path: string, method: "POST" | "PUT" | "PATCH" | "DELETE",
                                                 schema: RESTPublishableRouteResolverSchema, integration: Readonly<ServiceAPIIntegration>): Readonly<HTTPRoute> {
     const connector = ConnectorCompiler.publish(schema.publish, integration, this.props.policyPlugins, {
-      mappableKeys: ["context", "path", "params", "query", "body"],
+      mappableKeys: ["context", "path", "query", "body"],
     });
 
     const handler: HTTPRouteHandler = async (context, req, res) => {
-      // tslint:disable-next-line:no-shadowed-variable
-      const { path, params, query, body } = req;
-      const mappableArgs = {context, path, params, query, body};
+      const {params, query, body} = req;
+      const mappableArgs = {context, path: params, query, body};
       const result = await connector(context, mappableArgs);
-      res.json(result);
+      this.sendResponse(res, result);
     };
 
     return new HTTPRoute({
@@ -366,5 +347,46 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
   // TODO: REST plugin catalog
   public describeSchema(schema: Readonly<RESTProtocolPluginSchema>): RESTProtocolPluginCatalog {
     return {} as RESTProtocolPluginCatalog;
+  }
+
+  private sendResponse(res: HTTPRouteResponse, result: any) {
+    if (result === null || typeof result === "undefined") {
+      res.status(200).end();
+    } else if (typeof result === "object") {
+      // response header modification
+      if (typeof result.$headers === "object") {
+        for (const [k, v] of Object.entries(result.$headers)) {
+          if (typeof k !== "string") {
+            continue;
+          }
+          res.setHeader(k, v as any);
+        }
+      }
+
+      // response code modification
+      if (typeof result.$status === "number") {
+        res.status(result.$status);
+      }
+
+      // streaming support
+      if (typeof result.createReadStream === "function") {
+        const stream = result.createReadStream() as ReadableStream;
+        if (!isReadStream(stream)) {
+          throw new Error("invalid read stream"); // TODO: normalize error
+        }
+        if (!res.hasHeader("Content-Type")) {
+          res.setHeader("Content-Type", "application/octet-stream");
+        }
+        if (!res.hasHeader("Transfer-Encoding")) {
+          res.setHeader("Transfer-Encoding", "chunked");
+        }
+        stream.pipe(res);
+      } else {
+        const { $status, $headers, ...otherProps } = result;
+        res.json(otherProps);
+      }
+    } else {
+      res.status(200).json(result);
+    }
   }
 }

@@ -3,8 +3,9 @@ import http from "http";
 import http2 from "http2";
 import ws from "ws";
 
+export type WebSocket = ws;
 export type WebSocketHTTPRequest = (http.IncomingMessage | http2.Http2ServerRequest) & { path: string, params: any, query: any };
-export type WebSocketRouteHandler<Context = any> = (context: Context, socket: ws, req: WebSocketHTTPRequest) => void;
+export type WebSocketRouteHandler<Context = any> = (context: Context, socket: WebSocket, req: WebSocketHTTPRequest) => void;
 
 /*
   WebSocketRouteInternalHandler will be attached to `wsServer.on("connection", ...)`

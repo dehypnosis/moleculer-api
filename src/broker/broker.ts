@@ -313,7 +313,7 @@ export class ServiceBroker<DelegatorContext = any> {
   }
 
   /* compile inline function string */
-  public createInlineFunction<MappableArgs, Return>(props: InlineFunctionProps<MappableArgs>): (args: MappableArgs) => Return {
+  public createInlineFunction<MappableArgs, Return>(props: InlineFunctionProps<MappableArgs, Return>): (args: MappableArgs) => Return {
     return createInlineFunction<MappableArgs, Return>(props, this.opts.function);
   }
 

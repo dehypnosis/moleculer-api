@@ -2,7 +2,7 @@ import * as _ from "lodash";
 import * as Moleculer from "moleculer";
 import { ServiceMetaDataSchema } from "../../../schema";
 import { APIRequestContext } from "../../../server";
-import { isReadableStream } from "../../../interface";
+import { isReadStream } from "../../../interface";
 import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../../registry";
 import { Report } from "../../reporter";
 import { EventPacket } from "../../pubsub";
@@ -108,28 +108,33 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
     }
 
     let response: any;
-    const oldMetaKeys = Object.keys(context.meta);
 
-    // TODO: can handle stream request by { stream: ReadableStream, meta: object } params
-    if (params && params.stream && isReadableStream(params.stream)) {
-      response = await this.broker.call(action.id, params.stream, {nodeID: node.id, meta: params.meta || {}, parentCtx: context });
+    // create child context
+    const ctx = Moleculer.Context.create(this.broker);
+
+    // streaming request
+    if (typeof params.createReadStream === "function") {
+      const { createReadStream, ...meta } = params;
+      const stream = params.createReadStream();
+      if (!isReadStream(stream)) {
+        throw new Error("invalid stream request"); // TODO: normalize error
+      }
+      response = await ctx.call(action.id, stream, {nodeID: node.id, meta, parentCtx: context });
     } else {
       // normal request
-      response = await this.broker.call(action.id, params, {nodeID: node.id, parentCtx: context });
+      response = await ctx.call(action.id, params, {nodeID: node.id, parentCtx: context });
     }
 
-    // can handle stream response
-    if (isReadableStream(response)) {
-      const addedMeta = Object.keys(context.meta).reduce((meta, k) => {
-        if (!oldMetaKeys.includes(k)) {
-          meta[k] = _.cloneDeep(context.meta[k]);
-        }
-        return meta;
-      }, {} as any);
-      return {stream: response, meta: addedMeta};
+    // streaming response (can obtain other props from ctx.meta in streaming response)
+    if (isReadStream(response)) {
+      return {
+        createReadStream: () => response,
+        ...ctx.meta,
+      };
+    } else {
+      // normal response
+      return response;
     }
-
-    return response;
   }
 
   /* publish event */
