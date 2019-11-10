@@ -62,7 +62,7 @@ export class ErrorMiddleware extends ServerMiddleware {
       return next(error);
     }
 
-    res.status(500).json({error: this.formatError(error)}); // TODO: normalize error
+    res.status(500).json(this.formatError(error)); // TODO: normalize error
   }
 
   private handleHTTPNotFound(req: HTTPRouteRequest, res: HTTPRouteResponse, next: HTTPRouteNextFn): void {
@@ -71,11 +71,11 @@ export class ErrorMiddleware extends ServerMiddleware {
 
   private handleWebSocketError(error: any, socket?: WebSocket, req?: WebSocketHTTPRequest): void {
     if (socket) {
-      socket.send(JSON.stringify({error: this.formatError(error)})); // TODO: normalize error
+      socket.send(this.formatError(error, true)); // TODO: normalize error
     }
   }
 
-  private formatError(error: any): any {
+  private formatError(error: any, stringify = false): any {
     const {responseFormat, displayErrorStack} = this.opts;
     let value: any = error;
     if (typeof error === "object" && error !== null) {
@@ -96,6 +96,16 @@ export class ErrorMiddleware extends ServerMiddleware {
       }
     }
 
-    return value;
+    let result: any = {error: value};
+
+    if (stringify) {
+      try {
+        result = JSON.stringify(result);
+      } catch {
+        result = JSON.stringify({error: error.toString(), truncated: true});
+      }
+    }
+
+    return result;
   }
 }

@@ -2,7 +2,7 @@ import { APIGateway } from "./gateway";
 import { getMoleculerServiceBroker } from "./test";
 import fs from "fs";
 import path from "path";
-import { ReadableStream as ReadableMemoryStream } from "memory-streams";
+import MemoryStream from "memorystream";
 import ReadableStream = NodeJS.ReadableStream;
 
 const gateway = new APIGateway({
@@ -31,10 +31,10 @@ const gateway = new APIGateway({
       http: {
         port: 8080,
       },
-      https: {
-        key: fs.readFileSync(path.join(__dirname, "../../https/key.pem")),
-        cert: fs.readFileSync(path.join(__dirname, "../../https/server.crt")),
-      },
+      // https: {
+      //   key: fs.readFileSync(path.join(__dirname, "../../https/key.pem")),
+      //   cert: fs.readFileSync(path.join(__dirname, "../../https/server.crt")),
+      // },
     },
     middleware: [ // TODO: to -> object type...
       {
@@ -78,19 +78,30 @@ const services = getMoleculerServiceBroker({
               basePath: "/chat",
               description: "...",
               routes: [
-                /* bidirectional streaming */
+                /* bidirectional streaming chat */
                 {
-                  path: "/streaming/:roomId",
+                  path: "/message-stream/:roomId",
                   call: {
-                    action: "chat.streaming",
+                    action: "chat.message.stream",
                     params: {
                       roomId: "@path.roomId",
                     },
                   },
                 },
-                /* pub/sub video streaming */
+                /* pub/sub chat */
                 {
-                  path: "/video",
+                  path: "/message-pubsub/:roomId",
+                  subscribe: {
+                    events: `({ path }) => ["chat.message." + path.roomId]`,
+                  },
+                  publish: {
+                    event: `({ path }) => "chat.message." + path.roomId`,
+                    params: "@message",
+                  },
+                },
+                /* pub/sub video */
+                {
+                  path: "/video-pubsub",
                   subscribe: {
                     events: ["chat.video"],
                   },
@@ -104,15 +115,15 @@ const services = getMoleculerServiceBroker({
                     filter: `({ params }) => params.id && params.username && params.data`,
                   },
                 },
-                /* pub/sub chat */
+                /* streaming video */
                 {
-                  path: "/:roomId",
-                  subscribe: {
-                    events: `({ path }) => ["chat.message." + path.roomId]`,
-                  },
-                  publish: {
-                    event: `({ path }) => "chat.message." + path.roomId`,
-                    params: "@message",
+                  path: "/video-stream/:type",
+                  call: {
+                    action: "chat.video.stream",
+                    params: {
+                      id: "@context.id",
+                      type: "@path.type",
+                    },
                   },
                 },
               ],
@@ -121,16 +132,94 @@ const services = getMoleculerServiceBroker({
         },
       },
       actions: {
-        streaming: {
+        "message.stream": {
           handler(ctx) {
             // bidirectional
-            const serverStream = new ReadableMemoryStream("---initial-content-from-server---");
+            const serverStream = new MemoryStream("---initial-content-from-server---");
             const clientStream = ctx.params! as ReadableStream;
             clientStream.on("data", data => {
-              // @ts-ignore
-              serverStream.append("---remote service received data and echo: " + data.toString() + "---");
+              serverStream.write("---remote service received data and echo: " + data.toString() + "---");
             });
             return serverStream;
+          },
+        },
+        "video.stream": {
+          handler(ctx) {
+            // mono-directional
+            const {id, type} = ctx.meta || {};
+            if (!id || !type) {
+              throw new Error("invalid params");
+            }
+
+            if (type === "server") {
+              // store server stream
+              if (this.serverStream) {
+                throw new Error("server is already going on");
+              }
+
+              const stream = ctx.params! as ReadableStream;
+              if (!stream || !stream.pipe) {
+                throw new Error("invalid stream for server");
+              }
+
+              this.serverStream = stream;
+              if (!this.clientStreams) {
+                this.clientStreams = [];
+              }
+
+              stream.on("close", () => {
+                delete this.serverStream;
+                delete this.metaChunks;
+              });
+
+              this.metaChunks = null;
+              stream.on("data", data => {
+                this.lastPacketTime = new Date().getTime();
+                if (!this.metaChunks) {
+                  this.metaChunks = [];
+                }
+                if (this.metaChunks.length < 2) {
+                  this.metaChunks.push(data);
+                  console.log(`collecting meta chunks... (${this.metaChunks.length}/2)`);
+                }
+                this.clientStreams.forEach((clientStream: any) => clientStream.write(data));
+              });
+
+              this.interval = setInterval(() => {
+                if (this.lastPacketTime && new Date().getTime() - this.lastPacketTime > 1000 * 5) {
+                  // @ts-ignore
+                  stream.destroy();
+                  clearInterval(this.interval);
+                  delete this.interval;
+                  console.log("server stream closed due to interval timeout 5s", id);
+                }
+              }, 1000);
+              console.log("server stream created", id);
+            } else {
+              if (!this.serverStream) {
+                throw new Error("there are no server going on");
+              }
+
+              // new stream for client
+              const stream = new MemoryStream();
+              console.log("client stream created", id);
+              if (this.metaChunks) {
+                console.log(`send meta chunks (${this.metaChunks.length}) to ${id}`);
+                for (const chunk of this.metaChunks) {
+                  stream.write(chunk);
+                }
+              }
+              stream.on("close", () => {
+                const index = (this.clientStreams as MemoryStream[]).indexOf(stream);
+                if (index !== -1) {
+                  this.clientStreams.splice(index, 1);
+                  console.log("client stream closed", id);
+                }
+              });
+              this.clientStreams.push(stream);
+
+              return stream;
+            }
           },
         },
       },

@@ -9,7 +9,7 @@
   document.getElementById("host").value = document.location.origin.replace("http", "ws");
 </script>
 
-<h3>WebSocket to pub/sub text(json) messages (~/chat/1234)</h3>
+<h3>WebSocket to pub/sub text(json) messages (~/chat/message-pubsub/1234)</h3>
 <textarea id="message" style="display: block; width: 300px; height: 200px">
 Hello world
 </textarea>
@@ -32,7 +32,7 @@ function write(message) {
 function init() {
   submit.removeEventListener("click", init);
 
-  const ws = new WebSocket(host.value + "/chat/1234");
+  const ws = new WebSocket(host.value + "/chat/message-pubsub/1234");
 
   const send = () => {
     ws.send(message.value);

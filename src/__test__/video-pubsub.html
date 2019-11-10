@@ -1,8 +1,10 @@
 <html>
 <body>
-<h2>WebSocket Pub/Sub Video Streaming</h2>
+<h2>WebSocket Pub/Sub Example</h2>
+<p>It is not for production, just a tough demonstration.<br/>
+  Should use streaming websocket protocol with video encoding rather than pub/sub websocket.</p>
 
-<h3>Streaming Endpoint</h3>
+<h3>WebSocket Endpoint (~/chat/video-pubsub)</h3>
 <input id="endpoint" type="text" style="display:block" value="" />
 <input id="username" type="text" style="display:block" value="" />
 <input id="start" type="button" value="start" />
@@ -17,7 +19,7 @@
 </div>
 <script>
 const endpoint = document.querySelector("#endpoint");
-endpoint.value = `${document.location.origin.replace("http", "ws")}/chat/video`;
+endpoint.value = `${document.location.origin.replace("http", "ws")}/chat/video-pubsub`;
 const username = document.querySelector("#username");
 username.value = `guest${Math.floor(Math.random() * 1000)}`;
 const start = document.querySelector("#start");

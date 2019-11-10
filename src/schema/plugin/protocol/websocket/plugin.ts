@@ -6,10 +6,8 @@ import { WebSocketRoute, Route, WebSocketRouteHandler } from "../../../../server
 import { ConnectorCompiler, ConnectorValidator } from "../../connector";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
 import { WebSocketProtocolPluginSchema, WebSocketProtocolPluginCatalog, WebSocketRouteSchema, WebSocketPubSubRouteSchema, WebSocketStreamingRouteSchema } from "./schema";
+import { createStreamFromWebSocket } from "./stream";
 import ReadableStream = NodeJS.ReadableStream;
-// @ts-ignore ref: https://github.com/maxogden/websocket-stream
-import createWebSocketStream from "websocket-stream/stream";
-import ReadWriteStream = NodeJS.ReadWriteStream;
 
 export type WebSocketProtocolPluginOptions = {};
 
@@ -272,8 +270,9 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
       const errorListeners = socket.listeners("error");
       try {
         // create websocket stream
-        const clientStream: ReadableStream = createWebSocketStream(socket as any, {
-          binary: false,
+        const clientStream: ReadableStream = createStreamFromWebSocket(socket, {
+          allowHalfOpen: false,
+          readableObjectMode: true,
         });
 
         // proxy stream error to socket error handler
