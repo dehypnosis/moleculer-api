@@ -31,13 +31,23 @@ const gateway = new APIGateway({
       http: {
         port: 8080,
       },
+      https: {
+        key: fs.readFileSync(path.join(__dirname, "../../https/key.pem")),
+        cert: fs.readFileSync(path.join(__dirname, "../../https/server.crt")),
+      },
     },
-    middleware: [
+    middleware: [ // TODO: to -> object type...
       {
         cors: {
           // origin: [
           //   "https://www.google.com",
           // ],
+        },
+      },
+      {
+        serveStatic: {
+          dirRootPath: __dirname + "/__test__",
+          routeBasePath: "/",
         },
       },
     ],
@@ -68,16 +78,7 @@ const services = getMoleculerServiceBroker({
               basePath: "/chat",
               description: "...",
               routes: [
-                {
-                  path: "/:roomId",
-                  subscribe: {
-                    events: `({ path }) => ["chat.root." + path.roomId]`,
-                  },
-                  publish: {
-                    event: `({ path }) => "chat.root." + path.roomId`,
-                    params: "@message",
-                  },
-                },
+                /* bidirectional streaming */
                 {
                   path: "/streaming/:roomId",
                   call: {
@@ -85,6 +86,33 @@ const services = getMoleculerServiceBroker({
                     params: {
                       roomId: "@path.roomId",
                     },
+                  },
+                },
+                /* pub/sub video streaming */
+                {
+                  path: "/video",
+                  subscribe: {
+                    events: ["chat.video"],
+                  },
+                  publish: {
+                    event: "chat.video",
+                    params: {
+                      id: "@context.id",
+                      username: "@query.username",
+                      data: "@message",
+                    },
+                    filter: `({ params }) => params.id && params.username && params.data`,
+                  },
+                },
+                /* pub/sub chat */
+                {
+                  path: "/:roomId",
+                  subscribe: {
+                    events: `({ path }) => ["chat.message." + path.roomId]`,
+                  },
+                  publish: {
+                    event: `({ path }) => "chat.message." + path.roomId`,
+                    params: "@message",
                   },
                 },
               ],
@@ -95,6 +123,7 @@ const services = getMoleculerServiceBroker({
       actions: {
         streaming: {
           handler(ctx) {
+            // bidirectional
             const serverStream = new ReadableMemoryStream("---initial-content-from-server---");
             const clientStream = ctx.params! as ReadableStream;
             clientStream.on("data", data => {

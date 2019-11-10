@@ -26,7 +26,9 @@ export class APIRequestContext {
     },
   ): APIRequestContextConstructor {
     return async source => {
-      console.assert(!source.hasOwnProperty(APIRequestContext.SourceContextIsCreatingSymbol), "cannot call context factory more than once from a request: check ApplicationComponent.unmountRoutes/mountRoutes methods");
+      if (source.hasOwnProperty(APIRequestContext.SourceContextIsCreatingSymbol)) {
+        throw new Error("request already handled"); // TODO: normalize error
+      }
 
       // add reference to source which denote parsing context currently
       Object.defineProperty(source, APIRequestContext.SourceContextIsCreatingSymbol, {value: true});

@@ -19,9 +19,9 @@ export class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute>
 
   constructor(props: ServerApplicationComponentProps, opts?: RecursivePartial<ServerHTTPApplicationOptions>) {
     super(props);
-    this.opts = _.defaultsDeep(opts || {
+    this.opts = _.defaultsDeep(opts || {}, {
       trustProxy: true,
-    }, {});
+    });
 
     // create express.Application without http.Server instance
     this.module = express();
@@ -35,9 +35,9 @@ export class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute>
 
     // modify use method to emit mount event
     const originalUse = this.module.use.bind(this.module);
-    this.module.use = (subApp: any) => {
-      const result = originalUse(subApp);
-      this.module.emit("update", subApp);
+    this.module.use = (...args: any[]) => {
+      const result = originalUse(...args);
+      this.module.emit("update");
       return result;
     };
   }

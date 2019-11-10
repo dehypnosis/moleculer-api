@@ -5,6 +5,9 @@
 <body>
 <h3>Gateway Host</h3>
 <input id="host" type="text" style="display:block" value="ws://localhost:8080" />
+<script>
+  document.getElementById("host").value = document.location.origin.replace("http", "ws");
+</script>
 
 <h3>WebSocket to pub/sub text(json) messages (~/chat/1234)</h3>
 <textarea id="message" style="display: block; width: 300px; height: 200px">

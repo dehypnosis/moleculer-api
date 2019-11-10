@@ -1,6 +1,6 @@
 import * as vm from "vm";
 import * as tslib from "tslib";
-import { RecursivePartial } from "../interface";
+import { RecursivePartial, validateInlineFunction } from "../interface";
 import { Reporter } from "./reporter";
 
 export type InlineFunctionProps<Args, Return> = {
@@ -51,6 +51,10 @@ class DummyConsole implements PartialConsole {
 }
 
 export function createInlineFunction<Args extends {[key: string]: any}, Return = any>(props: InlineFunctionProps<Args, Return>, opts?: RecursivePartial<InlineFunctionOptions>): (args: Args) => Return {
+  if (!validateInlineFunction(props.function)) {
+    throw new Error("not a valid inline function"); // TODO: normalize error
+  }
+
   const script = new vm.Script(`(${props.function})({ ${props.mappableKeys.join(", ")} })`, {
     displayErrors: true,
     timeout: 100,

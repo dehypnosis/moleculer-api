@@ -159,11 +159,10 @@ export function validateValue(value: any, rule: ValidationRule | ValidationRule[
 
 export function validateInlineFunction(fnString: string): boolean {
   try {
-    const fn = vm.runInNewContext(`(${fnString})`, {}, {
+    return vm.runInNewContext(`typeof (${fnString}) === "function"`, {}, {
       displayErrors: true,
       timeout: 100,
     });
-    return typeof fn === "function";
   } catch {
     return false;
   }

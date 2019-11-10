@@ -67,6 +67,9 @@ export type PublishConnectorSchema<MappableArgs extends { [key: string]: any } =
 
   // response mapper
   map?: MapConnectorSchema<(args: PublishConnectorResponseMappableArgs) => any>; // default behavior: ({ context, event, params, groups, broadcast }) => params
+
+  // filter received event once more by inline function
+  filter?: MapConnectorSchema<(args: SubscribeConnectorResponseMappableArgs) => any>; // default behavior: () => true
 };
 
 export type SubscribeConnectorResponseMappableArgs = { context: any } & EventPacket;

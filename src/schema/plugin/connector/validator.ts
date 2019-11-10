@@ -66,6 +66,7 @@ export const ConnectorValidator: { [connector in "call" | "params" | "publish" |
         type: "boolean",
         optional: true,
       },
+      filter: map,
       map,
     },
   },

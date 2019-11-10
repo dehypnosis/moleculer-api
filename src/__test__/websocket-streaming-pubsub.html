@@ -1,0 +1,99 @@
+<html>
+<body>
+<h2>WebSocket Pub/Sub Video Streaming</h2>
+
+<h3>Streaming Endpoint</h3>
+<input id="endpoint" type="text" style="display:block" value="" />
+<input id="username" type="text" style="display:block" value="" />
+<input id="start" type="button" value="start" />
+
+<div style="display:none">
+<h3>My Video</h3>
+<video id="my-video" autoplay style="display: block"></video>
+</div>
+
+<h3>Streaming Video</h3>
+<div id="clients">
+</div>
+<script>
+const endpoint = document.querySelector("#endpoint");
+endpoint.value = `${document.location.origin.replace("http", "ws")}/chat/video`;
+const username = document.querySelector("#username");
+username.value = `guest${Math.floor(Math.random() * 1000)}`;
+const start = document.querySelector("#start");
+const video = document.querySelector("#my-video");
+const clients = document.querySelector("#clients");
+
+const init = () => {
+  start.setAttribute("disabled", "true");
+
+  const ws = new WebSocket(endpoint.value + "?username=" + encodeURIComponent(username.value));
+  let intervalTimer;
+  let videoStream;
+
+  const getFrame = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 320;
+    canvas.height = Math.floor(video.videoHeight / (video.videoWidth/ canvas.width));
+    canvas.getContext("2d").drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/png");
+  };
+
+  ws.onopen = () => {
+    console.log("opened...");
+    navigator.mediaDevices
+      .getUserMedia({video: {width: 640}})
+      .then(stream => {
+        if (ws.readyState !== ws.OPEN) return;
+        videoStream = video.srcObject = stream;
+        intervalTimer = setInterval(() => {
+          ws.send(getFrame());
+        }, 1000 / 5); // fps
+      });
+  };
+
+  ws.onmessage = msg => {
+    const packet = JSON.parse(msg.data);
+    const { id, username, data } = packet;
+    if (!id || !username || !data) {
+      console.log(msg);
+      return;
+    }
+
+    let client = clients.querySelector(`[data-id="${id}"]`);
+    if (!client) {
+      client = document.createElement("div");
+      client.setAttribute("data-id", id);
+      client.style.margin = "10px";
+      client.style.display = "inline-block";
+
+      const img = document.createElement("img");
+      img.style.width = "320px";
+      img.style.display = "block";
+      client.append(img);
+
+      const label = document.createElement("p");
+      client.append(label);
+      clients.append(client);
+    }
+    client.querySelector("img").src = data;
+    client.querySelector("p").innerText = username;
+  };
+
+  ws.onclose = () => {
+    console.log("closed...");
+    if (intervalTimer) {
+      clearInterval(intervalTimer);
+      delete intervalTimer;
+    }
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+    }
+    start.removeAttribute("disabled");
+  };
+};
+
+start.addEventListener("click", init);
+</script>
+</body>
+</html>

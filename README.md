@@ -36,7 +36,7 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
         - [x] Branch, Version specific routes while reusing handlers
         - [x] HTTP, WebSocket components (express, ws modules)
         - [x] HTTP protocol which mounts HTTP/WS components' modules
-- [] 0.2.x Alpha
+- [x] 0.2.x Alpha
     - [x] Middleware
       - Helmet (disabled by default)
       - CORS (enabled, including WebSocket)
@@ -66,8 +66,9 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
     - [] Integration example with `moleculer-iam`
     - [] Normalized errors
 - [] 1.0.x First Stable release
-    - [] API Server extensions
-        - [] HTTPS, HTTP2, HTTP2S extension
+    - [] API Server additional protocols
+        - [x] HTTPS
+        - [] HTTP2, HTTP2S
     - [] Integration example with `moleculer-i18n`
     - [] Integration example with `moleculer-file`
     - [] Unit tests coverage over 90%

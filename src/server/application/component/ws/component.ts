@@ -28,12 +28,12 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
 
   constructor(props: ServerApplicationComponentProps, opts?: RecursivePartial<ServerWebSocketApplicationOptions>) {
     super(props);
-    this.opts = _.defaultsDeep(opts || {
+    this.opts = _.defaultsDeep(opts || {}, {
       perMessageDeflate: false,
       clientTracking: true,
       contextCreationTimeout: 100,
       pingPongCheckInterval: 5000,
-    }, {});
+    });
 
     const {contextCreationTimeout, pingPongCheckInterval, ...serverOpts} = this.opts;
 
@@ -133,24 +133,28 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
           const match = regExp.exec(pathname!);
           if (match) {
             // create context
-            const context = await createContext(req);
-            socket.once("close", () => context.clear());
+            try {
+              const context = await createContext(req);
+              socket.once("close", () => context.clear());
 
-            // req.params
-            req.params = route.paramKeys.reduce((obj, key, i) => {
-              obj[key.name] = match[i + 1];
-              return obj;
-            }, {} as any);
+              // req.params
+              req.params = route.paramKeys.reduce((obj, key, i) => {
+                obj[key.name] = match[i + 1];
+                return obj;
+              }, {} as any);
 
-            // req.path
-            req.path = pathname!;
+              // req.path
+              req.path = pathname!;
 
-            // req.query
-            // use qs module to be along with http component: https://github.com/expressjs/express/blob/3ed5090ca91f6a387e66370d57ead94d886275e1/lib/middleware/query.js#L34
-            req.query = query ? qs.parse(query, {allowPrototypes: true}) : {};
+              // req.query
+              // use qs module to be along with http component: https://github.com/expressjs/express/blob/3ed5090ca91f6a387e66370d57ead94d886275e1/lib/middleware/query.js#L34
+              req.query = query ? qs.parse(query, {allowPrototypes: true}) : {};
 
-            // call handler
-            route.handler(context, socket, req);
+              // call handler
+              route.handler(context, socket, req);
+            } catch (error) {
+              socket.emit("error", error);
+            }
             break;
           }
         }

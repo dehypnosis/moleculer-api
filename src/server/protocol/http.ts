@@ -24,6 +24,8 @@ export class ServerHTTPProtocol extends ServerProtocol {
   }
 
   public async start(modules: ServerApplicationComponentModules): Promise<listeningURI[]> {
+    const { port, hostname } = this.opts;
+
     // mount http module
     this.server = http.createServer(modules.http);
 
@@ -31,10 +33,10 @@ export class ServerHTTPProtocol extends ServerProtocol {
     this.server.on("upgrade", modules.ws.upgradeEventHandler);
 
     // listen
-    this.server.listen(this.opts.port, this.opts.hostname);
+    this.server.listen(port, hostname);
     return [
-      `http://${this.opts.hostname}:${this.opts.port}`,
-      `ws://${this.opts.hostname}:${this.opts.port}`,
+      `http://${hostname}:${port}`,
+      `ws://${hostname}:${port}`,
     ];
   }
 

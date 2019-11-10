@@ -153,6 +153,18 @@ export const ConnectorCompiler = {
       }),
     });
 
+    // to filter packet
+    const packetFilter = schema.filter ? broker.createInlineFunction<PublishConnectorResponseMappableArgs, boolean>({
+      function: schema.filter,
+      mappableKeys: ["context", "event", "broadcast", "params"],
+      reporter: integration.reporter.getChild({
+        field: kleur.bold(kleur.cyan(field + ".filter")),
+        schema: schema.filter,
+      }),
+      // returnTypeCheck: value => typeof value === "boolean",
+      // returnTypeNotation: "boolean",
+    }) : null;
+
     // to map response
     const responseMapper = schema.map ? broker.createInlineFunction<PublishConnectorResponseMappableArgs, any>({
       function: schema.map,
@@ -199,7 +211,10 @@ export const ConnectorCompiler = {
         }
 
         // publish
-        await broker.publishEvent(context, args);
+        if (!packetFilter || packetFilter(args)) {
+          await broker.publishEvent(context, args);
+        }
+
         return responseMapper ? responseMapper(args) : args.params; // just return params only if mapper has not been defined
       };
 
@@ -259,8 +274,8 @@ export const ConnectorCompiler = {
         field: kleur.bold(kleur.cyan(field + ".filter")),
         schema: schema.filter,
       }),
-      returnTypeCheck: value => typeof value === "boolean",
-      returnTypeNotation: "boolean",
+      // returnTypeCheck: value => typeof value === "boolean",
+      // returnTypeNotation: "boolean",
     }) : null;
 
     // to map response

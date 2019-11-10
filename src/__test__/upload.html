@@ -4,7 +4,10 @@
 </head>
 <body>
 <h3>Gateway Host</h3>
-<input id="host" type="text" style="display:block" value="http://localhost:8080" />
+<input id="host" type="text" style="display:block" value="" />
+<script>
+document.getElementById("host").value = document.location.origin;
+</script>
 
 <h3>Multipart sync request to REST endpoint (~/file)</h3>
 <form method="post" enctype="multipart/form-data" onsubmit="setFormActionTarget(this)">
