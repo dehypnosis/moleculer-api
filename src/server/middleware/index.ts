@@ -17,31 +17,23 @@ export const ServerMiddlewareConstructors = {
   [ErrorMiddleware.key]: ErrorMiddleware,
 };
 
-export type ServerMiddlewareConstructorOptions = Array<{
+export type ServerMiddlewareConstructorOptions = {
   [HelmetMiddleware.key]: RecursivePartial<HelmetMiddlewareOptions> | false,
-} | {
   [CORSMiddleware.key]: RecursivePartial<CORSMiddlewareOptions> | false,
-} | {
   [ServeStaticMiddleware.key]: RecursivePartial<ServeStaticMiddlewareOptions> | false,
-} | {
   [BodyParserMiddleware.key]: RecursivePartial<BodyParserMiddlewareOptions> | false,
-} | {
   [LoggingMiddleware.key]: RecursivePartial<LoggingMiddlewareOptions> | false,
-}/* | {
-  [OtherMiddleware.key]: RecursivePartial<OtherMiddlewareOptions> | false,
-}*/ | {
   [ErrorMiddleware.key]: RecursivePartial<ErrorMiddlewareOptions> | false,
-} | {
-  [key: string]: never,
-}>;
+  // [OtherMiddleware.key]: RecursivePartial<OtherMiddlewareOptions> | false
+};
 
 /* orders matter */
-export const defaultServerMiddlewareConstructorOptions: ServerMiddlewareConstructorOptions = [
-  {[HelmetMiddleware.key]: HelmetMiddleware.autoLoadOptions},
-  {[CORSMiddleware.key]: CORSMiddleware.autoLoadOptions},
-  {[ServeStaticMiddleware.key]: ServeStaticMiddleware.autoLoadOptions},
-  {[BodyParserMiddleware.key]: BodyParserMiddleware.autoLoadOptions},
-  {[LoggingMiddleware.key]: LoggingMiddleware.autoLoadOptions},
-  // { [OtherMiddleware.key]: OtherMiddleware.autoLoadOptions },
-  {[ErrorMiddleware.key]: ErrorMiddleware.autoLoadOptions},
-];
+export const defaultServerMiddlewareConstructorOptions: ServerMiddlewareConstructorOptions = {
+  [HelmetMiddleware.key]: HelmetMiddleware.autoLoadOptions,
+  [CORSMiddleware.key]: CORSMiddleware.autoLoadOptions,
+  [ServeStaticMiddleware.key]: ServeStaticMiddleware.autoLoadOptions,
+  [BodyParserMiddleware.key]: BodyParserMiddleware.autoLoadOptions,
+  [LoggingMiddleware.key]: LoggingMiddleware.autoLoadOptions,
+  [ErrorMiddleware.key]: ErrorMiddleware.autoLoadOptions,
+  // [OtherMiddleware.key]: OtherMiddleware.autoLoadOptions,
+};

@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+    "importHelpers": false,
+		"esModuleInterop": true,
+		"noImplicitAny": false,
+		"module": "commonjs",
+		"moduleResolution": "node",
+    "pretty": true,
+		"types": [
+			"jest",
+			"node"
+		],
+		"target": "es6",
+		"baseUrl": "./",
+    "rootDir": "./",
+    "lib": [
+      "es6"
+    ]
+  },
+  "include": [
+    "**/*"
+  ]
+}

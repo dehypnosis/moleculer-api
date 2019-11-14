@@ -1,6 +1,6 @@
 {
   "name": "moleculer-api",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A dynamic API Gateway for MoleculerJS which updates REST endpoints and aggregated GraphQL schema, access control policy for each action calls from metadata of remote services&amp;amp;#x27; schema without restart or deployment.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "nodemon --watch ./src ./examples --exec ts-node ./examples",
+    "dev": "nodemon --exec ts-node ./examples",
     "build": "rm -rf ./dist && tsc",
     "lint": "tslint -p tsconfig.json",
     "deps": "npm-check -u",

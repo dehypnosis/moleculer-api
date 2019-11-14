@@ -39,7 +39,7 @@ export class APIServer {
       },
       application: {},
       context: defaultAPIRequestContextFactoryConstructorOptions,
-      middleware: [],
+      middleware: {},
       protocol: defaultServerProtocolConstructorOptions,
     });
     this.opts.update.debouncedSeconds = isNaN(this.opts.update.debouncedSeconds) ? 2 : Math.max(this.opts.update.debouncedSeconds, 0);
@@ -67,28 +67,21 @@ export class APIServer {
     }, this.opts.application);
 
     // override middleware options
-    const middlewareOptions: ServerMiddlewareConstructorOptions = [];
-    for (const item of defaultServerMiddlewareConstructorOptions) {
-      const key = Object.keys(item)[0];
-      const overriding = this.opts.middleware.find(it => Object.keys(it)[0] === key);
-      if (overriding) {
-        middlewareOptions.push(_.defaultsDeep(overriding, item));
+    const middlewareKeyAndOptions: Array<[keyof ServerMiddlewareConstructorOptions, any]> = [];
+    for (const [k, defaultOptions] of Object.entries(defaultServerMiddlewareConstructorOptions)) {
+      const key = k as keyof ServerMiddlewareConstructorOptions;
+      const overriding = this.opts.middleware[key];
+      if (typeof overriding !== "undefined") {
+        middlewareKeyAndOptions.push([key, overriding ? _.defaultsDeep(overriding, defaultOptions) : overriding]);
       } else {
-        middlewareOptions.push(item);
+        middlewareKeyAndOptions.push([key, defaultOptions]);
       }
     }
-    this.opts.middleware = middlewareOptions;
 
     // create middleware
-    const middleware = this.opts.middleware
-      .filter(obj => {
-        const key = Object.keys(obj)[0] as keyof typeof ServerMiddlewareConstructors;
-        // @ts-ignore: cannot infer key of union typed objects
-        return key && (obj[key] !== false);
-      })
-      .map(obj => {
-        const key = Object.keys(obj)[0] as keyof typeof ServerMiddlewareConstructors;
-        const options = (obj as any)[key];
+    const middleware = middlewareKeyAndOptions
+      .filter(([key, options]) => options !== false)
+      .map(([key, options]) => {
         return new (ServerMiddlewareConstructors[key])({
           logger: this.props.logger.getChild(`middleware/${key}`),
         }, options);
