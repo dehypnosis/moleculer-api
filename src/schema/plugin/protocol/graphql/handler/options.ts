@@ -135,4 +135,7 @@ export const defaultGraphQLHandlersOptions: GraphQLHandlersOptions = {
     }),
   },
   tracing: true,
+  playground: true,
+  introspection: true,
+  debug: false,
 };

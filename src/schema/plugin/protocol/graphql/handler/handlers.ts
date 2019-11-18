@@ -6,10 +6,10 @@ import { execute, subscribe } from "graphql";
 import { APIRequestContext, HTTPRouteHandler, WebSocketRouteHandler } from "../../../../../server";
 import { GraphQLSubscriptionHandler } from "./subscription";
 
-export type GraphQLHandlersOptions = Omit<ApolloServerConfig, "subscriptions" | "playgrounds" | "schema" | "typeDefs" | "context"> & {
+export type GraphQLHandlersOptions = Omit<ApolloServerConfig, "subscriptions" | "playground" | "schema" | "typeDefs" | "context"> & {
   typeDefs?: string | string[];
   subscriptions?: Omit<SubscriptionServerOptions, "path" | "onConnect" | "onDisconnect"> | false;
-  playgrounds?: false;
+  playground?: boolean;
 };
 
 // ref: https://github.com/apollographql/apollo-server/blob/master/packages/apollo-server-core/src/ApolloServer.ts
