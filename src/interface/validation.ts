@@ -48,11 +48,27 @@ function recNormalizeValidationSchema(paramSchema: ValidationSchema[string]): No
   let schema: NormalizedValidationSchema[string];
   if (typeof paramSchema === "string") {
     // normalize sugar syntax
+    // like "string", "number|optional|integer|positive|min:0|max:99", ...
+    // ref: https://github.com/icebob/fastest-validator/releases/tag/v1.0.0-beta1
     schema = {
       type: paramSchema,
       deprecated: false,
       description: null,
     };
+
+    const tokens = paramSchema.split("|").filter(t => t);
+    if (tokens.length > 1) {
+      for (let i=1; i<tokens.length; i++) {
+        const token = tokens[i];
+        const subTokens = token.split(":").filter(t => t);
+        if (subTokens.length === 1) {
+          schema[token] = true;
+        } else if (subTokens.length === 2) {
+          const asNum = parseInt(subTokens[1], 10);
+          schema[token] = isNaN(asNum) ? subTokens[1] : asNum;
+        }
+      }
+    }
   } else if (Array.isArray(paramSchema)) {
     // normalize array syntax
     schema = {

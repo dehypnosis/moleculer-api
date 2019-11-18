@@ -124,5 +124,8 @@ exports.defaultGraphQLHandlersOptions = {
         }),
     },
     tracing: true,
+    playground: true,
+    introspection: true,
+    debug: false,
 };
 //# sourceMappingURL=options.js.map

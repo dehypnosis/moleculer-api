@@ -11,8 +11,9 @@
 			"node"
 		],
 		"target": "es6",
-		"baseUrl": "./",
-    "rootDir": "./",
+    "baseUrl": "../",
+    "rootDir": "../",
+    "outDir": "./dist",
     "lib": [
       "es6"
     ]

@@ -42,6 +42,9 @@ const gateway = new APIGateway({
         dirRootPath: __dirname + "/__test__",
         routeBasePath: "/",
       },
+      // logging: {
+      //   level: "debug",
+      // },
     },
   },
   logger: {
@@ -138,7 +141,7 @@ const services = getMoleculerServiceBroker({
         "video.stream": {
           handler(ctx) {
             // mono-directional
-            const {id, type} = ctx.meta || {};
+            const {id, type} = (ctx.meta || {}) as any;
             if (!id || !type) {
               throw new Error("invalid params");
             }
@@ -253,14 +256,14 @@ const services = getMoleculerServiceBroker({
       actions: {
         upload(ctx) {
           return new Promise((resolve, reject) => {
-            if (!ctx.params || !ctx.params.pipe) {
+            if (!ctx.params || !(ctx.params! as any).pipe) {
               throw new Error("no file to upload");
             }
-            const meta = ctx.meta;
+            const meta = ctx.meta as any;
             const saveStream = fs.createWriteStream(path.join(__dirname, "..", "tmp." + (meta.filename || "unknown-file")));
-            ctx.params.pipe(saveStream);
-            ctx.params.on("end", () => resolve(meta));
-            ctx.params.on("error", reject);
+            (ctx.params! as any).pipe(saveStream);
+            (ctx.params! as any).on("end", () => resolve(meta));
+            (ctx.params! as any).on("error", reject);
           });
         },
         get: {
@@ -268,7 +271,7 @@ const services = getMoleculerServiceBroker({
             filename: "string",
           },
           handler(ctx) {
-            const filepath = path.join(__dirname, "..", "tmp." + ctx.params!.filename);
+            const filepath = path.join(__dirname, "..", "tmp." + (ctx.params! as any).filename);
             if (!fs.statSync(filepath).isFile()) {
               throw new Error("no such file");
             }
@@ -375,7 +378,7 @@ const services = getMoleculerServiceBroker({
             }],
           },
           handler(ctx) {
-            const id = ctx.params!.id;
+            const id = (ctx.params! as any).id;
             if (Array.isArray(id)) { // batching
               // tslint:disable-next-line:no-shadowed-variable
               return id.map(id => ({id}));

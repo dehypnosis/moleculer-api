@@ -56,7 +56,6 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
     - [x] Streaming support for REST plugin response
     - [x] Bidirectional streaming support for WebSocket plugin
 - [] 0.3.x Beta
-    - [] I18N (disabled by default) middleware
     - [] Schema Registry plugins
         - [] Filter access control policy plugin
         - [] Scope access control policy plugin
@@ -66,10 +65,9 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
     - [] Integration example with `moleculer-iam`
     - [] Normalized errors
 - [] 1.0.x First Stable release
-    - [] API Server additional protocols
+    - [x] API Server additional protocols
         - [x] HTTPS
         - [] HTTP2, HTTP2S
-    - [] Integration example with `moleculer-i18n`
     - [] Integration example with `moleculer-file`
     - [] Unit tests coverage over 90%
     - [] Memory leak test
