@@ -103,7 +103,7 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
   public async call(context: Context, args: DelegatedCallArgs): Promise<any> {
     const {action, node, params, disableCache} = args;
     if (disableCache) {
-      context.meta.$cache = false;
+      (context.meta as any).$cache = false;
     }
 
     let response: any;

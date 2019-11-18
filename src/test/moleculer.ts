@@ -67,11 +67,11 @@ export const MoleculerServiceSchemaFactory: { [key: string]: (branch: string | n
             foo: "string",
           },
           handler(ctx) {
-            return ctx.params!.foo || null;
+            return (ctx.params! as any).foo || null;
           },
         },
         $report(ctx) {
-          ctx.broker.logger.info(ctx.params!.table);
+          ctx.broker.logger.info((ctx.params! as any).table);
         },
       },
     };
