@@ -1,0 +1,1 @@
+{"version":3,"file":"pluggable.js","sourceRoot":"","sources":["../../src/interface/pluggable.ts"],"names":[],"mappings":";;AAAA,mCAAuC;AAEvC,MAAsB,SAAU,SAAQ,oBAAY;IAElD;QACE,KAAK,EAAE,CAAC;QACR,MAAM,WAAW,GAAG,IAAI,CAAC,WAA+B,CAAC;QACzD,IAAI,OAAO,WAAW,CAAC,eAAe,KAAK,WAAW,EAAE;YACtD,MAAM,IAAI,KAAK,CAAC,GAAG,WAAW,CAAC,IAAI,+CAA+C,CAAC,CAAC;SACrF;IACH,CAAC;CACF;AATD,8BASC"}

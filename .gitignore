@@ -1,5 +1,5 @@
-dist/**/*
-!dist/.gitkeep
+# dist/**/*
+# !dist/.gitkeep
 
 # Logs
 logs

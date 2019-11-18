@@ -5,7 +5,6 @@ import { APIRequestContext } from "../../../server";
 import { isReadStream } from "../../../interface";
 import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../../registry";
 import { Report } from "../../reporter";
-import { EventPacket } from "../../pubsub";
 import { defaultNamePatternResolver, NamePatternResolver } from "../../name";
 import { ServiceBrokerDelegator, ServiceBrokerDelegatorProps, DelegatedCallArgs, DelegatedEventPublishArgs } from "../delegator";
 import { proxyMoleculerServiceDiscovery } from "./discover";
