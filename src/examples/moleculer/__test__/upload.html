@@ -1,0 +1,86 @@
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+<h3>Gateway Host</h3>
+<input id="host" type="text" style="display:block" value="" />
+<script>
+document.getElementById("host").value = document.location.origin;
+</script>
+
+<h3>Multipart sync request to REST endpoint (~/file)</h3>
+<form method="post" enctype="multipart/form-data" onsubmit="setFormActionTarget(this)">
+  <input type="file" name="file" />
+  <input type="submit" value="Submit" />
+</form>
+
+<hr />
+
+<h3>Multipart async request to REST endpoint (~/file)</h3>
+
+<input id="ajax-file" type="file" name="file" />
+<input type="button" id="ajax-submit" value="Submit (AJAX)" />
+<code id="ajax-result" style="display: block; white-space: pre">
+</code>
+<script>
+document.getElementById("ajax-submit").addEventListener("click", () => {
+  const data = new FormData();
+  data.append("file", document.getElementById("ajax-file").files[0]);
+  fetch(document.getElementById("host").value + "/file", {
+    method: "POST",
+    body: data,
+  })
+    .then(res => res.json())
+    .then(json => document.getElementById("ajax-result").innerHTML = JSON.stringify(json, null, 2))
+    .catch(err => document.getElementById("ajax-result").innerHTML = `<span style="color:red">${JSON.stringify(err, null, 2)}</span>`)
+})
+</script>
+
+<hr>
+
+<h3>Multipart async request to GraphQL endpoint (~/graphql)</h3>
+<textarea id="gql-query" style="display: block; width: 300px; height: 200px">
+mutation($file: Upload!) {
+  uploadFile(file: $file) {
+    filename
+    mimetype
+    encoding
+  }
+}
+</textarea>
+<input id="gql-file" type="file" name="file" />
+<input type="button" id="gql-submit" value="Submit (AJAX)" />
+<code id="gql-result" style="display: block; white-space: pre">
+</code>
+<script>
+  function setFormActionTarget(form) {
+      form.action = document.getElementById("host").value + "/file"
+  }
+  document.getElementById("gql-submit").addEventListener("click", () => {
+    const data = new FormData();
+    data.append("operations", JSON.stringify({
+      query: document.getElementById("gql-query").value,
+      variables: {
+        file: null,
+      }
+    }));
+
+    // apollo upload link will make up below form data format automatically
+    // ref. https://github.com/jaydenseric/graphql-multipart-request-spec
+    data.append("map", JSON.stringify({
+      "0": ["variables.file"],
+    }));
+    data.append("0", document.getElementById("gql-file").files[0]);
+
+    fetch(document.getElementById("host").value + "/graphql", {
+      method: "POST",
+      body: data,
+    })
+      .then(res => res.json())
+      .then(json => document.getElementById("gql-result").innerHTML = JSON.stringify(json, null, 2))
+      .catch(err => document.getElementById("gql-result").innerHTML = `<span style="color:red">${JSON.stringify(err, null, 2)}</span>`)
+  })
+</script>
+</body>
+</html>

@@ -31,7 +31,7 @@ export declare class ServiceRegistry {
     addService(service: Readonly<Service>): void;
     removeServiceByHash(hash: string): boolean;
     findServiceByHash(hash: string): Readonly<Service> | null;
-    readonly services: Array<Readonly<Service>>;
+    get services(): Array<Readonly<Service>>;
     addActionExample(args: {
         action: Readonly<ServiceAction>;
         params: any;

@@ -1,0 +1,1 @@
+{"version":3,"file":"greeter.api.js","sourceRoot":"","sources":["../../../../src/examples/qmit/services/greeter.api.ts"],"names":[],"mappings":";;AAEa,QAAA,uBAAuB,GAAqB;IACvD,MAAM,EAAE,QAAQ;IAChB,QAAQ,EAAE;IACR,YAAY;IACZ,eAAe;IACf,iBAAiB;KAClB;IACD,MAAM,EAAE;IACN,YAAY;IACZ,iBAAiB;IACjB,eAAe;KAChB;CACF,CAAC"}

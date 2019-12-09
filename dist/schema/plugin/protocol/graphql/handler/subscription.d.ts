@@ -16,7 +16,7 @@ export declare class GraphQLSubscriptionHandler {
     private specifiedRules;
     constructor(options: SubscriptionServerOptions);
     close(): void;
-    readonly server: WebSocket.Server;
+    get server(): WebSocket.Server;
     private loadExecutor;
     private unsubscribe;
     private onClose;

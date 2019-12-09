@@ -25,13 +25,13 @@ export declare class ServiceAction {
     readonly paramsSchema: Readonly<NormalizedValidationSchema> | null;
     constructor(props: ServiceActionProps);
     toString(): string;
-    readonly id: string;
-    readonly displayName: string;
-    readonly service: Readonly<Service>;
-    readonly description: string | null;
-    readonly deprecated: boolean;
-    readonly cachePolicy: Readonly<ServiceActionCachePolicy> | null;
-    readonly meta: Readonly<object> | null;
+    get id(): string;
+    get displayName(): string;
+    get service(): Readonly<Service>;
+    get description(): string | null;
+    get deprecated(): boolean;
+    get cachePolicy(): Readonly<ServiceActionCachePolicy> | null;
+    get meta(): Readonly<object> | null;
     addExample(example: ActionExample, limit: number): void;
     getExamples(limit?: number): ActionExample[];
 }

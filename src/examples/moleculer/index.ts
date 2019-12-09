@@ -1,5 +1,5 @@
-import { APIGateway } from "../../src";
-import { getMoleculerServiceBroker } from "../../src/test";
+import { APIGateway } from "../../";
+import { getMoleculerServiceBroker } from "../../test";
 import fs from "fs";
 import path from "path";
 import MemoryStream from "memorystream";

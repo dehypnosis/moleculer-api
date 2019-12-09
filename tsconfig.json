@@ -11,12 +11,13 @@
 			"node"
 		],
 		"sourceMap": true,
-		"target": "es6",
 		"declaration": true,
-		"baseUrl": "./",
-    "rootDir": "./src",
-		"outDir": "./dist",
+    "allowJs": true,
 		"strict": true,
+    "target": "es6",
+    "baseUrl": "./",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "lib": [
       "es6",
       "esnext.asynciterable"

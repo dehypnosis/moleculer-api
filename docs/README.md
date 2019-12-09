@@ -890,4 +890,4 @@ GraphQL의 `Subscription` 타입이나 WebSocket 프로토콜 등을 사용하�
 
 # Examples
 
-예시 코드는 [../examples](../examples)를 참고 할 수 있습니다.
+예시 코드는 [../src/examples](../src/examples)를 참고 할 수 있습니다.

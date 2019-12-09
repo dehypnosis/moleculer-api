@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: api-gateway
+  name: api-gateway
+  namespace: util
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - image: gcr.io/qmit-pro/api-gateway:latest
+          imagePullPolicy: Always
+          name: server
+          resources: {}
+          env:
+            - name: APP_ENV
+              value: dev
+            - name: APP_K8S_CLUSTER
+              value: dev
+  selector:
+    matchLabels:
+      app: api-gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: api-gateway
+  name: api-gateway
+  namespace: util
+spec:
+  selector:
+    app: api-gateway
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels:
+    app: api-gateway
+  name: api-gateway
+  namespace: util
+spec:
+  rules:
+    - host: api.dev.qmit.pro
+      http:
+        paths:
+          - backend:
+              serviceName: api-gateway
+              servicePort: 80
+            path: /
+  tls:
+    - hosts:
+        - api.dev.qmit.pro
+      secretName: api-dev-qmit-pro-cert

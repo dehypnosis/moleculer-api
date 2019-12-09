@@ -1,0 +1,175 @@
+<html>
+<body>
+<h2>WebSocket Streaming Example (mono-directional)</h2>
+<p>
+  It is not for production, should be implemented with adaptive video streaming from server-side.<br/>
+  trick: server will not parse media chunks, just stores first 2 chunks and sends it to new clients before sending live chunks.
+</p>
+<pre>
+mimeType: video/webm;codecs=vp8,opus
+audioBitsPerSecond : 12800
+videoBitsPerSecond : 250000
+</pre>
+
+<h3>WebSocket Endpoint (~/chat/video-stream/server|client)</h3>
+<input id="endpoint" type="text" style="display:block" value=""/>
+<input id="start-server" type="button" value="start server"/>
+<input id="start-client" type="button" value="start client"/>
+
+<h3>Streaming Video</h3>
+<video id="video" style="display: block" controls="controls"></video>
+
+<h3>Log</h3>
+<small id="bytes">0</small>
+bytes received
+<div id="log" style="width: 100%; max-height: 400px; overflow:auto"></div>
+<script>
+  const endpoint = document.querySelector("#endpoint");
+  endpoint.value = `${document.location.origin.replace("http", "ws")}/chat/video-stream`;
+  const startServer = document.querySelector("#start-server");
+  const startClient = document.querySelector("#start-client");
+  const bytes = document.querySelector("#bytes");
+  const log = document.querySelector("#log");
+  const writeLog = (msg) => {
+    const line = document.createElement("p");
+    line.innerHTML = msg.toString();
+    log.prepend(line);
+  };
+
+  const BUFFERED_SECONDS = 60 * 5;
+  const CHUNK_SECONDS = 0.5;
+  const mimeType = "video/webm;codecs=vp8,opus";
+  const video = document.querySelector("#video");
+  video.addEventListener("error", evt => writeLog("video element error: " + evt.target.error.message));
+  let mediaSource;
+  const initClient = () => {
+    startClient.setAttribute("disabled", "true");
+
+    mediaSource = new MediaSource();
+    const blobBuffer = [];
+    let sourceBuffer;
+    let consuming = false;
+    const consumeBlobBuffer = () => {
+      if (consuming || blobBuffer.length === 0 || !sourceBuffer || sourceBuffer.updating) return;
+      console.log("consume blob buffer");
+      consuming = true;
+      const blob = blobBuffer.shift();
+      Object.defineProperty(blob, "type", {value: mimeType});
+      blob.arrayBuffer().then(buf => {
+        sourceBuffer.appendBuffer(buf);
+      })
+        .catch(error => writeLog("consum blob buffer error: " + error))
+        .finally(() => { consuming = false; });
+    };
+
+    mediaSource.addEventListener("sourceopen", () => {
+      sourceBuffer = mediaSource.addSourceBuffer(mimeType);
+      sourceBuffer.addEventListener("error", evt => console.log(evt));
+      let currentBufferIndex = 0;
+      sourceBuffer.addEventListener("updateend", () => {
+        if (video.buffered.length-1 > currentBufferIndex) {
+          currentBufferIndex = video.buffered.length-1;
+          video.currentTime = video.buffered.end(video.buffered.length - 1);
+          console.log("skip to: " + video.currentTime);
+        }
+      });
+      writeLog("media source opened..");
+    });
+    try {
+      video.type = mimeType;
+      video.src = URL.createObjectURL(mediaSource);
+      video.play();
+    } catch (error) {
+      writeLog("media source open error: " + error);
+    }
+
+    const ws = new WebSocket(endpoint.value + "/client");
+
+    ws.onopen = () => {
+      writeLog("client socket opened...");
+    };
+
+    ws.onclose = () => {
+      writeLog("client socket closed...");
+      URL.revokeObjectURL(video.src);
+      startClient.removeAttribute("disabled");
+    };
+
+    ws.onmessage = packet => {
+      const blob = packet.data;
+      if (typeof blob === "string") {
+        writeLog("client socket message: " + blob);
+        return;
+      }
+      bytes.innerText = (parseInt(bytes.innerText) + blob.size);
+      blobBuffer.push(blob);
+      consumeBlobBuffer();
+    };
+
+    ws.onerror = msg => writeLog("client socket error: " + (msg && msg.message || msg));
+  };
+
+  const initServer = () => {
+    startServer.setAttribute("disabled", "true");
+
+    const ws = new WebSocket(endpoint.value + "/server");
+    let mediaStream;
+    let mediaRecorder;
+
+    ws.onopen = () => {
+      writeLog("server socket opened...");
+      navigator.mediaDevices
+        .getUserMedia({video: {width: 640}, audio: true})
+        .then(stream => {
+          if (ws.readyState !== ws.OPEN) return;
+
+          mediaRecorder = new MediaRecorder(stream, {
+            audioBitsPerSecond: 12800,
+            videoBitsPerSecond: 250000,
+            mimeType: mimeType,
+          });
+          mediaStream = stream;
+          writeLog("start sending video stream...");
+          mediaRecorder.start(1000 * CHUNK_SECONDS);
+          mediaRecorder.ondataavailable = packet => {
+            // console.log(packet);
+            ws.send(packet.data);
+          };
+        });
+    };
+
+    ws.onclose = () => {
+      writeLog("server socket closed...");
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        delete mediaStream;
+        writeLog("closed server media stream");
+      }
+      startServer.removeAttribute("disabled");
+    };
+
+    ws.onmessage = msg => {
+      writeLog("server socket message: " + msg.data);
+      try {
+        const packet = JSON.parse(msg.data);
+        if (packet.error) {
+          clearTimeout(lazyStartTimer);
+          writeLog("failed to open server..");
+          ws.close();
+        }
+      } catch {
+      }
+    };
+
+    ws.onerror = msg => writeLog("server socket error: " + (msg && msg.message || msg));
+
+    let lazyStartTimer = setTimeout(() => {
+      initClient();
+    }, 2000);
+  };
+
+  startServer.addEventListener("click", initServer);
+  startClient.addEventListener("click", initClient);
+</script>
+</body>
+</html>

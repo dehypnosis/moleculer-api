@@ -17,6 +17,6 @@ export declare type WebSocketRouteProps<Context = any> = Omit<RouteProps, "handl
 export declare class WebSocketRoute extends Route {
     protected readonly props: WebSocketRouteProps;
     constructor(props: Omit<WebSocketRouteProps, "protocol">);
-    readonly handler: WebSocketRouteHandler;
+    get handler(): WebSocketRouteHandler;
     isConflict(route: Readonly<Route>): boolean;
 }

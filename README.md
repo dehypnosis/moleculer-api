@@ -79,7 +79,7 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
 - [Features and details: ./docs](./docs)
 
 ## 2. Examples
-- [MoleculerJs: ./examples](https://github.com/qmit-pro/moleculer-api/tree/master/examples)
+- [MoleculerJs: ./src/examples](https://github.com/qmit-pro/moleculer-api/tree/master/src/examples)
 
 ## 3. Quick Start
 ```

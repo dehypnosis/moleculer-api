@@ -14,13 +14,13 @@ export declare class ServerApplication {
     private readonly componentBranchHandlerMap;
     private readonly componentsAliasedVersions;
     constructor(props: ServerApplicationProps, opts?: RecursivePartial<ServerApplicationOptions>);
-    readonly componentModules: ServerApplicationComponentModules;
+    get componentModules(): ServerApplicationComponentModules;
     start(): Promise<void>;
     stop(): Promise<void>;
     private readonly lock;
     mountBranchHandler(branch: Branch): Promise<void>;
     unmountBranchHandler(branch: Branch): Promise<void>;
-    readonly routes: {
+    get routes(): {
         branch: Readonly<Branch>;
         version: Readonly<Version>;
         route: Readonly<Route>;

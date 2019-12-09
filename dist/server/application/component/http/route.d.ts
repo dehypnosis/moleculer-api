@@ -12,8 +12,8 @@ export declare type HTTPRouteProps<Context = any> = Omit<RouteProps, "handler"> 
 export declare class HTTPRoute extends Route {
     protected readonly props: HTTPRouteProps;
     constructor(props: Omit<HTTPRouteProps, "protocol">);
-    readonly method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-    readonly handler: HTTPRouteHandler;
+    get method(): "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+    get handler(): HTTPRouteHandler;
     isConflict(route: Readonly<Route>): boolean;
     toString(): string;
 }

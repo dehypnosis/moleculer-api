@@ -1,0 +1,64 @@
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+<h3>Gateway Host</h3>
+<input id="host" type="text" style="display:block" value="ws://localhost:8080" />
+<script>
+  document.getElementById("host").value = document.location.origin.replace("http", "ws");
+</script>
+
+<h3>WebSocket to pub/sub text(json) messages (~/chat/message-pubsub/1234)</h3>
+<textarea id="message" style="display: block; width: 300px; height: 200px">
+Hello world
+</textarea>
+<input type="button" id="submit" value="Submit" />
+<code id="result" style="display: block; white-space: pre">
+</code>
+
+<hr />
+
+<script>
+const host = document.getElementById("host");
+const message = document.getElementById("message");
+const submit = document.getElementById("submit");
+const result = document.getElementById("result");
+
+function write(message) {
+  result.innerHTML += `<br/>${message}`;
+}
+
+function init() {
+  submit.removeEventListener("click", init);
+
+  const ws = new WebSocket(host.value + "/chat/message-pubsub/1234");
+
+  const send = () => {
+    ws.send(message.value);
+    if (ws.readyState === ws.OPEN) {
+      write("message sent...");
+    }
+  };
+  submit.addEventListener("click", send);
+
+  ws.onopen = () => write("opened...");
+
+  ws.onclose = () => {
+    write("closed...\n");
+    submit.addEventListener("click", init);
+  };
+
+  ws.onmessage = (msg) => {
+    write("message received...");
+    write(msg.data);
+  };
+
+  ws.onerror = evt => write(evt.type);
+}
+
+submit.addEventListener("click", init);
+</script>
+
+</body>
+</html>

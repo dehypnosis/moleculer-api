@@ -30,15 +30,15 @@ export declare class Branch {
     private emitter;
     constructor(props: BranchProps, opts?: RecursivePartial<BranchOptions>);
     toString(): string;
-    readonly name: string;
-    readonly isMaster: boolean;
+    get name(): string;
+    get isMaster(): boolean;
     private latestUsedAt;
-    readonly isUnused: boolean;
-    readonly unusedSeconds: number;
+    get isUnused(): boolean;
+    get unusedSeconds(): number;
     touch(): void;
-    readonly services: Array<Readonly<Service>>;
-    readonly latestVersion: Readonly<Version>;
-    readonly versions: ReadonlyArray<Readonly<Version>>;
+    get services(): Array<Readonly<Service>>;
+    get latestVersion(): Readonly<Version>;
+    get versions(): ReadonlyArray<Readonly<Version>>;
     fork(props: {
         logger: Logger;
         name: string;

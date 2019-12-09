@@ -33,16 +33,16 @@ export declare class ServiceAPIIntegration {
     constructor(props: ServiceAPIIntegrationProps);
     clone(): Readonly<ServiceAPIIntegration>;
     toString(): string;
-    readonly type: "add" | "remove";
-    readonly schema: Readonly<ServiceAPISchema>;
-    readonly schemaHash: string;
-    readonly service: Readonly<Service>;
-    readonly reporter: Readonly<Reporter>;
-    readonly status: "queued" | "failed" | "succeed" | "skipped";
+    get type(): "add" | "remove";
+    get schema(): Readonly<ServiceAPISchema>;
+    get schemaHash(): string;
+    get service(): Readonly<Service>;
+    get reporter(): Readonly<Reporter>;
+    get status(): "queued" | "failed" | "succeed" | "skipped";
     findAction(actionId: string): Readonly<ServiceAction> | null;
     setFailed(branch: Readonly<Branch>, version: Readonly<Version>, errors: ReadonlyArray<Readonly<ValidationError>>, integrations: ReadonlyArray<Readonly<ServiceAPIIntegration>>): void;
     setSucceed(branch: Readonly<Branch>, version: Readonly<Version>, updates?: Readonly<string[]>): void;
-    readonly errors: ValidationError[] | null;
+    get errors(): ValidationError[] | null;
     setSkipped(branch: Readonly<Branch>, version: Readonly<Version>): void;
     reportRemoved(branch: Readonly<Branch>, version: Readonly<Version>): void;
 }

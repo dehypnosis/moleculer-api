@@ -6,8 +6,8 @@ export declare type ServiceNodeProps = {
 export declare class ServiceNode {
     protected readonly props: ServiceNodeProps;
     constructor(props: ServiceNodeProps);
-    readonly id: string;
-    readonly displayName: string;
-    readonly meta: Readonly<object> | null;
+    get id(): string;
+    get displayName(): string;
+    get meta(): Readonly<object> | null;
     toString(): string;
 }

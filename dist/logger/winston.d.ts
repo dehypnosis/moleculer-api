@@ -9,7 +9,7 @@ export declare class WinstonLogger extends Logger {
     private readonly logger;
     protected readonly opts: Winston.LoggerOptions;
     constructor(props: LoggerProps, opts?: WinstonLoggerOptions, reusableLogger?: Winston.Logger);
-    readonly options: WinstonLoggerOptions;
+    get options(): WinstonLoggerOptions;
     getChild(label: string, resetLabelPrefix?: true): Logger;
     private log;
     debug(...args: any[]): void;

@@ -22,13 +22,13 @@ export declare abstract class Route {
     static readonly rootStaticPathRegExp: RegExp;
     static isRootStaticPath(path: string): boolean;
     constructor(props: RouteProps);
-    readonly protocol: string;
-    readonly path: string;
+    get protocol(): string;
+    get path(): string;
     static mergePaths(...paths: string[]): string;
     readonly paramKeys: pathToRegExp.Key[];
     private paramKeysCollected;
     getPathRegExps(prefixes: string[]): RegExp[];
-    readonly handler: RouteHandler<any>;
+    get handler(): RouteHandler<any>;
     isConflict(route: Readonly<Route>): boolean;
     toString(): string;
 }

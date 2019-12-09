@@ -1,0 +1,109 @@
+#
+# Mandatory variables to be injected:
+#   SHORT_SHA, BRANCH_NAME
+#
+# Manual trigger example:
+#   gcloud builds submit . --substitutions="BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD),SHORT_SHA=$(git rev-parse --short HEAD)"
+#
+
+substitutions:
+  # Docker image to build
+  _IMAGE: 'gcr.io/qmit-pro/api-gateway'
+
+  # K8S resource and container name to be updated
+  _IMAGE_TARGET: 'deployment/api-gateway server'
+
+  # K8S namespace of the resource
+  _NAMESPACE: 'util'
+
+  # GKE cluster name and zone/region for development stage
+  _CLUSTER_DEV: 'dev'
+  _ZONE_DEV: 'asia-northeast1-a'
+
+  # GKE cluster name and zone/region for production stage
+  _CLUSTER_PROD: 'prod'
+  _ZONE_PROD: 'asia-northeast1-a'
+
+steps:
+  - id: '[*] build temporary image'
+    name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        (docker pull ${_IMAGE}:latest || true) \
+          && docker build . -f ./src/examples/qmit/Dockerfile -t ${_IMAGE}:ci-${SHORT_SHA} --cache-from ${_IMAGE}:latest \
+          && docker push ${_IMAGE}:ci-${SHORT_SHA} \
+          && echo "DONE: ${_IMAGE}:ci-${SHORT_SHA} pushed"
+
+  - id: '[*] do unit/integration test in dev cluster'
+    name: 'gcr.io/cloud-builders/kubectl'
+    entrypoint: 'bash'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=$_ZONE_DEV'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER_DEV'
+    args:
+      - '-c'
+      - |
+        gcloud container clusters get-credentials --zone $$CLOUDSDK_COMPUTE_ZONE $$CLOUDSDK_CONTAINER_CLUSTER \
+        && /builder/kubectl.bash -n ${_NAMESPACE} run \
+          test-${BUILD_ID} \
+          --labels=test=true \
+          --generator=run-pod/v1 \
+          --image ${_IMAGE}:ci-${SHORT_SHA} \
+          --rm -i --restart=Never --attach --pod-running-timeout=5m \
+          -- npm test
+
+  - id: '[develop] push the temporary image with :latest tag'
+    name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        ([ "$BRANCH_NAME" != "develop" ] && echo "SKIP: not a commit of develop branch") || ( \
+          docker tag ${_IMAGE}:ci-${SHORT_SHA} ${_IMAGE}:latest \
+            && docker push ${_IMAGE}:latest \
+            && echo "DONE: ${_IMAGE}:lastest pushed" \
+        )
+
+  - id: '[develop] deploy latest image to dev cluster'
+    name: 'gcr.io/cloud-builders/kubectl'
+    entrypoint: 'bash'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=$_ZONE_DEV'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER_DEV'
+    args:
+      - '-c'
+      - |
+        ([ "$BRANCH_NAME" != "develop" ] && echo "SKIP: not a commit of develop branch") || ( \
+          gcloud container clusters get-credentials --zone $$CLOUDSDK_COMPUTE_ZONE $$CLOUDSDK_CONTAINER_CLUSTER \
+          && /builder/kubectl.bash -n ${_NAMESPACE} set image ${_IMAGE_TARGET}=${_IMAGE}:ci-${SHORT_SHA} \
+          && echo "DONE: ${_IMAGE}:ci-${SHORT_SHA} (latest) deployed in dev cluster"
+        )
+
+  - id: '[master] push release image'
+    name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        ([ "$BRANCH_NAME" != "master" ] && echo "SKIP: not a commit of master branch") || ( \
+          docker tag ${_IMAGE}:ci-${SHORT_SHA} ${_IMAGE}:release-${SHORT_SHA} \
+            && docker push ${_IMAGE}:release-${SHORT_SHA} \
+            && echo "DONE: ${_IMAGE}:release-${SHORT_SHA} pushed" \
+        )
+
+  - id: '[master] deploy latest release image in prod cluster'
+    name: 'gcr.io/cloud-builders/kubectl'
+    entrypoint: 'bash'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=$_ZONE_PROD'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER_PROD'
+    args:
+      - '-c'
+      - |
+        ([ "$BRANCH_NAME" != "master" ] && echo "SKIP: not a commit of master branch") || ( \
+          gcloud container clusters get-credentials --zone $$CLOUDSDK_COMPUTE_ZONE $$CLOUDSDK_CONTAINER_CLUSTER \
+          && /builder/kubectl.bash -n ${_NAMESPACE} set image ${_IMAGE_TARGET}=${_IMAGE}:release-${SHORT_SHA} \
+          && echo "DONE: ${_IMAGE}:release-${SHORT_SHA} deployed in prod cluster" \
+        )

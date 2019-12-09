@@ -20,12 +20,12 @@ export declare class Service {
     readonly shortHash: string;
     private $broker;
     constructor(props: ServiceProps);
-    readonly hash: string;
-    readonly id: string;
-    readonly displayName: string;
-    readonly description: string | null;
-    readonly meta: Readonly<object> | null;
-    readonly broker: Readonly<ServiceBroker> | null;
+    get hash(): string;
+    get id(): string;
+    get displayName(): string;
+    get description(): string | null;
+    get meta(): Readonly<object> | null;
+    get broker(): Readonly<ServiceBroker> | null;
     setBroker(broker: Readonly<ServiceBroker> | null): void;
     toString(): string;
     addNode(node: ServiceNodeProps): void;
