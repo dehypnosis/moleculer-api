@@ -52,7 +52,7 @@ steps:
           --generator=run-pod/v1 \
           --image ${_IMAGE}:ci-${SHORT_SHA} \
           --rm -i --restart=Never --attach --pod-running-timeout=5m \
-          -- npm test
+          -- npm run test-with-examples
 
   - id: '[develop] push the temporary image with :latest tag'
     name: 'gcr.io/cloud-builders/docker'

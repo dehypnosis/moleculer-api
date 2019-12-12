@@ -13,7 +13,8 @@
     "lint": "tslint -p tsconfig.json",
     "deps": "npm-check -u",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "test": "node --trace-warnings node_modules/.bin/jest --coverage --detectOpenHandles --forceExit"
+    "test": "npm run test-with-examples -- --testPathIgnorePatterns=src/examples",
+    "test-with-examples": "node --trace-warnings node_modules/.bin/jest --coverage --detectOpenHandles --forceExit"
   },
   "keywords": [
     "QMIT",
