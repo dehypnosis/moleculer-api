@@ -1,6 +1,6 @@
-import { APIGateway } from "../../";
 import { createBrokerOptions } from "moleculer-qmit";
 import { config } from "./config";
+import { APIGateway, createAuthContextOIDCParser } from "../../";
 
 const { isDebug, isDev } = config;
 
@@ -35,6 +35,15 @@ export const gateway = new APIGateway({
       },
       ws: {
         pingPongCheckInterval: 5000,
+      },
+    },
+    context: {
+      auth: {
+        parser: createAuthContextOIDCParser({
+          issuer: "https://account.dev.qmit.pro",
+          client_id: "test",
+          client_secret: "3322b0c4c46443c88770041d05531dc994c8121d36ee4a21928c8626b09739d7",
+        }),
       },
     },
     protocol: {

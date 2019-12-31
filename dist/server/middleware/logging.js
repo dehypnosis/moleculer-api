@@ -6,6 +6,7 @@ const _ = tslib_1.__importStar(require("lodash"));
 const os = tslib_1.__importStar(require("os"));
 const morgan_1 = tslib_1.__importDefault(require("morgan"));
 const middleware_1 = require("./middleware");
+const context_1 = require("../application/context");
 /*
   Access Logging middleware
   ref: https://github.com/expressjs/morgan#predefined-formats
@@ -21,7 +22,7 @@ morgan_1.default.token("ws-protocol", req => {
     return "-";
 });
 morgan_1.default.token("ip", req => {
-    const forwarded = req.headers && req.headers["x-forwarded-for"];
+    const forwarded = req.headers && (req.headers["x-forwarded-for"] || req.headers["x-forwarded-proto"]);
     if (forwarded) {
         if (typeof forwarded === "string") {
             return forwarded;
@@ -32,6 +33,12 @@ morgan_1.default.token("ip", req => {
 });
 morgan_1.default.token("statusMessage", (req, res) => {
     return res.statusMessage || "-";
+});
+morgan_1.default.token("context", (req, res, key) => {
+    const context = context_1.APIRequestContext.findProps(req);
+    if (!context)
+        return "-";
+    return (_.get(context, key, "-") || "-").toString();
 });
 class LoggingMiddleware extends middleware_1.ServerMiddleware {
     constructor(props, opts) {
@@ -60,8 +67,8 @@ class LoggingMiddleware extends middleware_1.ServerMiddleware {
 exports.LoggingMiddleware = LoggingMiddleware;
 LoggingMiddleware.key = "logging";
 LoggingMiddleware.autoLoadOptions = {
-    httpFormat: `:method :url HTTP/:http-version - :status :statusMessage :res[content-length] byte :response-time ms - ${kleur.dim(`":ip" ":referrer" ":user-agent"`)}`,
-    wsFormat: `:method :url HTTP/:http-version WebSocket/:ws-protocol - 101 Switching Protocols - ${kleur.dim(`":ip" ":referrer" ":user-agent"`)}`,
+    httpFormat: `${kleur.cyan(":context[id]")} :method ":url" HTTP/:http-version - :status :statusMessage :res[content-length] byte :response-time ms - ${kleur.dim(`":ip" ":referrer" ":user-agent"`)} - ${kleur.dim(`":context[auth.user.sub]" ":context[auth.user.email]" ":context[auth.scope]" ":context[auth.client]"`)}`,
+    wsFormat: `${kleur.cyan(":context[id]")} :method ":url" HTTP/:http-version WebSocket/:ws-protocol - 101 Switching Protocols - byte - ms - ${kleur.dim(`":ip" ":referrer" ":user-agent"`)} - ${kleur.dim(`":context[auth.user.sub]" ":context[auth.user.email]" ":context[auth.scope]" ":context[auth.client]"`)}`,
     level: "info",
 };
 //# sourceMappingURL=logging.js.map

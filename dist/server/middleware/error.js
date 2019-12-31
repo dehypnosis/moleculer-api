@@ -42,7 +42,11 @@ class ErrorMiddleware extends middleware_1.ServerMiddleware {
         if (res.headersSent) {
             return next(error);
         }
-        res.status(500).json(this.formatError(error)); // TODO: normalize error
+        const err = this.formatError(error);
+        let status = typeof err !== "string" && err.error && (err.error.status || err.error.statusCode || err.error.code) || 500;
+        if (isNaN(status))
+            status = 500;
+        res.status(status).json(err); // TODO: normalize error
     }
     handleHTTPNotFound(req, res, next) {
         res.status(404).end();
@@ -68,8 +72,8 @@ class ErrorMiddleware extends middleware_1.ServerMiddleware {
             try {
                 value = responseFormat(value);
             }
-            catch (error) {
-                this.props.logger.error(error);
+            catch (e) {
+                this.props.logger.error("failed to format error", e);
             }
         }
         let result = { error: value };
@@ -77,7 +81,8 @@ class ErrorMiddleware extends middleware_1.ServerMiddleware {
             try {
                 result = JSON.stringify(result);
             }
-            catch (_a) {
+            catch (e) {
+                console.error("failed to stringify error", e);
                 result = JSON.stringify({ error: error.toString(), truncated: true });
             }
         }

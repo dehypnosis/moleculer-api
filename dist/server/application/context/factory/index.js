@@ -6,19 +6,22 @@ const cookie_1 = require("./cookie");
 const ip_1 = require("./ip");
 const locale_1 = require("./locale");
 const id_1 = require("./id");
-const userAgent_1 = require("./userAgent");
+const user_agent_1 = require("./user-agent");
+const auth_1 = require("./auth");
 exports.APIRequestContextFactoryConstructors = {
     [id_1.IDContextFactory.key]: id_1.IDContextFactory,
     [ip_1.IPContextFactory.key]: ip_1.IPContextFactory,
     [locale_1.LocaleContextFactory.key]: locale_1.LocaleContextFactory,
     [cookie_1.CookieContextFactory.key]: cookie_1.CookieContextFactory,
-    [userAgent_1.UserAgentContextFactory.key]: userAgent_1.UserAgentContextFactory,
+    [user_agent_1.UserAgentContextFactory.key]: user_agent_1.UserAgentContextFactory,
+    [auth_1.AuthContextFactory.key]: auth_1.AuthContextFactory,
 };
 exports.defaultAPIRequestContextFactoryConstructorOptions = {
     [id_1.IDContextFactory.key]: id_1.IDContextFactory.autoLoadOptions,
     [ip_1.IPContextFactory.key]: ip_1.IPContextFactory.autoLoadOptions,
     [locale_1.LocaleContextFactory.key]: locale_1.LocaleContextFactory.autoLoadOptions,
     [cookie_1.CookieContextFactory.key]: cookie_1.CookieContextFactory.autoLoadOptions,
-    [userAgent_1.UserAgentContextFactory.key]: userAgent_1.UserAgentContextFactory.autoLoadOptions,
+    [user_agent_1.UserAgentContextFactory.key]: user_agent_1.UserAgentContextFactory.autoLoadOptions,
+    [auth_1.AuthContextFactory.key]: auth_1.AuthContextFactory.autoLoadOptions,
 };
 //# sourceMappingURL=index.js.map

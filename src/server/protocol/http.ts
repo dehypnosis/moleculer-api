@@ -13,7 +13,7 @@ export class ServerHTTPProtocol extends ServerProtocol {
   public static readonly key = "http";
   public static readonly autoLoadOptions: ServerHTTPProtocolOptions = {
     port: 8080,
-    hostname: "0.0.0.0",
+    hostname: "localhost",
   };
   private readonly opts: ServerHTTPProtocolOptions;
   private server?: http.Server;

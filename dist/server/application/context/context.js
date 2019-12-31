@@ -38,6 +38,12 @@ class APIRequestContext {
         }
         return null;
     }
+    static findProps(source) {
+        if (source.hasOwnProperty(APIRequestContext.SourceContextSymbol)) {
+            return source[APIRequestContext.SourceContextSymbol];
+        }
+        return null;
+    }
     static isCreating(source) {
         return source.hasOwnProperty(APIRequestContext.SourceContextIsCreatingSymbol);
     }

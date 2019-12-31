@@ -5,7 +5,7 @@ import { ServerMiddleware, ServerMiddlewareProps } from "./middleware";
 
 export type ErrorMiddlewareOptions = {
   displayErrorStack: boolean;
-  responseFormat: (obj: any) => any;
+  responseFormat: (obj: any) => { status?: number, statusCode?: number, code?: number|string, [key:string]: any };
 };
 
 /*
@@ -62,7 +62,10 @@ export class ErrorMiddleware extends ServerMiddleware {
       return next(error);
     }
 
-    res.status(500).json(this.formatError(error)); // TODO: normalize error
+    const err = this.formatError(error);
+    let status = typeof err !== "string" && err.error && (err.error.status || err.error.statusCode || err.error.code) || 500;
+    if (isNaN(status)) status = 500;
+    res.status(status).json(err); // TODO: normalize error
   }
 
   private handleHTTPNotFound(req: HTTPRouteRequest, res: HTTPRouteResponse, next: HTTPRouteNextFn): void {
@@ -75,7 +78,7 @@ export class ErrorMiddleware extends ServerMiddleware {
     }
   }
 
-  private formatError(error: any, stringify = false): any {
+  private formatError(error: any, stringify = false): { error: any } | string {
     const {responseFormat, displayErrorStack} = this.opts;
     let value: any = error;
     if (typeof error === "object" && error !== null) {
@@ -91,8 +94,8 @@ export class ErrorMiddleware extends ServerMiddleware {
     if (responseFormat) {
       try {
         value = responseFormat(value);
-      } catch (error) {
-        this.props.logger.error(error);
+      } catch (e) {
+        this.props.logger.error("failed to format error", e);
       }
     }
 
@@ -101,7 +104,8 @@ export class ErrorMiddleware extends ServerMiddleware {
     if (stringify) {
       try {
         result = JSON.stringify(result);
-      } catch {
+      } catch (e) {
+        console.error("failed to stringify error", e);
         result = JSON.stringify({error: error.toString(), truncated: true});
       }
     }

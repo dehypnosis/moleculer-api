@@ -12,6 +12,7 @@ export declare class APIRequestContext {
         after?: (source: APIRequestContextSource, context: APIRequestContext) => void;
     }): APIRequestContextConstructor;
     static find(source: APIRequestContextSource): APIRequestContext | null;
+    static findProps(source: APIRequestContextSource): APIRequestContextProps | null;
     static isCreating(source: APIRequestContextSource): boolean;
     set<T>(symbol: symbol, value: T, clear: (value: T) => void): void;
     get(symbol: symbol): any;

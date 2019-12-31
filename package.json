@@ -1,6 +1,6 @@
 {
   "name": "moleculer-api",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "A dynamic API Gateway for MoleculerJS which updates REST endpoints and aggregated GraphQL schema, access control policy for each action calls from metadata of remote services schema without restart or deployment.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,13 +8,23 @@
     "dist"
   ],
   "scripts": {
-    "dev": "nodemon --exec ts-node ./src/examples",
+    "dev": "nodemon",
     "build": "rm -rf ./dist && tsc && copyfiles -u 1 src/**/*.html src/**/*.css dist/",
     "lint": "tslint -p tsconfig.json",
     "deps": "npm-check -u",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "test": "npm run test-with-examples -- --testPathIgnorePatterns=src/examples",
     "test-with-examples": "node --trace-warnings node_modules/.bin/jest --coverage --detectOpenHandles --forceExit"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts",
+    "ignore": [
+      "src/**/*.spec.ts"
+    ],
+    "exec": "ts-node ./src/examples/index.ts"
   },
   "keywords": [
     "QMIT",
@@ -29,6 +39,7 @@
     "accept-language-parser": "^1.5.0",
     "apollo-server": "^2.9.7",
     "async-lock": "^1.2.2",
+    "auth-header": "^1.0.0",
     "axax": "^0.2.2",
     "busboy": "^0.3.1",
     "cookie-parser": "^1.4.4",
@@ -44,11 +55,13 @@
     "helmet": "^3.21.2",
     "kleur": "^3.0.3",
     "lodash": "^4.17.15",
+    "lru-cache": "^5.1.1",
     "moleculer": "^0.14.0-beta6",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
     "node-fetch": "^2.6.0",
     "object-hash": "^1.3.1",
+    "openid-client": "^3.10.0",
     "path-to-regexp": "^3.1.0",
     "qs": "^6.9.0",
     "smart-circular": "^1.0.2",
@@ -63,6 +76,7 @@
   "devDependencies": {
     "@types/accept-language-parser": "^1.5.1",
     "@types/async-lock": "^1.1.1",
+    "@types/auth-header": "^1.0.1",
     "@types/bluebird": "^3.5.24",
     "@types/busboy": "^0.2.3",
     "@types/cookie": "^0.3.3",
@@ -74,6 +88,7 @@
     "@types/helmet": "0.0.45",
     "@types/jest": "^24.0.18",
     "@types/lodash": "^4.14.139",
+    "@types/lru-cache": "^5.1.0",
     "@types/memorystream": "^0.3.0",
     "@types/morgan": "^1.7.37",
     "@types/node": "^12.7.5",

@@ -1,10 +1,11 @@
-import { APIGateway } from "../../";
-import { getMoleculerServiceBroker } from "../../test";
 import fs from "fs";
 import path from "path";
 import MemoryStream from "memorystream";
 import ReadableStream = NodeJS.ReadableStream;
+import { APIGateway, createAuthContextOIDCParser } from "../../";
+import { getMoleculerServiceBroker } from "../../test";
 
+/* create gateway and run */
 const gateway = new APIGateway({
   brokers: [
     {
@@ -35,6 +36,15 @@ const gateway = new APIGateway({
       //   key: fs.readFileSync(path.join(__dirname, "../../https/key.pem")),
       //   cert: fs.readFileSync(path.join(__dirname, "../../https/server.crt")),
       // },
+    },
+    context: {
+      auth: {
+        parser: createAuthContextOIDCParser({
+          issuer: "https://account.dev.qmit.pro",
+          client_id: "test",
+          client_secret: "3322b0c4c46443c88770041d05531dc994c8121d36ee4a21928c8626b09739d7",
+        }),
+      },
     },
     middleware: {
       cors: false,

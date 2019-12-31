@@ -1,3 +1,4 @@
+
 export * from "./factory";
 import { RecursivePartial } from "../../../../interface";
 import { CookieContextFactory, CookieContextFactoryOptions } from "./cookie";
@@ -5,7 +6,8 @@ import { APIRequestContextFactory } from "./factory";
 import { IPContextFactory, IPContextFactoryOptions } from "./ip";
 import { LocaleContextFactory, LocaleContextFactoryOptions } from "./locale";
 import { IDContextFactory, IDContextFactoryOptions } from "./id";
-import { UserAgentContextFactory, UserAgentContextFactoryOptions } from "./userAgent";
+import { UserAgentContextFactory, UserAgentContextFactoryOptions } from "./user-agent";
+import { AuthContextFactory, AuthContextFactoryOptions } from "./auth";
 
 export const APIRequestContextFactoryConstructors = {
   [IDContextFactory.key]: IDContextFactory,
@@ -13,6 +15,7 @@ export const APIRequestContextFactoryConstructors = {
   [LocaleContextFactory.key]: LocaleContextFactory,
   [CookieContextFactory.key]: CookieContextFactory,
   [UserAgentContextFactory.key]: UserAgentContextFactory,
+  [AuthContextFactory.key]: AuthContextFactory,
 };
 
 export type APIRequestContextFactoryConstructorOptions = {
@@ -21,6 +24,7 @@ export type APIRequestContextFactoryConstructorOptions = {
   [LocaleContextFactory.key]: RecursivePartial<LocaleContextFactoryOptions> | false,
   [CookieContextFactory.key]: RecursivePartial<CookieContextFactoryOptions> | false,
   [UserAgentContextFactory.key]: RecursivePartial<UserAgentContextFactoryOptions> | false,
+  [AuthContextFactory.key]: RecursivePartial<AuthContextFactoryOptions> | false,
 };
 
 export const defaultAPIRequestContextFactoryConstructorOptions: APIRequestContextFactoryConstructorOptions = {
@@ -29,6 +33,7 @@ export const defaultAPIRequestContextFactoryConstructorOptions: APIRequestContex
   [LocaleContextFactory.key]: LocaleContextFactory.autoLoadOptions,
   [CookieContextFactory.key]: CookieContextFactory.autoLoadOptions,
   [UserAgentContextFactory.key]: UserAgentContextFactory.autoLoadOptions,
+  [AuthContextFactory.key]: AuthContextFactory.autoLoadOptions,
 };
 
 export type APIRequestContextProps = { [key in keyof APIRequestContextFactoryConstructorOptions]?: InstanceType<(typeof APIRequestContextFactoryConstructors)[key]> extends APIRequestContextFactory<infer X> ? X : never };

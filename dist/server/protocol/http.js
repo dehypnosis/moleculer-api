@@ -36,6 +36,6 @@ exports.ServerHTTPProtocol = ServerHTTPProtocol;
 ServerHTTPProtocol.key = "http";
 ServerHTTPProtocol.autoLoadOptions = {
     port: 8080,
-    hostname: "0.0.0.0",
+    hostname: "localhost",
 };
 //# sourceMappingURL=http.js.map

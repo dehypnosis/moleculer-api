@@ -6,6 +6,7 @@ import { RecursivePartial } from "../../interface";
 import { LogLevel } from "../../logger";
 import { ServerApplicationComponentModules } from "../application/component";
 import { ServerMiddleware, ServerMiddlewareProps } from "./middleware";
+import { APIRequestContext, APIRequestContextProps } from "../application/context";
 
 export type LoggingMiddlewareOptions = {
   httpFormat: string;
@@ -30,7 +31,7 @@ morgan.token("ws-protocol", req => {
 });
 
 morgan.token("ip", req => {
-  const forwarded = req.headers && req.headers["x-forwarded-for"];
+  const forwarded = req.headers && (req.headers["x-forwarded-for"] || req.headers["x-forwarded-proto"]);
   if (forwarded) {
     if (typeof forwarded === "string") {
       return forwarded;
@@ -44,11 +45,17 @@ morgan.token("statusMessage", (req, res) => {
   return res.statusMessage || "-";
 });
 
+morgan.token("context", (req, res, key) => {
+  const context = APIRequestContext.findProps(req);
+  if (!context) return "-";
+  return (_.get(context, key as string, "-") || "-").toString();
+});
+
 export class LoggingMiddleware extends ServerMiddleware {
   public static readonly key = "logging";
   public static readonly autoLoadOptions = {
-    httpFormat: `:method :url HTTP/:http-version - :status :statusMessage :res[content-length] byte :response-time ms - ${kleur.dim(`":ip" ":referrer" ":user-agent"`)}`,
-    wsFormat: `:method :url HTTP/:http-version WebSocket/:ws-protocol - 101 Switching Protocols - ${kleur.dim(`":ip" ":referrer" ":user-agent"`)}`,
+    httpFormat: `${kleur.cyan(":context[id]")} :method ":url" HTTP/:http-version - :status :statusMessage :res[content-length] byte :response-time ms - ${kleur.dim(`":ip" ":referrer" ":user-agent"`)} - ${kleur.dim(`":context[auth.user.sub]" ":context[auth.user.email]" ":context[auth.scope]" ":context[auth.client]"`)}`,
+    wsFormat: `${kleur.cyan(":context[id]")} :method ":url" HTTP/:http-version WebSocket/:ws-protocol - 101 Switching Protocols - byte - ms - ${kleur.dim(`":ip" ":referrer" ":user-agent"`)} - ${kleur.dim(`":context[auth.user.sub]" ":context[auth.user.email]" ":context[auth.scope]" ":context[auth.client]"`)}`,
     level: "info" as LogLevel,
   };
   private readonly opts: LoggingMiddlewareOptions;

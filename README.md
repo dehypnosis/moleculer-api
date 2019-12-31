@@ -38,31 +38,31 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
         - [x] HTTP protocol which mounts HTTP/WS components' modules
 - [x] 0.2.x Alpha
     - [x] Middleware
-      - Helmet (disabled by default)
-      - CORS (enabled, including WebSocket)
-      - Serve Static (disabled)
-      - Body Parser (enabled)
-      - Logging (enabled, including WebSocket)
-      - Error Handler (enabled, including WebSocket)
+      - [x] Helmet (disabled by default)
+      - [x] CORS (enabled, including WebSocket)
+      - [x] Serve Static (disabled)
+      - [x] Body Parser (enabled)
+      - [x] Logging (enabled, including WebSocket)
+      - [x] Error Handler (enabled, including WebSocket)
     - [X] Context Factory
-      - ID (enabled; request id generation)
-      - User Agent (enabled)
-      - Cookie Parser (enabled)
-      - Locale (enabled)
-      - Auth (enabled)
+      - [x] ID (enabled; request id generation)
+      - [x] User Agent (enabled)
+      - [x] Cookie Parser (enabled)
+      - [x] Locale (enabled)
+      - [x] Auth (enabled; Bearer/OAuth, Basic, Digest, AWS, [RFC7235](https://tools.ietf.org/html/rfc7235))
     - [x] Schema Registry plugins
         - [x] WebSocket protocol plugin
     - [x] Streaming support for GraphQL/REST plugin multipart/form-data request
     - [x] Streaming support for REST plugin response
     - [x] Bidirectional streaming support for WebSocket plugin
 - [] 0.3.x Beta
+    - [x] Integration example with `moleculer-iam` (OIDC provider)
     - [] Schema Registry plugins
         - [] Filter access control policy plugin
         - [] Scope access control policy plugin
     - [] Gateway schema presets
         - [] Service Catalog and API Catalog in GraphQL
         - [] Health Check endpoints in REST
-    - [] Integration example with `moleculer-iam`
     - [] Normalized errors
 - [] 1.0.x First Stable release
     - [x] API Server additional protocols

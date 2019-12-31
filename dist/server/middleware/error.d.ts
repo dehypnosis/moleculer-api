@@ -3,7 +3,12 @@ import { ServerApplicationComponentModules } from "../application/component";
 import { ServerMiddleware, ServerMiddlewareProps } from "./middleware";
 export declare type ErrorMiddlewareOptions = {
     displayErrorStack: boolean;
-    responseFormat: (obj: any) => any;
+    responseFormat: (obj: any) => {
+        status?: number;
+        statusCode?: number;
+        code?: number | string;
+        [key: string]: any;
+    };
 };
 export declare class ErrorMiddleware extends ServerMiddleware {
     protected readonly props: ServerMiddlewareProps;

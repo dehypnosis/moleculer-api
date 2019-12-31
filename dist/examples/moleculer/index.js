@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-const __1 = require("../../");
-const test_1 = require("../../test");
 const fs_1 = tslib_1.__importDefault(require("fs"));
 const path_1 = tslib_1.__importDefault(require("path"));
 const memorystream_1 = tslib_1.__importDefault(require("memorystream"));
+const __1 = require("../../");
+const test_1 = require("../../test");
+/* create gateway and run */
 const gateway = new __1.APIGateway({
     brokers: [
         {
@@ -31,6 +32,15 @@ const gateway = new __1.APIGateway({
         protocol: {
             http: {
                 port: 8080,
+            },
+        },
+        context: {
+            auth: {
+                parser: __1.createAuthContextOIDCParser({
+                    issuer: "https://account.dev.qmit.pro",
+                    client_id: "test",
+                    client_secret: "3322b0c4c46443c88770041d05531dc994c8121d36ee4a21928c8626b09739d7",
+                }),
             },
         },
         middleware: {

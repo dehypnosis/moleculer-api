@@ -20,7 +20,7 @@ export class ServerHTTPSProtocol extends ServerProtocol {
     super(props);
     this.opts = _.defaultsDeep(opts || {}, {
       port: 443,
-      hostname: "0.0.0.0",
+      hostname: "localhost",
     });
   }
 

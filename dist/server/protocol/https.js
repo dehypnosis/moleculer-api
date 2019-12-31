@@ -9,7 +9,7 @@ class ServerHTTPSProtocol extends protocol_1.ServerProtocol {
         super(props);
         this.opts = _.defaultsDeep(opts || {}, {
             port: 443,
-            hostname: "0.0.0.0",
+            hostname: "localhost",
         });
     }
     start(modules) {

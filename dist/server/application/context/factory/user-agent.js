@@ -21,4 +21,4 @@ class UserAgentContextFactory extends factory_1.APIRequestContextFactory {
 exports.UserAgentContextFactory = UserAgentContextFactory;
 UserAgentContextFactory.key = "userAgent";
 UserAgentContextFactory.autoLoadOptions = {};
-//# sourceMappingURL=userAgent.js.map
+//# sourceMappingURL=user-agent.js.map
