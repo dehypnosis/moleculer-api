@@ -1,16 +1,18 @@
 import * as _ from "lodash";
+import url from "url";
 import LRUCache, { Options as LRUCacheOptions } from "lru-cache";
-import { parse as parseAuthorizationHeader, Token } from "auth-header";
+import { parse as parseAuthRawToken, Token } from "auth-header";
 import { RecursivePartial } from "../../../../interface";
 import { Logger } from "../../../../logger";
 import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFactoryProps } from "./factory";
 
-export type AuthorizationHeader = string;
+export type AuthRawToken = string;
 export type AuthContext = { scope: string[], user: any | void, client: string | void, token: Token | void };
 export type AuthContextParser = (token: Token | void, logger: Logger) => Promise<Partial<AuthContext & { maxAge: number }> | void>;
 export type AuthContextFactoryOptions = {
   parser: AuthContextParser;
-  cache: LRUCacheOptions<AuthorizationHeader, AuthContext>;
+  cache: LRUCacheOptions<AuthRawToken, AuthContext>;
+  tokenQueryKey: string | false;
 };
 
 /*
@@ -28,10 +30,11 @@ export class AuthContextFactory extends APIRequestContextFactory<AuthContext> {
       max: 1000,
       maxAge: 1000 * 60 * 5, // 5min; default cache max age
     },
+    tokenQueryKey: "auth",
   };
 
   private readonly opts: AuthContextFactoryOptions;
-  private readonly cache: LRUCache<AuthorizationHeader, AuthContext>;
+  private readonly cache: LRUCache<AuthRawToken, AuthContext>;
 
   constructor(protected readonly props: APIRequestContextFactoryProps, opts?: RecursivePartial<AuthContextFactoryOptions>) {
     super(props);
@@ -39,20 +42,27 @@ export class AuthContextFactory extends APIRequestContextFactory<AuthContext> {
     this.cache = new LRUCache(this.opts.cache);
   }
 
-  public async create({headers}: APIRequestContextSource) {
-    const header: AuthorizationHeader = headers.authorization || "";
+  public async create(source: APIRequestContextSource) {
+    let rawToken: AuthRawToken = source.headers.authorization || "";
+    if (!rawToken && source.url && this.opts.tokenQueryKey) {
+      const parsedURL = url.parse(source.url, true);
+      const tokenQuery = parsedURL.query[this.opts.tokenQueryKey];
+      if (typeof tokenQuery === "string") {
+        rawToken = tokenQuery;
+      }
+    }
 
     // check LRU cache
-    const cachedContext = this.cache.get(header);
+    const cachedContext = this.cache.get(rawToken);
     if (cachedContext) return cachedContext;
 
     // parse token then user, scope
     let token: Token | null = null;
-    if (header) {
+    if (rawToken) {
       try {
-        token = parseAuthorizationHeader(header);
+        token = parseAuthRawToken(rawToken);
       } catch (error) {
-        throw new Error("failed to parse authorization header"); // TODO: normalize error
+        throw new Error("failed to parse authorization token"); // TODO: normalize error
       }
     }
 
@@ -71,7 +81,7 @@ export class AuthContextFactory extends APIRequestContextFactory<AuthContext> {
     if (partialContext) {
       let maxAge = partialContext.maxAge;
       if (!maxAge || isNaN(maxAge) || maxAge <= 0) maxAge = undefined;
-      this.cache.set(header, context, maxAge);
+      this.cache.set(rawToken, context, maxAge);
     }
     return context;
   }
