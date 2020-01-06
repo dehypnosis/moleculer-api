@@ -1,6 +1,5 @@
 import { Issuer, Client } from "openid-client";
 import { AuthContextParser } from "./auth";
-
 // TODO: as composable presets
 
 /* OIDC parser */
@@ -66,7 +65,7 @@ export const createAuthContextOIDCParser = (opts: AuthContextOIDCParserOptions):
           // console.log(res);
           client = res.client_id;
           scope = res.scope.split(" ");
-          maxAge = Math.floor(1577791463*1000 - new Date().getTime());
+          maxAge = Math.floor(1577791463 * 1000 - new Date().getTime());
         })
         .catch(error => {
           const err: any = new Error(error.message); // TODO: normalize error

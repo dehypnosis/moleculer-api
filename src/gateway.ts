@@ -19,7 +19,7 @@ type APIGatewayOwnOptions = {
 };
 
 export class APIGateway {
-  private readonly brokers: ServiceBroker[];
+  public readonly brokers: ServiceBroker[];
   private readonly schema: SchemaRegistry;
   private readonly server: APIServer;
   private readonly logger: Logger;
@@ -69,6 +69,10 @@ export class APIGateway {
       schema: this.schema,
       logger: this.logger.getChild(`server`),
     }, server);
+  }
+
+  public get delegatedBrokers() {
+    return this.brokers.map(b => b.delegatedBroker);
   }
 
   public async start() {

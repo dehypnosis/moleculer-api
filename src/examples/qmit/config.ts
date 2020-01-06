@@ -10,6 +10,13 @@ export const config = vault(async (get, list) => {
     env,
     isDev: env === "dev",
     isDebug: !!process.env.APP_DEBUG,
+    ...((await get(`${env}/data/api-gateway`)).data as {
+      oidc: {
+        issuer: string,
+        client_id: string,
+        client_secret: string,
+      };
+    }),
     // example: (await get("common/data/test")).data,
   };
 }, {

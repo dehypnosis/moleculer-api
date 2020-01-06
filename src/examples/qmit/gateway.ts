@@ -1,8 +1,10 @@
+import url from "url";
 import { createBrokerOptions } from "moleculer-qmit";
 import { config } from "./config";
-import { APIGateway, createAuthContextOIDCParser } from "../../";
+import { APIGateway, Logger } from "../../";
+import { APIRequestContextSource, AuthContext, createAuthContextOIDCParser } from "../../server";
 
-const { isDebug, isDev } = config;
+const { oidc, isDebug, isDev } = config;
 
 export const gateway = new APIGateway({
   brokers: [
@@ -39,11 +41,17 @@ export const gateway = new APIGateway({
     },
     context: {
       auth: {
-        parser: createAuthContextOIDCParser({
-          issuer: "https://account.dev.qmit.pro",
-          client_id: "test",
-          client_secret: "3322b0c4c46443c88770041d05531dc994c8121d36ee4a21928c8626b09739d7",
-        }),
+        parser: createAuthContextOIDCParser(oidc),
+        impersonator: async (source: APIRequestContextSource, auth: AuthContext, logger: Logger) => {
+          if (auth.user && auth.user.impersonator === true && source.url) {
+            const parsedURL = url.parse(source.url, true);
+            if (parsedURL.query.impersonation) {
+              auth.user._impersonator_sub = auth.user.sub;
+              auth.user.sub = parsedURL.query.impersonation;
+              logger.warn(`${auth.user._impersonator_sub}:${auth.user.email} has impersonated as ${auth.user.sub}`);
+            }
+          }
+        },
       },
     },
     protocol: {

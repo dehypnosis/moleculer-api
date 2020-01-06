@@ -1,5 +1,5 @@
-
 export * from "./factory";
+
 import { RecursivePartial } from "../../../../interface";
 import { CookieContextFactory, CookieContextFactoryOptions } from "./cookie";
 import { APIRequestContextFactory } from "./factory";
@@ -8,6 +8,9 @@ import { LocaleContextFactory, LocaleContextFactoryOptions } from "./locale";
 import { IDContextFactory, IDContextFactoryOptions } from "./id";
 import { UserAgentContextFactory, UserAgentContextFactoryOptions } from "./user-agent";
 import { AuthContextFactory, AuthContextFactoryOptions } from "./auth";
+
+export { AuthContext, AuthContextParser } from "./auth";
+export { createAuthContextOIDCParser, AuthContextOIDCParserOptions } from "./auth.preset";
 
 export const APIRequestContextFactoryConstructors = {
   [IDContextFactory.key]: IDContextFactory,

@@ -19,25 +19,26 @@ type Context = Moleculer.Context;
 
 export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Context> {
   public static readonly key = "moleculer";
-  private readonly broker: Moleculer.ServiceBroker;
+  public readonly broker: Moleculer.ServiceBroker;
   private readonly service: Moleculer.Service;
 
   constructor(protected readonly props: ServiceBrokerDelegatorProps, opts?: MoleculerServiceBrokerDelegatorOptions) {
     super(props);
-    this.broker = new Moleculer.ServiceBroker(_.defaultsDeep(opts || {}, {
-      logger: createMoleculerLoggerOptions(this.props.logger),
-      skipProcessEventRegistration: true,
-    }));
 
-    /* service to broker events and service discovery */
-    this.service = this.broker.createService(createMoleculerServiceSchema(props));
+    if (!opts) opts = {};
+    opts.logger = createMoleculerLoggerOptions(this.props.logger);
+    opts.skipProcessEventRegistration = true;
+    this.broker = new Moleculer.ServiceBroker(opts);
 
-    /* create optional moleculer services */
-    if (opts && opts.services) {
+    // create optional moleculer services
+    if (opts.services) {
       for (const serviceSchema of opts.services) {
         this.broker.createService(serviceSchema);
       }
     }
+
+    // create a service which handles event and service discovery
+    this.service = this.broker.createService(createMoleculerServiceSchema(props));
   }
 
   /* action/event name matching for call, publish, subscribe, clear cache */
@@ -113,15 +114,15 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
 
     // streaming request
     if (params && typeof params.createReadStream === "function") {
-      const { createReadStream, ...meta } = params;
+      const {createReadStream, ...meta} = params;
       const stream = params.createReadStream();
       if (!isReadStream(stream)) {
         throw new Error("invalid stream request"); // TODO: normalize error
       }
-      response = await ctx.call(action.id, stream, {nodeID: node.id, meta, parentCtx: context });
+      response = await ctx.call(action.id, stream, {nodeID: node.id, meta, parentCtx: context});
     } else {
       // normal request
-      response = await ctx.call(action.id, params, {nodeID: node.id, parentCtx: context });
+      response = await ctx.call(action.id, params, {nodeID: node.id, parentCtx: context});
     }
 
     // streaming response (can obtain other props from ctx.meta in streaming response)
@@ -140,7 +141,7 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
   public async publish(context: Context, args: DelegatedEventPublishArgs): Promise<void> {
     const {event, params, groups, broadcast} = args;
     const publish = broadcast ? this.broker.broadcast : this.broker.emit;
-    publish(event, params, { groups: groups && groups.length > 0 ? groups : undefined, parentCtx: context });
+    publish(event, params, {groups: groups && groups.length > 0 ? groups : undefined, parentCtx: context});
   }
 
   /* cache management */

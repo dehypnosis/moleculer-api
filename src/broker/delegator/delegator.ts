@@ -20,6 +20,8 @@ export abstract class ServiceBrokerDelegator<Context> extends HasStaticKey {
     super();
   }
 
+  public abstract readonly broker: any;
+
   /* action/event name matching for call, publish, subscribe, clear cache */
   public abstract readonly actionNameResolver: NamePatternResolver;
   public abstract readonly eventNameResolver: NamePatternResolver;

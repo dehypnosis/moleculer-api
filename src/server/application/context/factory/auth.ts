@@ -9,10 +9,12 @@ import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFac
 export type AuthRawToken = string;
 export type AuthContext = { scope: string[], user: any | void, client: string | void, token: Token | void };
 export type AuthContextParser = (token: Token | void, logger: Logger) => Promise<Partial<AuthContext & { maxAge: number }> | void>;
+export type AuthContextImpersonator = (source: APIRequestContextSource, auth: AuthContext, logger: Logger) => Promise<Partial<AuthContext & { maxAge: number }> | void>;
 export type AuthContextFactoryOptions = {
-  parser: AuthContextParser;
-  cache: LRUCacheOptions<AuthRawToken, AuthContext>;
   tokenQueryKey: string | false;
+  parser: AuthContextParser;
+  impersonator: AuthContextImpersonator | false;
+  cache: LRUCacheOptions<AuthRawToken, AuthContext>;
 };
 
 /*
@@ -26,6 +28,8 @@ export class AuthContextFactory extends APIRequestContextFactory<AuthContext> {
     async parser(token, logger) {
       logger.warn("AuthContextFactory parser is not implemented:", token);
     },
+    // impersonation feature is disabled by default
+    impersonator: false,
     cache: {
       max: 1000,
       maxAge: 1000 * 60 * 5, // 5min; default cache max age
@@ -43,7 +47,10 @@ export class AuthContextFactory extends APIRequestContextFactory<AuthContext> {
   }
 
   public async create(source: APIRequestContextSource) {
+    // get raw token from header
     let rawToken: AuthRawToken = source.headers.authorization || "";
+
+    // get raw token from query string
     if (!rawToken && source.url && this.opts.tokenQueryKey) {
       const parsedURL = url.parse(source.url, true);
       const tokenQuery = parsedURL.query[this.opts.tokenQueryKey];
@@ -52,37 +59,50 @@ export class AuthContextFactory extends APIRequestContextFactory<AuthContext> {
       }
     }
 
-    // check LRU cache
-    const cachedContext = this.cache.get(rawToken);
-    if (cachedContext) return cachedContext;
+    // get context from LRU cache
+    let context = this.cache.get(rawToken);
 
-    // parse token then user, scope
-    let token: Token | null = null;
-    if (rawToken) {
-      try {
-        token = parseAuthRawToken(rawToken);
-      } catch (error) {
-        throw new Error("failed to parse authorization token"); // TODO: normalize error
+    // get context from token
+    if (!context) {
+      let token: Token | null = null;
+      if (rawToken) {
+        try {
+          token = parseAuthRawToken(rawToken);
+        } catch (error) {
+          throw new Error("failed to parse authorization token"); // TODO: normalize error
+        }
+      }
+
+      const parsedContext = await this.opts.parser(token!, this.props.logger);
+      context = _.defaultsDeep(
+        parsedContext || {},
+        {
+          scope: [],
+          user: null,
+          client: null,
+          token,
+        },
+      );
+
+      // store cache for parsed token
+      if (parsedContext) {
+        let maxAge = parsedContext.maxAge;
+        if (!maxAge || isNaN(maxAge) || maxAge <= 0) maxAge = undefined;
+        this.cache.set(rawToken, context!, maxAge);
       }
     }
 
-    const partialContext = await this.opts.parser(token!, this.props.logger);
-    const context = _.defaultsDeep(
-      partialContext || {},
-      {
-        scope: [],
-        user: null,
-        client: null,
-        token,
-      },
-    );
-
-    // store cache for parsed token
-    if (partialContext) {
-      let maxAge = partialContext.maxAge;
-      if (!maxAge || isNaN(maxAge) || maxAge <= 0) maxAge = undefined;
-      this.cache.set(rawToken, context, maxAge);
+    // try impersonation
+    if (this.opts.impersonator) {
+      const impersonatedContext = await this.opts.impersonator(source, context!, this.props.logger);
+      if (impersonatedContext) {
+        context = _.defaultsDeep(
+          context!,
+          impersonatedContext,
+        );
+      }
     }
-    return context;
+
+    return context!;
   }
 }

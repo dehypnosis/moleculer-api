@@ -33,7 +33,7 @@ export type ServiceBrokerListeners = {
   nodePoolUpdated: (service: Readonly<Service>) => void;
 };
 
-export type CallArgs = { action: Readonly<ServiceAction>, params?: any, batchingParams?: any, disableCache: boolean};
+export type CallArgs = { action: Readonly<ServiceAction>, params?: any, batchingParams?: any, disableCache: boolean };
 export type EventPublishArgs = Omit<EventPacket, "from">;
 export type DelegatedCallArgs = Omit<CallArgs, "batchingParams"> & { node: Readonly<ServiceNode> };
 export type DelegatedEventPublishArgs = EventPublishArgs;
@@ -91,6 +91,10 @@ export class ServiceBroker<DelegatorContext = any> {
 
   /* lifecycle */
   private working = false;
+
+  public get delegatedBroker(): any {
+    return this.delegator.broker;
+  }
 
   public async start(listeners: ServiceBrokerListeners): Promise<void> {
     this.working = true;
