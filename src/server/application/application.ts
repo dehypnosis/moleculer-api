@@ -16,7 +16,7 @@ export type ServerApplicationOptions = {} & ServerApplicationComponentConstructo
 export class ServerApplication {
   public readonly components: ReadonlyArray<ServerApplicationComponent<Route>>;
   private readonly componentBranchHandlerMap = new Map<ServerApplicationComponent<Route>, BranchHandlerMap<Route>>();
-  private readonly componentsAliasedVersions = new Map<ServerApplicationComponent<Route>, Array<Readonly<Version>>>();
+  private readonly componentsAliasedVersions = new Map<ServerApplicationComponent<Route>, Readonly<Version>[]>();
 
   constructor(protected readonly props: ServerApplicationProps, opts?: RecursivePartial<ServerApplicationOptions>) {
     // create application components
@@ -25,7 +25,7 @@ export class ServerApplication {
       return components.concat(new Component({
         logger: this.props.logger.getChild(`${key}`),
       }, opts && opts[key]));
-    }, [] as Array<ServerApplicationComponent<Route>>);
+    }, [] as ServerApplicationComponent<Route>[]);
 
     // create branch handler map for each components
     for (const component of this.components) {
@@ -164,7 +164,7 @@ export class ServerApplication {
   }
 
   public get routes() {
-    const items: Array<{ branch: Readonly<Branch>, version: Readonly<Version>, route: Readonly<Route> }> = [];
+    const items: { branch: Readonly<Branch>, version: Readonly<Version>, route: Readonly<Route> }[] = [];
     for (const branchHandlerMap of this.componentBranchHandlerMap.values()) {
       for (const [branch, versionHandlerMap] of branchHandlerMap.entries()) {
         for (const [version, routeHandlerMap] of versionHandlerMap.entries()) {

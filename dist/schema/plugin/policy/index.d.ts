@@ -19,9 +19,9 @@ export declare type PolicySchemaPluginProps = {
     [key in keyof (typeof PolicyPluginConstructors)]?: InstanceType<(typeof PolicyPluginConstructors)[key]> extends PolicyPlugin<infer Schema, any> ? Schema : never;
 };
 export declare type PolicySchema = {
-    call?: Array<CallPolicySchema & PolicySchemaPluginProps>;
-    publish?: Array<PublishPolicySchema & PolicySchemaPluginProps>;
-    subscribe?: Array<SubscribePolicySchema & PolicySchemaPluginProps>;
+    call?: (CallPolicySchema & PolicySchemaPluginProps)[];
+    publish?: (PublishPolicySchema & PolicySchemaPluginProps)[];
+    subscribe?: (SubscribePolicySchema & PolicySchemaPluginProps)[];
 };
 export declare type PolicyCatalog = {
     [key in keyof (typeof PolicyPluginConstructors)]?: InstanceType<(typeof PolicyPluginConstructors)[key]> extends PolicyPlugin<any, infer Catalog> ? Catalog : never;

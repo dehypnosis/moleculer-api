@@ -12,7 +12,7 @@ import { createMoleculerLoggerOptions } from "./logger";
 import { createMoleculerServiceSchema } from "./service";
 
 export type MoleculerServiceBrokerDelegatorOptions = Moleculer.BrokerOptions & {
-  services?: Array<Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema }>;
+  services?: (Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema })[];
 };
 
 type Context = Moleculer.Context;
@@ -318,7 +318,7 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
   }
 
   /* send reporter to service */
-  public async report(service: Readonly<Service>, messages: Array<Readonly<Report>>, table: string): Promise<void> {
+  public async report(service: Readonly<Service>, messages: Readonly<Report>[], table: string): Promise<void> {
     const action = `${service.id}.$report`;
     const params = {messages, table};
     const payloads = Array.from(service.nodeIdMap.keys())

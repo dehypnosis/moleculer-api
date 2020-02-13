@@ -7,6 +7,8 @@ import { LocaleContextFactory, LocaleContextFactoryOptions } from "./locale";
 import { IDContextFactory, IDContextFactoryOptions } from "./id";
 import { UserAgentContextFactory, UserAgentContextFactoryOptions } from "./user-agent";
 import { AuthContextFactory, AuthContextFactoryOptions } from "./auth";
+export { AuthContext, AuthContextParser } from "./auth";
+export { createAuthContextOIDCParser, AuthContextOIDCParserOptions } from "./auth.preset";
 export declare const APIRequestContextFactoryConstructors: {
     [IDContextFactory.key]: typeof IDContextFactory;
     [IPContextFactory.key]: typeof IPContextFactory;

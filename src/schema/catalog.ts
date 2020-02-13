@@ -40,9 +40,9 @@ export class ServiceCatalog {
     return items && items[0] || null;
   }
 
-  public get services(): Array<Readonly<Service>> {
+  public get services(): Readonly<Service>[] {
     return Array.from(this.serviceIdItemsMap.values())
-      .reduce((services, items) => services.concat(items.map(item => item.service)), [] as Array<Readonly<Service>>);
+      .reduce((services, items) => services.concat(items.map(item => item.service)), [] as Readonly<Service>[]);
   }
 
   public add(item: Readonly<ServiceCatalogItem>): void {

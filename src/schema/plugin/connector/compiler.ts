@@ -22,7 +22,7 @@ export const ConnectorCompiler = {
     schema: Readonly<MapConnectorSchema>,
     integration: Readonly<ServiceAPIIntegration>,
     opts: {
-      mappableKeys: Array<Extract<keyof MappableArgs, string>>;
+      mappableKeys: Extract<keyof MappableArgs, string>[];
     },
   ): MapConnector<MappableArgs> {
     // find path of connector schema from whole service schema
@@ -45,8 +45,8 @@ export const ConnectorCompiler = {
     integration: Readonly<ServiceAPIIntegration>,
     policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>,
     opts: {
-      explicitMappableKeys: Array<Extract<keyof MappableArgs, string>>;
-      implicitMappableKeys: Array<Extract<keyof MappableArgs, string>>;
+      explicitMappableKeys: Extract<keyof MappableArgs, string>[];
+      implicitMappableKeys: Extract<keyof MappableArgs, string>[];
       batchingEnabled: boolean;
       disableCache: boolean;
     },
@@ -132,7 +132,7 @@ export const ConnectorCompiler = {
     integration: Readonly<ServiceAPIIntegration>,
     policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>,
     opts: {
-      mappableKeys: Array<Extract<keyof MappableArgs, string>>;
+      mappableKeys: Extract<keyof MappableArgs, string>[];
     },
   ): PublishConnector<MappableArgs> {
     const broker = integration.service.broker!;
@@ -257,7 +257,7 @@ export const ConnectorCompiler = {
     integration: Readonly<ServiceAPIIntegration>,
     policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>,
     opts: {
-      mappableKeys: Array<Extract<keyof MappableArgs, string>>;
+      mappableKeys: Extract<keyof MappableArgs, string>[];
       getAsyncIterator?: GetAsyncIterator,
     },
   ): SubscribeConnector<MappableArgs, GetAsyncIterator extends true ? null : (packet: any) => void> {
@@ -309,7 +309,7 @@ export const ConnectorCompiler = {
 
     const connector: SubscribeConnector<MappableArgs, GetAsyncIterator extends true ? null : (packet: any) => void> = async (context, mappableArgs, listener) => {
       const eventNames = Array.isArray(eventNamesOrFn) ? eventNamesOrFn : eventNamesOrFn(mappableArgs);
-      const asyncIteratorComposeItems: Array<AsyncIteratorComposeItem<EventPacket>> = [];
+      const asyncIteratorComposeItems: AsyncIteratorComposeItem<EventPacket>[] = [];
 
       for (const event of eventNames) {
 

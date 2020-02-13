@@ -19,10 +19,10 @@ export declare class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtoco
     start(): Promise<void>;
     stop(): Promise<void>;
     validateSchema(schema: Readonly<GraphQLProtocolPluginSchema>): ValidationError[];
-    compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Array<Readonly<ServiceAPIIntegration>>): Array<{
+    compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): {
         hash: string;
         route: Readonly<Route>;
-    }>;
+    }[];
     describeSchema(schema: Readonly<GraphQLProtocolPluginSchema>): GraphQLProtocolPluginCatalog;
     private createGraphQLHandlers;
     private createGraphQLResolvers;

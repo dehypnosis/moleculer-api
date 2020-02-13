@@ -177,8 +177,8 @@ export class ServiceBroker<DelegatorContext = any> {
 
   private static EventSubscriptionSymbol = Symbol("BrokerEventSubscriptions");
 
-  private getEventSubscriptions(context: APIRequestContext): Array<number | AsyncIterator<EventPacket>> {
-    let subscriptions: Array<number | AsyncIterator<EventPacket>> | undefined = context.get(ServiceBroker.EventSubscriptionSymbol);
+  private getEventSubscriptions(context: APIRequestContext): (number | AsyncIterator<EventPacket>)[] {
+    let subscriptions: (number | AsyncIterator<EventPacket>)[] | undefined = context.get(ServiceBroker.EventSubscriptionSymbol);
     if (!subscriptions) {
       subscriptions = [];
       context.set(ServiceBroker.EventSubscriptionSymbol, subscriptions, subs => {
@@ -218,7 +218,7 @@ export class ServiceBroker<DelegatorContext = any> {
 
       // set batching handler for this call
       if (!batchingPool.hasBatchingHandler(batchingKey)) { // or register job
-        batchingPool.setBatchingHandler(batchingKey, async (batchingParamsList: any[]) => {
+        batchingPool.setBatchingHandler(batchingKey, async (batchingParamsList: readonly any[]) => {
 
           // merge common params with batching params
           const mergedParams = (params || {}) as any;

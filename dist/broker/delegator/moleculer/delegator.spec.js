@@ -22,9 +22,9 @@ describe("moleculer service broker test", () => {
         return expect(broker.healthCheckSubscribe()).resolves.toMatchObject({ code: 200 });
     });
     it("broker should not discovered anything yet", () => {
-        return expect(mocks.connected).not.toHaveBeenCalled()
-            && expect(mocks.disconnected).not.toHaveBeenCalled()
-            && expect(mocks.nodePoolUpdated).not.toHaveBeenCalled();
+        expect(mocks.connected).not.toHaveBeenCalled();
+        expect(mocks.disconnected).not.toHaveBeenCalled();
+        expect(mocks.nodePoolUpdated).not.toHaveBeenCalled();
     });
     afterAll(() => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         yield broker.stop();

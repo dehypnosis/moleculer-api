@@ -4,7 +4,7 @@ import { Logger } from "../logger";
 import { Branch, BranchOptions } from "./branch";
 import { SchemaPluginConstructorOptions } from "./plugin";
 export declare type SchemaRegistryProps = {
-    brokers: Array<Readonly<ServiceBroker>>;
+    brokers: Readonly<ServiceBroker>[];
     logger: Logger;
 };
 export declare type SchemaRegistryOptions = {
@@ -33,7 +33,7 @@ export declare class SchemaRegistry {
     private hashServiceAPISchema;
     private findOrCreateBranch;
     getBranch(branchName: string): Readonly<Branch> | null;
-    getBranches(): Array<Readonly<Branch>>;
+    getBranches(): Readonly<Branch>[];
     deleteBranch(branchName: string): Promise<boolean>;
     private $deleteBranch;
     private clearUnusedBranchesIntervalTimer?;

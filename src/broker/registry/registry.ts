@@ -26,8 +26,8 @@ export type ServiceRegistryOptions = {
 };
 
 export class ServiceRegistry {
-  private readonly actionExamplesQueue: Array<{ serviceHash: string, actionId: string, params: any, response: any }> = [];
-  private readonly eventExamplesQueue: Array<{ events: string[], packet: EventPacket }> = [];
+  private readonly actionExamplesQueue: { serviceHash: string, actionId: string, params: any, response: any }[] = [];
+  private readonly eventExamplesQueue: { events: string[], packet: EventPacket }[] = [];
   private readonly serviceHashMap = new Map<string, Readonly<Service>>();
   private readonly opts: ServiceRegistryOptions;
 
@@ -68,7 +68,7 @@ export class ServiceRegistry {
     return this.serviceHashMap.get(hash) || null;
   }
 
-  public get services(): Array<Readonly<Service>> {
+  public get services(): Readonly<Service>[] {
     return Array.from(this.serviceHashMap.values());
   }
 

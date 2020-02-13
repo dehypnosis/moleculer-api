@@ -45,7 +45,7 @@ export abstract class ServiceBrokerDelegator<Context> extends HasStaticKey {
   public abstract publish(context: Context, args: DelegatedEventPublishArgs): Promise<void>;
 
   /* send reporter to service */
-  public abstract report(service: Readonly<Service>, messages: Array<Readonly<Report>>, table: string): Promise<void>;
+  public abstract report(service: Readonly<Service>, messages: Readonly<Report>[], table: string): Promise<void>;
 
   /* health check */
   public abstract healthCheckCall(action: Readonly<ServiceAction>): Promise<ServiceStatus>;

@@ -1,10 +1,10 @@
-import { ServiceBrokerOptions } from "./broker";
+import { ServiceBroker, ServiceBrokerOptions } from "./broker";
 import { RecursivePartial } from "./interface";
 import { SchemaRegistryOptions } from "./schema";
 import { APIServerOptions } from "./server";
 import { LoggerConstructorOptions } from "./logger";
 export declare type APIGatewayOptions = {
-    brokers?: Array<RecursivePartial<ServiceBrokerOptions>>;
+    brokers?: RecursivePartial<ServiceBrokerOptions>[];
     schema?: RecursivePartial<SchemaRegistryOptions>;
     server?: RecursivePartial<APIServerOptions>;
     logger?: LoggerConstructorOptions;
@@ -13,12 +13,13 @@ declare type APIGatewayOwnOptions = {
     skipProcessEventRegistration?: boolean;
 };
 export declare class APIGateway {
-    private readonly brokers;
+    readonly brokers: ServiceBroker[];
     private readonly schema;
     private readonly server;
     private readonly logger;
     private readonly opts;
     constructor(opts?: APIGatewayOptions);
+    get delegatedBrokers(): any[];
     start(): Promise<void>;
     stop(): Promise<void>;
     static readonly ShutdownSignals: string[];

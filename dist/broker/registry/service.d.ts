@@ -15,7 +15,7 @@ export declare class Service {
     protected readonly props: ServiceProps;
     readonly nodeIdMap: Map<string, Readonly<ServiceNode>>;
     readonly actionMap: Map<string, Readonly<ServiceAction>>;
-    readonly subscribedEvents: Array<Readonly<ServiceEvent>>;
+    readonly subscribedEvents: Readonly<ServiceEvent>[];
     readonly status: ServiceStatus;
     readonly shortHash: string;
     private $broker;

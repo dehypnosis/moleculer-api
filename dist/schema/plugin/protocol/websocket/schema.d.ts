@@ -21,10 +21,10 @@ export declare type WebSocketStreamingRouteSchema = {
 export declare type WebSocketProtocolPluginCatalog = IProtocolPluginCatalog & {
     schema: WebSocketProtocolPluginSchema;
     description: string;
-    entries: Array<{
+    entries: {
         path: string;
         description: string | null;
         deprecated: boolean;
         connector: ConnectorCatalog;
-    }>;
+    }[];
 };

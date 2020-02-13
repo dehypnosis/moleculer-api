@@ -57,7 +57,7 @@ export class APIServer {
           );
         }
         return factories;
-      }, [] as Array<APIRequestContextFactory<any>>);
+      }, [] as APIRequestContextFactory<any>[]);
     this.props.logger.info(`gateway context factories have been applied ${contextFactories.join(", ")}`);
 
     // create application
@@ -67,7 +67,7 @@ export class APIServer {
     }, this.opts.application);
 
     // override middleware options
-    const middlewareKeyAndOptions: Array<[keyof ServerMiddlewareConstructorOptions, any]> = [];
+    const middlewareKeyAndOptions: [keyof ServerMiddlewareConstructorOptions, any][] = [];
     for (const [k, defaultOptions] of Object.entries(defaultServerMiddlewareConstructorOptions)) {
       const key = k as keyof ServerMiddlewareConstructorOptions;
       const overriding = this.opts.middleware[key];

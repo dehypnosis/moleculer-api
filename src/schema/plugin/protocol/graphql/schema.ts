@@ -47,16 +47,16 @@ export type GraphQLIsTypeOfFieldResolverSchema = MapConnectorSchema<(obj: { sour
 export type GraphQLProtocolPluginCatalog = IProtocolPluginCatalog & {
   schema: GraphQLProtocolPluginSchema;
   description: string;
-  entries: Array<{
+  entries: {
     typeDef: string;
     kind: string;
     description: string | null;
     deprecated: boolean;
-    fields: Array<{
+    fields: {
       name: string;
       description: string | null;
       deprecated: boolean;
       connector: ConnectorCatalog;
-    }> | null;
-  }>;
+    }[] | null;
+  }[];
 };

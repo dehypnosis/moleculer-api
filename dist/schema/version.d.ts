@@ -20,8 +20,8 @@ export declare class Version {
     addIntegrationHistory(integration: Readonly<ServiceAPIIntegration>): void;
     forgetParentVersion(): void;
     get parentVersion(): Readonly<Version> | null;
-    get routes(): Array<Readonly<Route>>;
+    get routes(): Readonly<Route>[];
     get integrations(): ReadonlyArray<Readonly<ServiceAPIIntegration>>;
     get derivedIntegrations(): ReadonlyArray<Readonly<ServiceAPIIntegration>>;
-    getRetryableIntegrations(): Array<Readonly<ServiceAPIIntegration>>;
+    getRetryableIntegrations(): Readonly<ServiceAPIIntegration>[];
 }

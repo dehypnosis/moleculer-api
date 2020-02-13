@@ -6,9 +6,9 @@ export declare function getMoleculerServiceBroker(props?: {
         label?: string;
         level?: "info" | "warn" | "debug" | "error";
     };
-    services?: Array<Moleculer.ServiceSchema & {
+    services?: (Moleculer.ServiceSchema & {
         metadata?: ServiceMetaDataSchema;
-    }>;
+    })[];
     moleculer?: Moleculer.BrokerOptions;
 }): Moleculer.ServiceBroker;
 export declare const MoleculerServiceSchemaFactory: {

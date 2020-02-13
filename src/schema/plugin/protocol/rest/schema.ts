@@ -25,11 +25,11 @@ export type RESTMappableRouteResolverSchema = { map: MapConnectorSchema<(obj: { 
 export type RESTProtocolPluginCatalog = IProtocolPluginCatalog & {
   schema: RESTProtocolPluginSchema;
   description: string;
-  entries: Array<{
+  entries: {
     path: string;
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     description: string | null;
     deprecated: boolean;
     connector: ConnectorCatalog;
-  }>;
+  }[];
 };

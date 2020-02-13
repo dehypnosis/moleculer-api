@@ -14,7 +14,7 @@ export interface IProtocolPluginSchema {
 }
 
 export type ProtocolPluginProps = PluginProps & {
-  policyPlugins: Array<Readonly<PolicyPlugin<any, any>>>;
+  policyPlugins: Readonly<PolicyPlugin<any, any>>[];
 };
 
 export abstract class ProtocolPlugin<PluginSchema extends IProtocolPluginSchema, PluginCatalog extends IProtocolPluginCatalog> extends Plugin<PluginSchema, PluginCatalog> {
@@ -23,5 +23,5 @@ export abstract class ProtocolPlugin<PluginSchema extends IProtocolPluginSchema,
   }
 
   /* Schema integration and route generation */
-  public abstract compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Array<Readonly<ServiceAPIIntegration>>): Array<{ hash: string, route: Readonly<Route> }>;
+  public abstract compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): { hash: string, route: Readonly<Route> }[];
 }

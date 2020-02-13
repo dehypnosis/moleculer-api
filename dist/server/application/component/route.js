@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const kleur = tslib_1.__importStar(require("kleur"));
-const path_to_regexp_1 = tslib_1.__importDefault(require("path-to-regexp"));
+const path_to_regexp_1 = require("path-to-regexp");
 class Route {
     constructor(props) {
         this.props = props;
@@ -35,7 +35,7 @@ class Route {
                 this.paramKeysCollected = true;
                 paramKeys = this.paramKeys;
             }
-            return path_to_regexp_1.default(path, paramKeys, {
+            return path_to_regexp_1.pathToRegexp(path, paramKeys, {
                 sensitive: false,
                 strict: false,
                 end: true,

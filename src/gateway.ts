@@ -8,7 +8,7 @@ import { APIServer, APIServerOptions } from "./server";
 import { Logger, LoggerConstructors, LoggerConstructorOptions } from "./logger";
 
 export type APIGatewayOptions = {
-  brokers?: Array<RecursivePartial<ServiceBrokerOptions>>,
+  brokers?: RecursivePartial<ServiceBrokerOptions>[],
   schema?: RecursivePartial<SchemaRegistryOptions>,
   server?: RecursivePartial<APIServerOptions>,
   logger?: LoggerConstructorOptions,

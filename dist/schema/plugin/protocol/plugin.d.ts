@@ -11,13 +11,13 @@ export interface IProtocolPluginSchema {
     description: string;
 }
 export declare type ProtocolPluginProps = PluginProps & {
-    policyPlugins: Array<Readonly<PolicyPlugin<any, any>>>;
+    policyPlugins: Readonly<PolicyPlugin<any, any>>[];
 };
 export declare abstract class ProtocolPlugin<PluginSchema extends IProtocolPluginSchema, PluginCatalog extends IProtocolPluginCatalog> extends Plugin<PluginSchema, PluginCatalog> {
     protected readonly props: ProtocolPluginProps;
     constructor(props: ProtocolPluginProps, opts?: any);
-    abstract compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Array<Readonly<ServiceAPIIntegration>>): Array<{
+    abstract compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): {
         hash: string;
         route: Readonly<Route>;
-    }>;
+    }[];
 }

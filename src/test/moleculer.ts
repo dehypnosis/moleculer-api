@@ -7,7 +7,7 @@ import { getLogger } from "./util";
 
 export function getMoleculerServiceBroker(props?: {
   logger?: { label?: string, level?: "info" | "warn" | "debug" | "error" };
-  services?: Array<Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema }>;
+  services?: (Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema })[];
   moleculer?: Moleculer.BrokerOptions
 }) {
   const broker = new Moleculer.ServiceBroker(_.defaultsDeep({

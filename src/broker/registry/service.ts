@@ -17,7 +17,7 @@ export type ServiceProps = {
 export class Service {
   public readonly nodeIdMap: Map<string, Readonly<ServiceNode>>;
   public readonly actionMap: Map<string, Readonly<ServiceAction>>;
-  public readonly subscribedEvents: Array<Readonly<ServiceEvent>>;
+  public readonly subscribedEvents: Readonly<ServiceEvent>[];
   public readonly status: ServiceStatus = {message: "unknown", code: 503, updatedAt: new Date()};
   public readonly shortHash: string;
   private $broker: Readonly<ServiceBroker> | null = null;

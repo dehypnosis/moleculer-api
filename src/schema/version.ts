@@ -20,7 +20,7 @@ export class Version {
   });
   public readonly hash: string;
   public readonly shortHash: string;
-  private readonly $integrations: Array<Readonly<ServiceAPIIntegration>> = [];
+  private readonly $integrations: Readonly<ServiceAPIIntegration>[] = [];
 
   constructor(protected readonly props: VersionProps) {
     this.hash = hashObject([...props.schemaHashMap.keys(), ...props.routeHashMap.keys()], false);
@@ -51,7 +51,7 @@ export class Version {
     return this.props.parentVersion;
   }
 
-  public get routes(): Array<Readonly<Route>> {
+  public get routes(): Readonly<Route>[] {
     return Array.from(this.props.routeHashMap.values());
   }
 
@@ -65,7 +65,7 @@ export class Version {
     return this.$integrations;
   }
 
-  public getRetryableIntegrations(): Array<Readonly<ServiceAPIIntegration>> {
+  public getRetryableIntegrations(): Readonly<ServiceAPIIntegration>[] {
     const retryableIntegrations = this.$integrations
       .filter(integration => integration.status !== ServiceAPIIntegration.Status.Succeed);
 

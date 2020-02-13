@@ -16,6 +16,7 @@ export declare type ServiceBrokerDelegatorProps = {
 export declare abstract class ServiceBrokerDelegator<Context> extends HasStaticKey {
     protected readonly props: ServiceBrokerDelegatorProps;
     constructor(props: ServiceBrokerDelegatorProps, opts?: any);
+    abstract readonly broker: any;
     abstract readonly actionNameResolver: NamePatternResolver;
     abstract readonly eventNameResolver: NamePatternResolver;
     abstract start(): Promise<void>;
@@ -25,7 +26,7 @@ export declare abstract class ServiceBrokerDelegator<Context> extends HasStaticK
     abstract selectActionTargetNode(context: Context, action: Readonly<ServiceAction>): Readonly<ServiceNode> | null;
     abstract call(context: Context, args: DelegatedCallArgs): Promise<any>;
     abstract publish(context: Context, args: DelegatedEventPublishArgs): Promise<void>;
-    abstract report(service: Readonly<Service>, messages: Array<Readonly<Report>>, table: string): Promise<void>;
+    abstract report(service: Readonly<Service>, messages: Readonly<Report>[], table: string): Promise<void>;
     abstract healthCheckCall(action: Readonly<ServiceAction>): Promise<ServiceStatus>;
     abstract healthCheckPublish(args: Omit<DelegatedEventPublishArgs, "params">): Promise<ServiceStatus>;
     abstract healthCheckSubscribe(): Promise<ServiceStatus>;

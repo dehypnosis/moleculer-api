@@ -13,10 +13,10 @@ export declare class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketPro
     start(): Promise<void>;
     stop(): Promise<void>;
     validateSchema(schema: Readonly<WebSocketProtocolPluginSchema>): ValidationError[];
-    compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Array<Readonly<ServiceAPIIntegration>>): Array<{
+    compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): {
         hash: string;
         route: Readonly<Route>;
-    }>;
+    }[];
     private createRouteFromWebSocketPubSubRouteScheme;
     private createRouteFromWebSocketStreamingRouteScheme;
     describeSchema(schema: Readonly<WebSocketProtocolPluginSchema>): WebSocketProtocolPluginCatalog;

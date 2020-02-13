@@ -1,4 +1,4 @@
-import pathToRegExp from "path-to-regexp";
+import PathToRegExp from "path-to-regexp";
 import { Branch, Version } from "../../../schema";
 export declare type BranchHandlerMap<ApplicationRoute extends Route> = Map<Readonly<Branch>, VersionHandlerMap<ApplicationRoute>>;
 export declare type VersionHandlerMap<ApplicationRoute extends Route> = Map<Readonly<Version>, Readonly<RouteHandlerMap<ApplicationRoute>>>;
@@ -25,7 +25,7 @@ export declare abstract class Route {
     get protocol(): string;
     get path(): string;
     static mergePaths(...paths: string[]): string;
-    readonly paramKeys: pathToRegExp.Key[];
+    readonly paramKeys: PathToRegExp.Key[];
     private paramKeysCollected;
     getPathRegExps(prefixes: string[]): RegExp[];
     get handler(): RouteHandler<any>;

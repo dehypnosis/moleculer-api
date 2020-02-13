@@ -51,6 +51,9 @@ class ServiceBroker {
             logger: this.props.logger.getChild("registry"),
         }, this.opts.registry);
     }
+    get delegatedBroker() {
+        return this.delegator.broker;
+    }
     start(listeners) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.working = true;

@@ -3,7 +3,7 @@ import { Token } from "auth-header";
 import { RecursivePartial } from "../../../../interface";
 import { Logger } from "../../../../logger";
 import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFactoryProps } from "./factory";
-export declare type AuthorizationHeader = string;
+export declare type AuthRawToken = string;
 export declare type AuthContext = {
     scope: string[];
     user: any | void;
@@ -13,9 +13,14 @@ export declare type AuthContext = {
 export declare type AuthContextParser = (token: Token | void, logger: Logger) => Promise<Partial<AuthContext & {
     maxAge: number;
 }> | void>;
+export declare type AuthContextImpersonator = (source: APIRequestContextSource, auth: AuthContext, logger: Logger) => Promise<Partial<AuthContext & {
+    maxAge: number;
+}> | void>;
 export declare type AuthContextFactoryOptions = {
+    tokenQueryKey: string | false;
     parser: AuthContextParser;
-    cache: LRUCacheOptions<AuthorizationHeader, AuthContext>;
+    impersonator: AuthContextImpersonator | false;
+    cache: LRUCacheOptions<AuthRawToken, AuthContext>;
 };
 export declare class AuthContextFactory extends APIRequestContextFactory<AuthContext> {
     protected readonly props: APIRequestContextFactoryProps;
@@ -24,5 +29,5 @@ export declare class AuthContextFactory extends APIRequestContextFactory<AuthCon
     private readonly opts;
     private readonly cache;
     constructor(props: APIRequestContextFactoryProps, opts?: RecursivePartial<AuthContextFactoryOptions>);
-    create({ headers }: APIRequestContextSource): Promise<any>;
+    create(source: APIRequestContextSource): Promise<AuthContext>;
 }

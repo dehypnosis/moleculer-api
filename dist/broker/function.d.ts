@@ -2,7 +2,7 @@ import { RecursivePartial } from "../interface";
 import { Reporter } from "./reporter";
 export declare type InlineFunctionProps<Args, Return> = {
     function: string;
-    mappableKeys: Array<Extract<keyof Args, string>>;
+    mappableKeys: Extract<keyof Args, string>[];
     reporter: Reporter;
     returnTypeCheck?: (value: Return) => boolean;
     returnTypeNotation?: string;

@@ -22,9 +22,9 @@ describe("moleculer service broker test", () => {
   });
 
   it("broker should not discovered anything yet", () => {
-    return expect(mocks.connected).not.toHaveBeenCalled()
-      && expect(mocks.disconnected).not.toHaveBeenCalled()
-      && expect(mocks.nodePoolUpdated).not.toHaveBeenCalled();
+    expect(mocks.connected).not.toHaveBeenCalled();
+    expect(mocks.disconnected).not.toHaveBeenCalled();
+    expect(mocks.nodePoolUpdated).not.toHaveBeenCalled();
   });
 
   afterAll(async () => {

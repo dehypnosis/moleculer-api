@@ -1,5 +1,5 @@
 import * as kleur from "kleur";
-import pathToRegExp from "path-to-regexp";
+import PathToRegExp, { pathToRegexp } from "path-to-regexp";
 import { Branch, Version } from "../../../schema";
 
 export type BranchHandlerMap<ApplicationRoute extends Route> = Map<Readonly<Branch>, VersionHandlerMap<ApplicationRoute>>;
@@ -60,17 +60,17 @@ export abstract class Route {
     return "/" + paths.join("/").split("/").filter(p => !!p).join("/");
   }
 
-  public readonly paramKeys: pathToRegExp.Key[] = [];
+  public readonly paramKeys: PathToRegExp.Key[] = [];
   private paramKeysCollected = false;
   public getPathRegExps(prefixes: string[]): RegExp[] {
     return prefixes.map(prefix => {
       const path = Route.mergePaths(prefix, this.path);
-      let paramKeys: pathToRegExp.Key[] | undefined;
+      let paramKeys: PathToRegExp.Key[] | undefined;
       if (!this.paramKeysCollected) {
         this.paramKeysCollected = true;
         paramKeys = this.paramKeys;
       }
-      return pathToRegExp(path, paramKeys, {
+      return pathToRegexp(path, paramKeys, {
         sensitive: false,
         strict: false,
         end: true,

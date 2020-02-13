@@ -24,7 +24,7 @@ export class GraphQLSubscriptionHandler {
   private rootValue?: any;
   private closeHandler?: () => void;
   private specifiedRules:
-    Array<(context: ValidationContext) => any> |
+    ((context: ValidationContext) => any)[] |
     ReadonlyArray<any>;
 
   constructor(options: SubscriptionServerOptions) {

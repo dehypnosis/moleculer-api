@@ -36,7 +36,7 @@ export declare class Branch {
     get isUnused(): boolean;
     get unusedSeconds(): number;
     touch(): void;
-    get services(): Array<Readonly<Service>>;
+    get services(): Readonly<Service>[];
     get latestVersion(): Readonly<Version>;
     get versions(): ReadonlyArray<Readonly<Version>>;
     fork(props: {

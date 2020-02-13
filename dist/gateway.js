@@ -59,6 +59,9 @@ class APIGateway {
             logger: this.logger.getChild(`server`),
         }, server);
     }
+    get delegatedBrokers() {
+        return this.brokers.map(b => b.delegatedBroker);
+    }
     start() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             // catch os shutdown signal

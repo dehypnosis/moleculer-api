@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-const _ = tslib_1.__importStar(require("lodash"));
 const Moleculer = tslib_1.__importStar(require("moleculer"));
 const interface_1 = require("../../../interface");
 const name_1 = require("../../name");
@@ -16,18 +15,19 @@ class MoleculerServiceBrokerDelegator extends delegator_1.ServiceBrokerDelegator
         /* action/event name matching for call, publish, subscribe, clear cache */
         this.actionNameResolver = name_1.defaultNamePatternResolver;
         this.eventNameResolver = name_1.defaultNamePatternResolver;
-        this.broker = new Moleculer.ServiceBroker(_.defaultsDeep(opts || {}, {
-            logger: logger_1.createMoleculerLoggerOptions(this.props.logger),
-            skipProcessEventRegistration: true,
-        }));
-        /* service to broker events and service discovery */
-        this.service = this.broker.createService(service_1.createMoleculerServiceSchema(props));
-        /* create optional moleculer services */
-        if (opts && opts.services) {
+        if (!opts)
+            opts = {};
+        opts.logger = logger_1.createMoleculerLoggerOptions(this.props.logger);
+        opts.skipProcessEventRegistration = true;
+        this.broker = new Moleculer.ServiceBroker(opts);
+        // create optional moleculer services
+        if (opts.services) {
             for (const serviceSchema of opts.services) {
                 this.broker.createService(serviceSchema);
             }
         }
+        // create a service which handles event and service discovery
+        this.service = this.broker.createService(service_1.createMoleculerServiceSchema(props));
     }
     /* lifecycle */
     start() {

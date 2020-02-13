@@ -51,7 +51,7 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
   }
 
   public validateSchema(schema: Readonly<GraphQLProtocolPluginSchema>): ValidationError[] {
-    const typeDefs: Array<Exclude<TypeDefinitionNode | TypeExtensionNode, ScalarTypeDefinitionNode | ScalarTypeExtensionNode>> = [];
+    const typeDefs: Exclude<TypeDefinitionNode | TypeExtensionNode, ScalarTypeDefinitionNode | ScalarTypeExtensionNode>[] = [];
     return validateObject(schema, {
         description: {
           type: "string",
@@ -314,7 +314,7 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
       });
   }
 
-  public compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Array<Readonly<ServiceAPIIntegration>>): Array<{ hash: string; route: Readonly<Route>; }> {
+  public compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): { hash: string; route: Readonly<Route>; }[] {
     const items = new Array<{ hash: string, route: Readonly<Route> }>();
 
     /* calculate integrated hash to fetch cached handlers */
@@ -369,7 +369,7 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
   }
 
   // @throwable
-  private createGraphQLHandlers(integrations: Array<Readonly<ServiceAPIIntegration>>): { route: Readonly<HTTPRoute>, subscriptionRoute?: Readonly<WebSocketRoute>, playgroundRoute?: Readonly<HTTPRoute> } {
+  private createGraphQLHandlers(integrations: Readonly<ServiceAPIIntegration>[]): { route: Readonly<HTTPRoute>, subscriptionRoute?: Readonly<WebSocketRoute>, playgroundRoute?: Readonly<HTTPRoute> } {
     const typeDefs: string[] = [];
     let resolvers: IResolvers = {};
     for (const integration of integrations) {

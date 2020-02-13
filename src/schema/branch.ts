@@ -85,7 +85,7 @@ export class Branch {
   }
 
   /* services */
-  public get services(): Array<Readonly<Service>> {
+  public get services(): Readonly<Service>[] {
     return this.serviceCatalog.services;
   }
 
@@ -213,7 +213,7 @@ export class Branch {
   }
 
   /* schema integration */
-  private async consumeIntegrations(integrations: Array<Readonly<ServiceAPIIntegration>>, initialCompile = false): Promise<void> {
+  private async consumeIntegrations(integrations: Readonly<ServiceAPIIntegration>[], initialCompile = false): Promise<void> {
     try {
       const parentVersion = this.$latestVersion;
 
@@ -338,8 +338,8 @@ export class Branch {
       this.$latestVersion = version;
 
       // report to origin services
-      const updatedRoutes: Array<Readonly<Route>> = [];
-      const removedRoutes: Array<Readonly<Route>> = [];
+      const updatedRoutes: Readonly<Route>[] = [];
+      const removedRoutes: Readonly<Route>[] = [];
       for (const [hash, route] of routeHashMap) {
         if (!routeHashMapCache.has(hash)) {
           updatedRoutes.push(route);

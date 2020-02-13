@@ -11,7 +11,7 @@ export declare class BatchingPool {
     constructor(opts?: RecursivePartial<BatchingPoolOptions>);
     getBatchingKey(...args: any[]): any;
     hasBatchingHandler(key: any): boolean;
-    setBatchingHandler(key: any, handler: (batchingParamsList: any[]) => Promise<any[]>): void;
+    setBatchingHandler(key: any, handler: (batchingParamsList: readonly any[]) => Promise<any[]>): void;
     batch(key: any, batchingParams: any): Promise<any | Error>;
     clear(): void;
 }

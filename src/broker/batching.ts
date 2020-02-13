@@ -33,8 +33,8 @@ export class BatchingPool {
     return this.loaderMap.has(key);
   }
 
-  public setBatchingHandler(key: any, handler: (batchingParamsList: any[]) => Promise<any[]>): void {
-    const loader = new DataLoader<any, any>((batchingParamsList: any[]) => {
+  public setBatchingHandler(key: any, handler: (batchingParamsList: readonly any[]) => Promise<any[]>): void {
+    const loader = new DataLoader<any, any>((batchingParamsList: readonly any[]) => {
       return handler(batchingParamsList)
         .then(entries => {
           return entries.map(entry => {

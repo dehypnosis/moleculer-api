@@ -14,8 +14,8 @@ export type AsyncIteratorComposeItem<T> = {
   map?: ((value: T) => any);
 };
 
-export function composeAsyncIterators<T>(items: Array<AsyncIteratorComposeItem<T>>): AsyncIterator<any> {
-  const iterables: Array<AsyncIterable<any>> = [];
+export function composeAsyncIterators<T>(items: AsyncIteratorComposeItem<T>[]): AsyncIterator<any> {
+  const iterables: AsyncIterable<any>[] = [];
   for (const { iterator, filter, map } of items) {
     const asyncIterable: AsyncIterable<T> = Object.defineProperty({}, Symbol.asyncIterator, {
       value(): AsyncIterator<T> {
@@ -23,7 +23,7 @@ export function composeAsyncIterators<T>(items: Array<AsyncIteratorComposeItem<T
       },
     });
 
-    const pipes: Array<(iterable: AsyncIterable<T>) => any> = [];
+    const pipes: ((iterable: AsyncIterable<T>) => any)[] = [];
     if (filter) {
       pipes.push(filterAsyncIterable(filter));
     }

@@ -48,7 +48,7 @@ exports.createAuthContextOIDCParser = (opts) => {
         if (token && token.scheme === "Bearer" && typeof token.token === "string") {
             yield oidcClient.introspect(token.token)
                 .then(res => {
-                console.log(res);
+                // console.log(res);
                 client = res.client_id;
                 scope = res.scope.split(" ");
                 maxAge = Math.floor(1577791463 * 1000 - new Date().getTime());

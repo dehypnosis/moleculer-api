@@ -12,7 +12,7 @@ import { Branch, BranchOptions } from "./branch";
 import { ProtocolPlugin, PolicyPlugin, SchemaPluginConstructors, SchemaPluginConstructorOptions, defaultSchemaPluginConstructorOptions } from "./plugin";
 
 export type SchemaRegistryProps = {
-  brokers: Array<Readonly<ServiceBroker>>,
+  brokers: Readonly<ServiceBroker>[],
   logger: Logger,
 };
 
@@ -31,8 +31,8 @@ export class SchemaRegistry {
     Removed: "removed",
   };
   private readonly plugin: {
-    protocol: Array<ProtocolPlugin<any, any>>,
-    policy: Array<PolicyPlugin<any, any>>,
+    protocol: ProtocolPlugin<any, any>[],
+    policy: PolicyPlugin<any, any>[],
   };
   private readonly branchMap = new Map<string, Branch>();
   private readonly branchOptions?: RecursivePartial<BranchOptions>;
@@ -234,7 +234,7 @@ export class SchemaRegistry {
       policy: {
         type: "object",
         optional: false,
-        props: (["call", "publish", "subscribe"] as Array<"call" | "publish" | "subscribe">).reduce((props, connectorType) => {
+        props: (["call", "publish", "subscribe"] as ("call" | "publish" | "subscribe")[]).reduce((props, connectorType) => {
           props[connectorType] = {
             type: "array",
             optional: true,
@@ -367,7 +367,7 @@ export class SchemaRegistry {
     return this.branchMap.get(branchName.toLowerCase()) || null;
   }
 
-  public getBranches(): Array<Readonly<Branch>> {
+  public getBranches(): Readonly<Branch>[] {
     return Array.from(this.branchMap.values());
   }
 

@@ -18,10 +18,10 @@ export declare class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPlugi
     start(): Promise<void>;
     stop(): Promise<void>;
     validateSchema(schema: Readonly<RESTProtocolPluginSchema>): ValidationError[];
-    compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Array<Readonly<ServiceAPIIntegration>>): Array<{
+    compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): {
         hash: string;
         route: Readonly<Route>;
-    }>;
+    }[];
     private createRouteFromMapConnectorScheme;
     private createRouteFromCallConnectorScheme;
     private createRouteFromPublishConnectorScheme;

@@ -1,9 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+const url_1 = tslib_1.__importDefault(require("url"));
 const moleculer_qmit_1 = require("moleculer-qmit");
 const config_1 = require("./config");
 const __1 = require("../../");
-const { isDebug, isDev } = config_1.config;
+const server_1 = require("../../server");
+const { oidc, isDebug, isDev } = config_1.config;
 exports.gateway = new __1.APIGateway({
     brokers: [
         {
@@ -39,10 +42,16 @@ exports.gateway = new __1.APIGateway({
         },
         context: {
             auth: {
-                parser: __1.createAuthContextOIDCParser({
-                    issuer: "https://account.dev.qmit.pro",
-                    client_id: "test",
-                    client_secret: "3322b0c4c46443c88770041d05531dc994c8121d36ee4a21928c8626b09739d7",
+                parser: server_1.createAuthContextOIDCParser(oidc),
+                impersonator: (source, auth, logger) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+                    if (auth.user && auth.user.impersonator === true && source.url) {
+                        const parsedURL = url_1.default.parse(source.url, true);
+                        if (parsedURL.query.impersonation) {
+                            auth.user._impersonator_sub = auth.user.sub;
+                            auth.user.sub = parsedURL.query.impersonation;
+                            logger.warn(`${auth.user._impersonator_sub}:${auth.user.email} has impersonated as ${auth.user.sub}`);
+                        }
+                    }
                 }),
             },
         },

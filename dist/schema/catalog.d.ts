@@ -12,7 +12,7 @@ export declare class ServiceCatalog {
     clone(): ServiceCatalog;
     get size(): number;
     get(serviceId: string): ServiceCatalogItem | null;
-    get services(): Array<Readonly<Service>>;
+    get services(): Readonly<Service>[];
     add(item: Readonly<ServiceCatalogItem>): void;
     remove(service: Readonly<Service>): boolean;
     findAction(id: string): Readonly<ServiceAction> | null;

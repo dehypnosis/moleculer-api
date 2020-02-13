@@ -11,11 +11,11 @@ function createMoleculerServiceSchema(props) {
             "**": (ctx) => {
                 const event = ctx.eventName;
                 // skip internal events
-                if (event.startsWith("$")) {
+                if (!event || event.startsWith("$")) {
                     return;
                 }
                 const params = ctx.params;
-                const groups = ctx.eventGroups ? (Array.isArray(ctx.eventGroups) ? ctx.eventGroups : [ctx.eventGroups]) : (ctx.eventType === "broadcastLocal" ? [serviceName] : null);
+                const groups = ctx.eventGroups ? (Array.isArray(ctx.eventGroups) ? ctx.eventGroups : [ctx.eventGroups]) : (ctx.eventType === "broadcastLocal" ? [serviceName] : []);
                 const broadcast = ctx.eventType === "broadcast";
                 let from;
                 const nodeId = ctx.nodeID;

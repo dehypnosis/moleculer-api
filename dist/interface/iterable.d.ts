@@ -3,4 +3,4 @@ export declare type AsyncIteratorComposeItem<T> = {
     filter?: ((value: T) => boolean);
     map?: ((value: T) => any);
 };
-export declare function composeAsyncIterators<T>(items: Array<AsyncIteratorComposeItem<T>>): AsyncIterator<any>;
+export declare function composeAsyncIterators<T>(items: AsyncIteratorComposeItem<T>[]): AsyncIterator<any>;

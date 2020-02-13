@@ -48,6 +48,7 @@ export declare class ServiceBroker<DelegatorContext = any> {
     private readonly opts;
     constructor(props: ServiceBrokerProps, opts?: RecursivePartial<ServiceBrokerOptions>);
     private working;
+    get delegatedBroker(): any;
     start(listeners: ServiceBrokerListeners): Promise<void>;
     stop(): Promise<void>;
     protected emitEvent(packet: EventPacket): Promise<void>;

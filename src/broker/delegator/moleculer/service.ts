@@ -11,15 +11,15 @@ export function createMoleculerServiceSchema(props: ServiceBrokerDelegatorProps)
     name: serviceName,
     events: {
       /* receive all events and broker */
-      "**": (ctx) => {
+      "**": (ctx: Moleculer.Context) => {
         const event = ctx.eventName;
         // skip internal events
-        if (event.startsWith("$")) {
+        if (!event || event.startsWith("$")) {
           return;
         }
 
         const params = ctx.params;
-        const groups = ctx.eventGroups ? (Array.isArray(ctx.eventGroups) ? ctx.eventGroups : [ctx.eventGroups]) : (ctx.eventType === "broadcastLocal" ? [serviceName] : null);
+        const groups = ctx.eventGroups ? (Array.isArray(ctx.eventGroups) ? ctx.eventGroups : [ctx.eventGroups]) : (ctx.eventType === "broadcastLocal" ? [serviceName] : []);
         const broadcast = ctx.eventType === "broadcast";
 
         let from;
@@ -34,8 +34,8 @@ export function createMoleculerServiceSchema(props: ServiceBrokerDelegatorProps)
       },
 
       /* service discovery */
-      "$node.connected": (ctx) => {
-        const node = ctx.params.node as Moleculer.BrokerNode;
+      "$node.connected": (ctx: Moleculer.Context) => {
+        const node = (ctx.params as any).node as Moleculer.BrokerNode;
         const services = proxyMoleculerServiceDiscovery(node);
         discoveryMap.set(node.id, services);
         for (const service of services) {
@@ -45,8 +45,8 @@ export function createMoleculerServiceSchema(props: ServiceBrokerDelegatorProps)
           props.emitServiceConnected(service);
         }
       },
-      "$node.disconnected": (ctx) => {
-        const node = ctx.params.node as Moleculer.BrokerNode;
+      "$node.disconnected": (ctx: Moleculer.Context) => {
+        const node = (ctx.params as any).node as Moleculer.BrokerNode;
         const services = discoveryMap.get(node.id) || [];
         for (const service of services) {
           if (service.id === serviceName) {
