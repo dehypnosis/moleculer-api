@@ -1,6 +1,6 @@
 {
   "name": "moleculer-api",
-  "version": "0.2.8",
+  "version": "0.2.10",
   "description": "A dynamic API Gateway for MoleculerJS which updates REST endpoints and aggregated GraphQL schema, access control policy for each action calls from metadata of remote services schema without restart or deployment.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
     "lint": "tslint -p tsconfig.json",
     "deps": "yarn-check -u",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "test": "npm run test-with-examples -- --testPathIgnorePatterns=src/examples",
+    "test": "yarn test-with-examples --testPathIgnorePatterns=src/examples",
     "test-with-examples": "node --trace-warnings node_modules/.bin/jest --coverage --detectOpenHandles --forceExit"
   },
   "nodemonConfig": {
@@ -105,10 +105,9 @@
     "jest": "^25.1.0",
     "jest-cli": "^25.1.0",
     "memorystream": "^0.3.1",
-    "moleculer-qmit": "^1.0.10",
+    "moleculer-qmit": "^1.0.12",
     "moleculer-repl": "^0.6.2",
     "nodemon": "^2.0.2",
-    "npm": "^6.13.0",
     "ts-jest": "^25.2.0",
     "ts-node": "^8.5.4",
     "tslint": "^6.0.0",

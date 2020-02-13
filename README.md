@@ -83,7 +83,7 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
 
 ## 3. Quick Start
 ```
-npm install moleculer-api --save
+yarn add moleculer-api
 ```
 
 ### A. MoleculerJS
@@ -249,13 +249,13 @@ broker.start();
 ```
 
 # Development
-## 1. NPM Scripts
-- `npm run dev [example=moleculer]` - Start development (nodemon with ts-node)
-- `npm run build`- Uses typescript to transpile service to javascript
-- `npm run lint` - Run TSLint
-- `npm run deps`- Update dependencies
-- `npm test` - Run tests & generate coverage report
-- `npm test -- --watch` - Watch and run tests
+## 1. Yarn Scripts
+- `yarn dev [example=simple]` - Start development (nodemon with ts-node)
+- `yarn build`- Uses typescript to transpile service to javascript
+- `yarn lint` - Run TSLint
+- `yarn deps`- Update dependencies
+- `yarn test` - Run tests & generate coverage report
+- `yarn test --watch` - Watch and run tests
 
 
 # Contribution
