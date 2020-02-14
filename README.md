@@ -9,6 +9,8 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
 [![NPM version](https://img.shields.io/npm/v/moleculer-api.svg)](https://www.npmjs.com/package/moleculer-api)
 [![Moleculer](https://badgen.net/badge/Powered%20by/Moleculer/0e83cd)](https://moleculer.services)
 
+![Project Architecture Diagram](./docs/diagram.svg)
+
 # Release Road-map
 - [x] 0.1.x Pre-alpha
     - [x] Service Broker
