@@ -1,4 +1,4 @@
-# API Gateway
+# moleculer-api
 
 A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket handlers and access control policies by integrating metadata of discovered remote services.
 
@@ -10,6 +10,22 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
 [![Moleculer](https://badgen.net/badge/Powered%20by/Moleculer/0e83cd)](https://moleculer.services)
 
 ![Project Architecture Diagram](./docs/diagram.svg)
+
+# Usage
+## 1. Documents
+- [Features and details: ./docs](./docs)
+
+## 2. Examples
+- [MoleculerJs: ./src/examples](https://github.com/qmit-pro/moleculer-api/tree/master/src/examples)
+
+![Project Architecture Diagram](./docs/report.png)
+
+## 3. Quick Start
+```
+yarn add moleculer-api
+```
+...
+
 
 # Release Road-map
 - [x] 0.1.x Pre-alpha
@@ -76,179 +92,6 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
     - [] Stress test and performance profiling
     - [] Update documents and translate to English
 
-# Usage
-## 1. Documents
-- [Features and details: ./docs](./docs)
-
-## 2. Examples
-- [MoleculerJs: ./src/examples](https://github.com/qmit-pro/moleculer-api/tree/master/src/examples)
-
-## 3. Quick Start
-```
-yarn add moleculer-api
-```
-
-### A. MoleculerJS
-#### APIGatewayService Node
-```js
-const { ServiceBroker } = require("moleculer");
-const { MoleculerAPIGateway } = require("moleculer-api");
-
-const broker = new ServiceBroker();
-broker.createService({
-  mixins: [ MoleculerAPIGateway ],
-  settings: {
-    // ...override settings
-  },
-});
-
-broker.start();
-```
-
-#### FooService Node
-```js
-const { ServiceBroker } = require("moleculer");
-
-const FooService = {
-  metadata: {
-    api: {
-      branch: "master",
-      protocol: {
-        // REST mapping to service actions
-        REST: {
-          basePath: "/foo",
-          routes: [
-            {
-              method: "GET",
-              path: "/:id",
-              deprecated: false,
-              description: "Get foo information by id",
-              call: {
-                action: "foo.get",
-                params: {
-                  id: "@path.id",
-                },
-              },
-            },
-          ]
-        },
-        
-        // GraphQL Schema extension and mapping to service actions, events
-        GraphQL: {
-          typeDefs: `
-            """Dummy type comment"""
-            type Foo implements Dummy {
-              id: ID!
-              name: String!
-              email: String!
-              """A bar belongs to"""
-              bar: Bar
-            }
-      
-            extend type Query {
-              viewerFoo: Foo
-              bar(id: ID!): Bar
-            }
-      
-            extend type Subscription {
-              fooMessage: String!
-              barUpdated: Bar
-            }
-          }`,
-          resolvers: {
-            Foo: {
-              email: `({ source, context, info }) => context.user.isAdmin ? source.email : source.email.split("@")[0]+"@blabla"`,
-              bar: {
-                call: {
-                  action: "bar.get",
-                  params: {
-                    id: "@source.barId",
-                  },
-                },
-              },
-              __isTypeOf: `({ source, context, info }) => source.hasDummyInterface`,
-            },
-            Query: {
-              viewerFoo: {
-                call: {
-                  action: "foo.get",
-                  params: {
-                    id: "@context.user.foo.id",
-                  },
-                },
-              },
-              bar: {
-                call: {
-                  action: "bar.get",
-                  params: {
-                    id: "@args.id",
-                  },
-                },
-              },
-            },
-            Subscription: {
-              // ...see documents for detail     
-            },
-          },
-        },
-
-        // WebSocket mapping to service actions, events
-        WebSocket: {
-          // ...see documents for detail
-        },
-      },
-
-      // Common access control policies for all mappings based on OAuth2 scope and FBAC
-      policy: {
-        call: [
-          {
-            description: "admin can remove foo, newbie and admin can create foo",
-            actions: ["foo.**"],
-            scopes: ["foo", "foo.admin"],
-            filter: `(action, params, context, utils) => {
-              if (action === "foo.remove") {
-                return context.user?.isAdmin && context?.user?.foo?.id != params.id;
-              } else if (action === "foo.create") {
-                return context.user && (!context.user.foo || context.user.isAdmin); 
-              }
-              return true;
-            }`,
-          },
-          {
-            description: "user can get associated bar, admin can get all the bar",
-            actions: ["bar.get"],
-            scopes: ["foo", "foo.admin"],
-            filter: ((action, params, context, utils) => {
-              if (context.user?.isAdmin || params.id === context.user?.foo?.barId) {
-                return true;
-              }
-              return false;
-            }).toString(),
-          },
-        ],
-        // ...see documents for detail
-      },
-    },
-    // ...other service metadata
-  },
-
-  actions: {
-    // ...implement actions
-  },
-
-  events: {
-    "api.debug"({ payload }) {
-      if (payload.origin.nodeID !== this.broker.nodeID) return;
-      this.logger[payload.error ? "error" : "info"](payload);
-    },
-    // ...subscribe events
-  },
-};
-
-const broker = new ServiceBroker();
-broker.createService(FooService);
-broker.start();
-```
 
 # Development
 ## 1. Yarn Scripts
