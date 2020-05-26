@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PubSub = void 0;
 const graphql_subscriptions_1 = require("graphql-subscriptions");
 class PubSub {
     constructor(props) {

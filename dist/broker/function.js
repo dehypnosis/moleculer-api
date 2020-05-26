@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createInlineFunction = void 0;
 const tslib_1 = require("tslib");
 const vm = tslib_1.__importStar(require("vm"));
 const tslib = tslib_1.__importStar(require("tslib"));

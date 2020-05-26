@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.hashObject = void 0;
 const tslib_1 = require("tslib");
 const object_hash_1 = tslib_1.__importDefault(require("object-hash"));
 function hashObject(v, respectArrayOrders = false) {

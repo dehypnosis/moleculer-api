@@ -55,10 +55,11 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
     return validateObject(schema, {
         description: {
           type: "string",
+          optional: true,
         },
         typeDefs: {
           type: "custom",
-          check(value) {
+          check(value: any) {
             if (typeof value !== "string") {
               return [{
                 field: `typeDefs`,
@@ -101,7 +102,7 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
         },
         resolvers: {
           type: "custom",
-          check(value) {
+          check(value: any) {
             if (typeof value !== "object" || value === null) {
               return [{
                 field: `resolvers`,

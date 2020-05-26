@@ -1,7 +1,7 @@
 import { CallConnectorSchema, ConnectorCatalog, MapConnectorSchema, PublishConnectorSchema } from "../../connector/schema";
 import { IProtocolPluginSchema, IProtocolPluginCatalog } from "../plugin";
 export declare type RESTProtocolPluginSchema = IProtocolPluginSchema & {
-    description: string;
+    description?: string;
     basePath: string;
     routes: RESTRouteSchema[];
 };
@@ -32,7 +32,7 @@ export declare type RESTMappableRouteResolverSchema = {
 };
 export declare type RESTProtocolPluginCatalog = IProtocolPluginCatalog & {
     schema: RESTProtocolPluginSchema;
-    description: string;
+    description: string | null;
     entries: {
         path: string;
         method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";

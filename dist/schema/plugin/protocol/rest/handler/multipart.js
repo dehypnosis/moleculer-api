@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MultipartFormDataHandler = void 0;
 const tslib_1 = require("tslib");
 const busboy_1 = tslib_1.__importDefault(require("busboy"));
 const fs_capacitor_1 = require("fs-capacitor");

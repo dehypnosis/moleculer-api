@@ -5,12 +5,12 @@ import { PolicyPlugin } from "../policy";
 
 export interface IProtocolPluginCatalog {
   schema: any;
-  description: string;
+  description?: string;
   entries: any[];
 }
 
 export interface IProtocolPluginSchema {
-  description: string;
+  description?: string;
 }
 
 export type ProtocolPluginProps = PluginProps & {

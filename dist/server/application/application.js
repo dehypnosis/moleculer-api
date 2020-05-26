@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ServerApplication = void 0;
 const tslib_1 = require("tslib");
 const async_lock_1 = tslib_1.__importDefault(require("async-lock"));
 const error_1 = require("tslint/lib/error");

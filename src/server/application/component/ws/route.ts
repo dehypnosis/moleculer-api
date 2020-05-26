@@ -23,7 +23,7 @@ export class WebSocketRoute extends Route {
 
   constructor(props: Omit<WebSocketRouteProps, "protocol">) {
     const propsWithProtocol = {...props, protocol: "ws"};
-    super(propsWithProtocol);
+    super(propsWithProtocol as RouteProps);
     this.props = propsWithProtocol;
   }
 

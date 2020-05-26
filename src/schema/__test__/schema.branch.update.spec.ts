@@ -32,7 +32,6 @@ const remote2 = getMoleculerServiceBroker({
   moleculer: {...moleculer, nodeID: "remote2"},
   services: [
     MoleculerServiceSchemaFactory.echo(null, "non-branched"),
-    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("dev", "conflict-a", {
       protocol: {
         REST: {

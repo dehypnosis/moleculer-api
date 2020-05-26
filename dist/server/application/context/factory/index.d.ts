@@ -10,12 +10,12 @@ import { AuthContextFactory, AuthContextFactoryOptions } from "./auth";
 export { AuthContext, AuthContextParser } from "./auth";
 export { createAuthContextOIDCParser, AuthContextOIDCParserOptions } from "./auth.preset";
 export declare const APIRequestContextFactoryConstructors: {
-    [IDContextFactory.key]: typeof IDContextFactory;
-    [IPContextFactory.key]: typeof IPContextFactory;
-    [LocaleContextFactory.key]: typeof LocaleContextFactory;
-    [CookieContextFactory.key]: typeof CookieContextFactory;
-    [UserAgentContextFactory.key]: typeof UserAgentContextFactory;
-    [AuthContextFactory.key]: typeof AuthContextFactory;
+    id: typeof IDContextFactory;
+    ip: typeof IPContextFactory;
+    locale: typeof LocaleContextFactory;
+    cookie: typeof CookieContextFactory;
+    userAgent: typeof UserAgentContextFactory;
+    auth: typeof AuthContextFactory;
 };
 export declare type APIRequestContextFactoryConstructorOptions = {
     [IDContextFactory.key]: RecursivePartial<IDContextFactoryOptions> | false;

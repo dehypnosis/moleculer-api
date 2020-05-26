@@ -3,7 +3,7 @@ import { IProtocolPluginSchema, IProtocolPluginCatalog } from "../plugin";
 
 /* REST Protocol Plugin */
 export type RESTProtocolPluginSchema = IProtocolPluginSchema & {
-  description: string;
+  description?: string;
   basePath: string;
   routes: RESTRouteSchema[];
 };
@@ -24,7 +24,7 @@ export type RESTMappableRouteResolverSchema = { map: MapConnectorSchema<(obj: { 
 
 export type RESTProtocolPluginCatalog = IProtocolPluginCatalog & {
   schema: RESTProtocolPluginSchema;
-  description: string;
+  description: string | null;
   entries: {
     path: string;
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";

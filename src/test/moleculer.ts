@@ -22,7 +22,7 @@ export function getMoleculerServiceBroker(props?: {
   return broker;
 }
 
-export const MoleculerServiceSchemaFactory: { [key: string]: (branch: string | null, name: string, schemaAdjust?: RecursivePartial<ServiceAPISchema>) => Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema } } = {
+export const MoleculerServiceSchemaFactory: { [key: string]: (branch: string | null, name: string, schemaAdjust?: any) => Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema } } = {
   echo: (branch: string | null, name: string, schemaAdjust?: RecursivePartial<ServiceAPISchema>) => {
     const schema: Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema } = {
       name,
@@ -37,7 +37,7 @@ export const MoleculerServiceSchemaFactory: { [key: string]: (branch: string | n
                 name: String
               }
             `,
-              resolvers: {
+              resolvers: schemaAdjust && schemaAdjust.protocol && schemaAdjust.protocol.GraphQL && schemaAdjust.protocol.GraphQL.typeDefs ? {} : {
                 Query: {
                   name: `() => 'name-string'`,
                 },

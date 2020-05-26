@@ -5,9 +5,9 @@ import { ServerHTTPSProtocol, ServerHTTPSProtocolOptions } from "./https";
 import { ServerProtocol } from "./protocol";
 export { ServerProtocol };
 export declare const ServerProtocolConstructors: {
-    [ServerHTTPProtocol.key]: typeof ServerHTTPProtocol;
-    [ServerHTTPSProtocol.key]: typeof ServerHTTPSProtocol;
-    [ServerHTTP2Protocol.key]: typeof ServerHTTP2Protocol;
+    http: typeof ServerHTTPProtocol;
+    https: typeof ServerHTTPSProtocol;
+    http2: typeof ServerHTTP2Protocol;
 };
 export declare type ServerProtocolConstructorOptions = {
     [ServerHTTPProtocol.key]: RecursivePartial<ServerHTTPProtocolOptions> | false;

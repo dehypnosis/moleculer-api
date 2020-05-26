@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultServerMiddlewareConstructorOptions = exports.ServerMiddlewareConstructors = void 0;
 var middleware_1 = require("./middleware");
-exports.ServerMiddleware = middleware_1.ServerMiddleware;
+Object.defineProperty(exports, "ServerMiddleware", { enumerable: true, get: function () { return middleware_1.ServerMiddleware; } });
 const cors_1 = require("./cors");
 const helmet_1 = require("./helmet");
 const serve_static_1 = require("./serve-static");

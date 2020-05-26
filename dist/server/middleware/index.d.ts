@@ -7,12 +7,12 @@ import { BodyParserMiddleware, BodyParserMiddlewareOptions } from "./body-parser
 import { LoggingMiddleware, LoggingMiddlewareOptions } from "./logging";
 import { ErrorMiddleware, ErrorMiddlewareOptions } from "./error";
 export declare const ServerMiddlewareConstructors: {
-    [HelmetMiddleware.key]: typeof HelmetMiddleware;
-    [CORSMiddleware.key]: typeof CORSMiddleware;
-    [ServeStaticMiddleware.key]: typeof ServeStaticMiddleware;
-    [BodyParserMiddleware.key]: typeof BodyParserMiddleware;
-    [LoggingMiddleware.key]: typeof LoggingMiddleware;
-    [ErrorMiddleware.key]: typeof ErrorMiddleware;
+    helmet: typeof HelmetMiddleware;
+    cors: typeof CORSMiddleware;
+    serveStatic: typeof ServeStaticMiddleware;
+    bodyParser: typeof BodyParserMiddleware;
+    logging: typeof LoggingMiddleware;
+    error: typeof ErrorMiddleware;
 };
 export declare type ServerMiddlewareConstructorOptions = {
     [HelmetMiddleware.key]: RecursivePartial<HelmetMiddlewareOptions> | false;

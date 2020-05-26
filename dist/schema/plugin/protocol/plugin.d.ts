@@ -4,11 +4,11 @@ import { Plugin, PluginProps } from "../plugin";
 import { PolicyPlugin } from "../policy";
 export interface IProtocolPluginCatalog {
     schema: any;
-    description: string;
+    description?: string;
     entries: any[];
 }
 export interface IProtocolPluginSchema {
-    description: string;
+    description?: string;
 }
 export declare type ProtocolPluginProps = PluginProps & {
     policyPlugins: Readonly<PolicyPlugin<any, any>>[];

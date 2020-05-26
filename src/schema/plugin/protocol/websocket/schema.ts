@@ -3,7 +3,7 @@ import { IProtocolPluginSchema, IProtocolPluginCatalog } from "../plugin";
 
 /* WebSocket Protocol Plugin */
 export type WebSocketProtocolPluginSchema = IProtocolPluginSchema & {
-  description: string;
+  description?: string;
   basePath: string;
   routes: WebSocketRouteSchema[];
 };
@@ -27,7 +27,7 @@ export type WebSocketStreamingRouteSchema = {
 
 export type WebSocketProtocolPluginCatalog = IProtocolPluginCatalog & {
   schema: WebSocketProtocolPluginSchema;
-  description: string;
+  description: string | null;
   entries: {
     path: string;
     description: string | null;

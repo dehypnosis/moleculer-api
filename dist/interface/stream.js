@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isDuplexStream = exports.isReadStream = exports.isWriteStream = exports.isStream = void 0;
 function isStream(stream) {
     return stream !== null &&
         typeof stream === "object" &&

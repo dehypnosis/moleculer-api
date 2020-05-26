@@ -12,7 +12,7 @@ const moleculer = {
 
 const schema = getSchemaRegistry({
   logger: {
-    level: "info",
+    level: "error",
     label: "gateway",
     silent: true, /* YOU MAY MISSED IT! */
   },
@@ -23,7 +23,6 @@ const remoteWrong = getMoleculerServiceBroker({
   logger: {level: "error", label: "remote-wrong"},
   moleculer: {...moleculer, nodeID: "remote-wrong"},
   services: [
-    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "master-c", {
       protocol: {
         GraphQL: {
@@ -33,7 +32,7 @@ const remoteWrong = getMoleculerServiceBroker({
             }
           `,
           resolvers: {
-            Query: null,
+            Query: {},
           },
         },
       },
@@ -45,7 +44,6 @@ const remote = getMoleculerServiceBroker({
   logger: {level: "error", label: "remote"},
   moleculer: {...moleculer, nodeID: "remote"},
   services: [
-    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "master-b", {
       protocol: {
         GraphQL: {
@@ -55,12 +53,11 @@ const remote = getMoleculerServiceBroker({
             }
           `,
           resolvers: {
-            Query: null,
+            Query: {},
           },
         },
       },
     }), // failed then succeed in retry
-    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "master-a", {
       protocol: {
         GraphQL: {
@@ -70,7 +67,7 @@ const remote = getMoleculerServiceBroker({
             }
           `,
           resolvers: {
-            Query: null,
+            Query: {},
           },
         },
       },

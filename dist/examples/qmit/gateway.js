@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.gateway = void 0;
 const tslib_1 = require("tslib");
 const url_1 = tslib_1.__importDefault(require("url"));
-const moleculer_qmit_1 = require("moleculer-qmit");
+const qmit_sdk_1 = require("qmit-sdk");
 const config_1 = require("./config");
 const __1 = require("../../");
 const server_1 = require("../../server");
@@ -10,7 +11,12 @@ const { oidc, isDebug, isDev } = config_1.config;
 exports.gateway = new __1.APIGateway({
     brokers: [
         {
-            moleculer: moleculer_qmit_1.createBrokerOptions(),
+            moleculer: qmit_sdk_1.moleculer.createServiceBrokerOptions({
+                tracing: {
+                    // TODO: dig into what causes GC crash for stopping broker when tracing enabled...
+                    enabled: false,
+                },
+            }),
         },
     ],
     schema: {

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Pluggable = void 0;
 const keyed_1 = require("./keyed");
 class Pluggable extends keyed_1.HasStaticKey {
     constructor() {

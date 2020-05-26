@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createStreamFromWebSocket = void 0;
 const stream_1 = require("stream");
 function createStreamFromWebSocket(socket, opts = {}) {
     const write = (chunk, enc, cb) => {

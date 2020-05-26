@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DiscoveryPubSub = void 0;
 const tslib_1 = require("tslib");
 const pubsub_1 = require("./pubsub");
 class DiscoveryPubSub extends pubsub_1.PubSub {

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.HTTPRoute = void 0;
 const tslib_1 = require("tslib");
 const kleur = tslib_1.__importStar(require("kleur"));
 const route_1 = require("../route");

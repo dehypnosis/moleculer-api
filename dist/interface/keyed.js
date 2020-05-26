@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.HasStaticKey = void 0;
 const tslib_1 = require("tslib");
 const kleur = tslib_1.__importStar(require("kleur"));
 class HasStaticKey {

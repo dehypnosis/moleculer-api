@@ -5,7 +5,7 @@ import { IProtocolPluginCatalog, IProtocolPluginSchema } from "../plugin";
 
 /* GraphQL Protocol Plugin */
 export type GraphQLProtocolPluginSchema = IProtocolPluginSchema & {
-  description: string;
+  description?: string;
   typeDefs: string;
   resolvers: GraphQLProtocolResolversSchema;
 };
@@ -33,7 +33,7 @@ export type GraphQLProtocolSubscriptionTypeResolverSchema = {
 export type GraphQLProtocolObjectTypeResolverSchema = {
   __isTypeOf?: GraphQLIsTypeOfFieldResolverSchema;
 } & {
-  [fieldName: string]: GraphQLCallableFieldResolverSchema | GraphQLMappableFieldResolverSchema | undefined;
+  [fieldName: string]: GraphQLCallableFieldResolverSchema | GraphQLMappableFieldResolverSchema;
 };
 
 export type GraphQLFieldResolverSchema = GraphQLCallableFieldResolverSchema | GraphQLPublishableFieldResolverSchema | GraphQLSubscribableFieldResolverSchema
@@ -46,7 +46,7 @@ export type GraphQLIsTypeOfFieldResolverSchema = MapConnectorSchema<(obj: { sour
 
 export type GraphQLProtocolPluginCatalog = IProtocolPluginCatalog & {
   schema: GraphQLProtocolPluginSchema;
-  description: string;
+  description: string | null;
   entries: {
     typeDef: string;
     kind: string;

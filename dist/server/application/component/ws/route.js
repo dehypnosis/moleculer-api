@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.WebSocketRoute = void 0;
 const route_1 = require("../route");
 class WebSocketRoute extends route_1.Route {
     constructor(props) {

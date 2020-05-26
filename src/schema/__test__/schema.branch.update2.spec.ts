@@ -20,7 +20,6 @@ const remote1 = getMoleculerServiceBroker({
   moleculer: {...moleculer, nodeID: "remote"},
   services: [
     MoleculerServiceSchemaFactory.echo("master", "master-a"),
-    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("master", "conflict-a", {
       protocol: {
         REST: {
@@ -28,6 +27,7 @@ const remote1 = getMoleculerServiceBroker({
             {
               method: "GET",
               path: "/echo",
+              description: "",
               call: {
                 action: `/conflict-a/echo`,
                 params: {},
@@ -36,6 +36,7 @@ const remote1 = getMoleculerServiceBroker({
             {
               method: "GET",
               path: "/echo2",
+              description: "",
               call: {
                 action: `/conflict-a/echo`,
                 params: {},
@@ -44,6 +45,7 @@ const remote1 = getMoleculerServiceBroker({
             {
               method: "GET",
               path: "/echo3",
+              description: "",
               call: {
                 action: `/conflict-a/echo`,
                 params: {},
@@ -52,6 +54,7 @@ const remote1 = getMoleculerServiceBroker({
             {
               method: "GET",
               path: "/echo4",
+              description: "",
               call: {
                 action: `/conflict-a/echo`,
                 params: {},
@@ -60,6 +63,7 @@ const remote1 = getMoleculerServiceBroker({
             {
               method: "GET",
               path: "/echo5",
+              description: "",
               call: {
                 action: `/conflict-a/echo`,
                 params: {},
@@ -76,7 +80,6 @@ const remote2 = getMoleculerServiceBroker({
   logger: {level: "error", label: "remote2"},
   moleculer: {...moleculer, nodeID: "remote2"},
   services: [
-    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("dev", "conflict-a", {
       protocol: {
         REST: {
@@ -84,6 +87,7 @@ const remote2 = getMoleculerServiceBroker({
             {
               method: "GET",
               path: "/echo",
+              description: "",
               call: {
                 action: `/conflict-a/echo`,
                 params: {},

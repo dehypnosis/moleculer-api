@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.GreeterServiceSchema = void 0;
 const greeter_api_1 = require("./greeter.api");
 exports.GreeterServiceSchema = {
     name: "greeter",

@@ -13,7 +13,7 @@ const moleculer = {
 };
 const schema = test_1.getSchemaRegistry({
     logger: {
-        level: "info",
+        level: "error",
         label: "gateway",
         silent: true,
     },
@@ -23,7 +23,6 @@ const remoteWrong = test_1.getMoleculerServiceBroker({
     logger: { level: "error", label: "remote-wrong" },
     moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "remote-wrong" }),
     services: [
-        // @ts-ignore
         test_1.MoleculerServiceSchemaFactory.echo("master", "master-c", {
             protocol: {
                 GraphQL: {
@@ -33,7 +32,7 @@ const remoteWrong = test_1.getMoleculerServiceBroker({
             }
           `,
                     resolvers: {
-                        Query: null,
+                        Query: {},
                     },
                 },
             },
@@ -44,7 +43,6 @@ const remote = test_1.getMoleculerServiceBroker({
     logger: { level: "error", label: "remote" },
     moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "remote" }),
     services: [
-        // @ts-ignore
         test_1.MoleculerServiceSchemaFactory.echo("master", "master-b", {
             protocol: {
                 GraphQL: {
@@ -54,12 +52,11 @@ const remote = test_1.getMoleculerServiceBroker({
             }
           `,
                     resolvers: {
-                        Query: null,
+                        Query: {},
                     },
                 },
             },
         }),
-        // @ts-ignore
         test_1.MoleculerServiceSchemaFactory.echo("master", "master-a", {
             protocol: {
                 GraphQL: {
@@ -69,7 +66,7 @@ const remote = test_1.getMoleculerServiceBroker({
             }
           `,
                     resolvers: {
-                        Query: null,
+                        Query: {},
                     },
                 },
             },

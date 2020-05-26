@@ -32,10 +32,11 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
     return validateObject(schema, {
       description: {
         type: "string",
+        optional: true,
       },
       basePath: {
         type: "custom",
-        check(value) {
+        check(value: any) {
           if (WebSocketRoute.isNonRootStaticPath(value)) {
             return true;
           }
@@ -53,7 +54,7 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
         empty: false,
         items: {
           type: "custom",
-          check(value) {
+          check(value: any) {
             const idx = schema.routes.indexOf(value);
             if (typeof value !== "object") {
               return [{

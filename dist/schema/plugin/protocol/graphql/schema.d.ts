@@ -3,7 +3,7 @@ export { GraphQLResolveInfo } from "graphql";
 import { CallConnectorSchema, ConnectorCatalog, MapConnectorSchema, PublishConnectorSchema, SubscribeConnectorSchema } from "../../connector";
 import { IProtocolPluginCatalog, IProtocolPluginSchema } from "../plugin";
 export declare type GraphQLProtocolPluginSchema = IProtocolPluginSchema & {
-    description: string;
+    description?: string;
     typeDefs: string;
     resolvers: GraphQLProtocolResolversSchema;
 };
@@ -26,7 +26,7 @@ export declare type GraphQLProtocolSubscriptionTypeResolverSchema = {
 export declare type GraphQLProtocolObjectTypeResolverSchema = {
     __isTypeOf?: GraphQLIsTypeOfFieldResolverSchema;
 } & {
-    [fieldName: string]: GraphQLCallableFieldResolverSchema | GraphQLMappableFieldResolverSchema | undefined;
+    [fieldName: string]: GraphQLCallableFieldResolverSchema | GraphQLMappableFieldResolverSchema;
 };
 export declare type GraphQLFieldResolverSchema = GraphQLCallableFieldResolverSchema | GraphQLPublishableFieldResolverSchema | GraphQLSubscribableFieldResolverSchema | GraphQLMappableFieldResolverSchema | GraphQLIsTypeOfFieldResolverSchema | undefined;
 export declare type GraphQLCallableFieldResolverSchema = {
@@ -52,7 +52,7 @@ export declare type GraphQLIsTypeOfFieldResolverSchema = MapConnectorSchema<(obj
 }) => boolean>;
 export declare type GraphQLProtocolPluginCatalog = IProtocolPluginCatalog & {
     schema: GraphQLProtocolPluginSchema;
-    description: string;
+    description: string | null;
     entries: {
         typeDef: string;
         kind: string;

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.composeAsyncIterators = void 0;
 const map_1 = require("axax/es5/map");
 const filter_1 = require("axax/es5/filter");
 const pipe_1 = require("axax/es5/pipe");

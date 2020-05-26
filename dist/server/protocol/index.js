@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultServerProtocolConstructorOptions = exports.ServerProtocolConstructors = exports.ServerProtocol = void 0;
 const http_1 = require("./http");
 const http2_1 = require("./http2");
 const https_1 = require("./https");
 const protocol_1 = require("./protocol");
-exports.ServerProtocol = protocol_1.ServerProtocol;
+Object.defineProperty(exports, "ServerProtocol", { enumerable: true, get: function () { return protocol_1.ServerProtocol; } });
 exports.ServerProtocolConstructors = {
     [http_1.ServerHTTPProtocol.key]: http_1.ServerHTTPProtocol,
     [https_1.ServerHTTPSProtocol.key]: https_1.ServerHTTPSProtocol,

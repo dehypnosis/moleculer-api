@@ -1,1 +1,1 @@
-{"version":3,"file":"event.js","sourceRoot":"","sources":["../../../src/broker/pubsub/event.ts"],"names":[],"mappings":";;AAAA,qCAA+C;AAO/C,MAAa,WAAY,SAAQ,eAE/B;IACA,YAA+B,KAAkB;QAC/C,KAAK,CAAC,KAAK,CAAC,CAAC;QADgB,UAAK,GAAL,KAAK,CAAa;IAEjD,CAAC;CACF;AAND,kCAMC"}
+{"version":3,"file":"event.js","sourceRoot":"","sources":["../../../src/broker/pubsub/event.ts"],"names":[],"mappings":";;;AAAA,qCAA+C;AAO/C,MAAa,WAAY,SAAQ,eAE/B;IACA,YAA+B,KAAkB;QAC/C,KAAK,CAAC,KAAK,CAAC,CAAC;QADgB,UAAK,GAAL,KAAK,CAAa;IAEjD,CAAC;CACF;AAND,kCAMC"}

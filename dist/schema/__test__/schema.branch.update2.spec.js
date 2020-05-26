@@ -20,7 +20,6 @@ const remote1 = test_1.getMoleculerServiceBroker({
     moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "remote" }),
     services: [
         test_1.MoleculerServiceSchemaFactory.echo("master", "master-a"),
-        // @ts-ignore
         test_1.MoleculerServiceSchemaFactory.echo("master", "conflict-a", {
             protocol: {
                 REST: {
@@ -28,6 +27,7 @@ const remote1 = test_1.getMoleculerServiceBroker({
                         {
                             method: "GET",
                             path: "/echo",
+                            description: "",
                             call: {
                                 action: `/conflict-a/echo`,
                                 params: {},
@@ -36,6 +36,7 @@ const remote1 = test_1.getMoleculerServiceBroker({
                         {
                             method: "GET",
                             path: "/echo2",
+                            description: "",
                             call: {
                                 action: `/conflict-a/echo`,
                                 params: {},
@@ -44,6 +45,7 @@ const remote1 = test_1.getMoleculerServiceBroker({
                         {
                             method: "GET",
                             path: "/echo3",
+                            description: "",
                             call: {
                                 action: `/conflict-a/echo`,
                                 params: {},
@@ -52,6 +54,7 @@ const remote1 = test_1.getMoleculerServiceBroker({
                         {
                             method: "GET",
                             path: "/echo4",
+                            description: "",
                             call: {
                                 action: `/conflict-a/echo`,
                                 params: {},
@@ -60,6 +63,7 @@ const remote1 = test_1.getMoleculerServiceBroker({
                         {
                             method: "GET",
                             path: "/echo5",
+                            description: "",
                             call: {
                                 action: `/conflict-a/echo`,
                                 params: {},
@@ -75,7 +79,6 @@ const remote2 = test_1.getMoleculerServiceBroker({
     logger: { level: "error", label: "remote2" },
     moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "remote2" }),
     services: [
-        // @ts-ignore
         test_1.MoleculerServiceSchemaFactory.echo("dev", "conflict-a", {
             protocol: {
                 REST: {
@@ -83,6 +86,7 @@ const remote2 = test_1.getMoleculerServiceBroker({
                         {
                             method: "GET",
                             path: "/echo",
+                            description: "",
                             call: {
                                 action: `/conflict-a/echo`,
                                 params: {},

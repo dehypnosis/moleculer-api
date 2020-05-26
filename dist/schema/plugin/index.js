@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultSchemaPluginConstructorOptions = exports.SchemaPluginConstructors = void 0;
 const tslib_1 = require("tslib");
 const policy_1 = require("./policy");
 const protocol_1 = require("./protocol");

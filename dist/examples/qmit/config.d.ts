@@ -4,7 +4,7 @@ export declare const config: {
         client_id: string;
         client_secret: string;
     };
-    env: string;
+    env: import("qmit-sdk/sdk/node/dist/common/context").AppEnv;
     isDev: boolean;
     isDebug: boolean;
 };

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.GraphQLHandlers = void 0;
 const tslib_1 = require("tslib");
 const path = tslib_1.__importStar(require("path"));
 const apollo_server_core_1 = require("apollo-server-core");

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultProtocolPluginConstructorOptions = exports.ProtocolPluginConstructors = void 0;
 const tslib_1 = require("tslib");
 const graphql_1 = require("./graphql");
 const rest_1 = require("./rest");

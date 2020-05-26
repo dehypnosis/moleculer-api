@@ -33,7 +33,7 @@ export declare class ServiceAPIIntegration {
     constructor(props: ServiceAPIIntegrationProps);
     clone(): Readonly<ServiceAPIIntegration>;
     toString(): string;
-    get type(): "add" | "remove";
+    get type(): "remove" | "add";
     get schema(): Readonly<ServiceAPISchema>;
     get schemaHash(): string;
     get service(): Readonly<Service>;
