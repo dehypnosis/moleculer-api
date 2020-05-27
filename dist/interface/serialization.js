@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.removeANSIColor = exports.sanitizeObject = void 0;
 const tslib_1 = require("tslib");
 const _ = tslib_1.__importStar(require("lodash"));
 // @ts-ignore

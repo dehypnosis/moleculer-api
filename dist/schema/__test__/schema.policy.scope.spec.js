@@ -12,7 +12,7 @@ const moleculer = {
     },
 };
 const schema = test_1.getSchemaRegistry({
-    logger: { level: "error", label: "gateway" },
+    logger: { level: "error", label: "gateway", silent: false },
     delegator: { moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "gateway" }) },
 });
 const remote1 = test_1.getMoleculerServiceBroker({
@@ -75,7 +75,6 @@ const remote2 = test_1.getMoleculerServiceBroker({
     logger: { level: "error", label: "remote2" },
     moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "remote2" }),
     services: [
-        // @ts-ignore
         test_1.MoleculerServiceSchemaFactory.echo("dev", "conflict-a", {
             protocol: {
                 REST: {

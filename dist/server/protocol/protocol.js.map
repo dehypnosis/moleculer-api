@@ -1,1 +1,1 @@
-{"version":3,"file":"protocol.js","sourceRoot":"","sources":["../../../src/server/protocol/protocol.ts"],"names":[],"mappings":";;AACA,+CAA4C;AAU5C,MAAsB,cAAe,SAAQ,qBAAS;IACpD,YAA+B,KAA0B,EAAE,IAAU;QACnE,KAAK,EAAE,CAAC;QADqB,UAAK,GAAL,KAAK,CAAqB;IAEzD,CAAC;CAMF;AATD,wCASC"}
+{"version":3,"file":"protocol.js","sourceRoot":"","sources":["../../../src/server/protocol/protocol.ts"],"names":[],"mappings":";;;AACA,+CAA4C;AAU5C,MAAsB,cAAe,SAAQ,qBAAS;IACpD,YAA+B,KAA0B,EAAE,IAAU;QACnE,KAAK,EAAE,CAAC;QADqB,UAAK,GAAL,KAAK,CAAqB;IAEzD,CAAC;CAMF;AATD,wCASC"}

@@ -61,7 +61,6 @@ describe("GraphQL schema validation test", () => {
                         ignoreError: true,
                     },
                 },
-                // @ts-ignore
                 Mutation: {
                     test: {
                         call: {
@@ -69,6 +68,7 @@ describe("GraphQL schema validation test", () => {
                             params: {},
                         },
                     },
+                    // @ts-ignore
                     __isTypeOf: "() => true",
                 },
             },

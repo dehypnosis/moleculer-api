@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import * as Moleculer from "moleculer";
 import { ServiceMetaDataSchema } from "../../../schema";
 import { APIRequestContext } from "../../../server";

@@ -14,7 +14,7 @@ export declare class LoggingMiddleware extends ServerMiddleware {
     static readonly autoLoadOptions: {
         httpFormat: string;
         wsFormat: string;
-        level: "error" | "info" | "debug" | "warn";
+        level: "info" | "error" | "debug" | "warn";
     };
     private readonly opts;
     constructor(props: ServerMiddlewareProps, opts?: RecursivePartial<LoggingMiddlewareOptions>);

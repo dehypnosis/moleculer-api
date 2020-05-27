@@ -11,7 +11,7 @@ const moleculer = {
 };
 
 const schema = getSchemaRegistry({
-  logger: {level: "error", label: "gateway"},
+  logger: {level: "error", label: "gateway", silent: false },
   delegator: {moleculer: {...moleculer, nodeID: "gateway"}},
 });
 
@@ -76,7 +76,6 @@ const remote2 = getMoleculerServiceBroker({
   logger: {level: "error", label: "remote2"},
   moleculer: {...moleculer, nodeID: "remote2"},
   services: [
-    // @ts-ignore
     MoleculerServiceSchemaFactory.echo("dev", "conflict-a", {
       protocol: {
         REST: {

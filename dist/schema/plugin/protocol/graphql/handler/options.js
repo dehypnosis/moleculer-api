@@ -3,6 +3,7 @@
   GraphQL Plugin default options for base schema and resolvers
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultGraphQLHandlersOptions = exports.defaultGraphQLResolvers = exports.defaultGraphQLTypeDefs = void 0;
 const tslib_1 = require("tslib");
 const apollo_server_caching_1 = require("apollo-server-caching");
 const graphql_upload_1 = require("graphql-upload");

@@ -9,8 +9,8 @@ export declare type ServerApplicationComponentConstructorOptions = {
     [ServerWebSocketApplication.key]: ServerWebSocketApplicationOptions;
 };
 export declare const ServerApplicationComponentConstructors: {
-    [ServerHTTPApplication.key]: typeof ServerHTTPApplication;
-    [ServerWebSocketApplication.key]: typeof ServerWebSocketApplication;
+    http: typeof ServerHTTPApplication;
+    ws: typeof ServerWebSocketApplication;
 };
 export declare type ServerApplicationComponentModules = {
     [ServerHTTPApplication.key]: ServerHTTPApplication["module"];

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createMoleculerServiceSchema = void 0;
 const discover_1 = require("./discover");
 const serviceName = "$api";
 function createMoleculerServiceSchema(props) {

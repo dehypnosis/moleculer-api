@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.testSubscribePolicy = exports.testPublishPolicy = exports.testCallPolicy = void 0;
 function testCallPolicy(policyPlugins, policies, args) {
     for (const policy of policies) {
         for (const plugin of policyPlugins) {

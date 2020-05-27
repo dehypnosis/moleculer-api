@@ -1,6 +1,5 @@
 import * as Moleculer from "moleculer";
-import { RecursivePartial } from "../interface";
-import { ServiceAPISchema, ServiceMetaDataSchema } from "../schema";
+import { ServiceMetaDataSchema } from "../schema";
 export declare function getMoleculerServiceBroker(props?: {
     logger?: {
         label?: string;
@@ -12,7 +11,7 @@ export declare function getMoleculerServiceBroker(props?: {
     moleculer?: Moleculer.BrokerOptions;
 }): Moleculer.ServiceBroker;
 export declare const MoleculerServiceSchemaFactory: {
-    [key: string]: (branch: string | null, name: string, schemaAdjust?: RecursivePartial<ServiceAPISchema>) => Moleculer.ServiceSchema & {
+    [key: string]: (branch: string | null, name: string, schemaAdjust?: any) => Moleculer.ServiceSchema & {
         metadata?: ServiceMetaDataSchema;
     };
 };

@@ -18,9 +18,9 @@ spec:
           name: server
           resources: {}
           env:
-            - name: APP_ENV
+            - name: QMIT_APP_ENV
               value: prod
-            - name: APP_K8S_CLUSTER
+            - name: QMIT_CLUSTER_NAME
               value: prod
   selector:
     matchLabels:

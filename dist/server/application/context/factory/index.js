@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultAPIRequestContextFactoryConstructorOptions = exports.APIRequestContextFactoryConstructors = void 0;
 const tslib_1 = require("tslib");
 tslib_1.__exportStar(require("./factory"), exports);
 const cookie_1 = require("./cookie");
@@ -9,7 +10,7 @@ const id_1 = require("./id");
 const user_agent_1 = require("./user-agent");
 const auth_1 = require("./auth");
 var auth_preset_1 = require("./auth.preset");
-exports.createAuthContextOIDCParser = auth_preset_1.createAuthContextOIDCParser;
+Object.defineProperty(exports, "createAuthContextOIDCParser", { enumerable: true, get: function () { return auth_preset_1.createAuthContextOIDCParser; } });
 exports.APIRequestContextFactoryConstructors = {
     [id_1.IDContextFactory.key]: id_1.IDContextFactory,
     [ip_1.IPContextFactory.key]: ip_1.IPContextFactory,

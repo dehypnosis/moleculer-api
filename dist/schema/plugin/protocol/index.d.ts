@@ -8,9 +8,9 @@ export * from "./graphql";
 export * from "./rest";
 export * from "./websocket";
 export declare const ProtocolPluginConstructors: {
-    [GraphQLProtocolPlugin.key]: typeof GraphQLProtocolPlugin;
-    [RESTProtocolPlugin.key]: typeof RESTProtocolPlugin;
-    [WebSocketProtocolPlugin.key]: typeof WebSocketProtocolPlugin;
+    GraphQL: typeof GraphQLProtocolPlugin;
+    REST: typeof RESTProtocolPlugin;
+    WebSocket: typeof WebSocketProtocolPlugin;
 };
 export declare type ProtocolPluginConstructorOptions = {
     [GraphQLProtocolPlugin.key]: RecursivePartial<GraphQLProtocolPluginOptions> | false;

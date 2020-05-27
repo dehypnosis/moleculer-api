@@ -1,5 +1,5 @@
 import * as kleur from "kleur";
-import { Route, RouteProps } from "../route";
+import { Route, RouteHandler, RouteProps } from "../route";
 import express from "express-serve-static-core";
 export type HTTPRouteRequest = express.Request;
 export type HTTPRouteResponse = express.Response;
@@ -17,7 +17,7 @@ export class HTTPRoute extends Route {
 
   constructor(props: Omit<HTTPRouteProps, "protocol">) {
     const propsWithProtocol = {...props, protocol: "http"};
-    super(propsWithProtocol);
+    super(propsWithProtocol as RouteProps);
     this.props = propsWithProtocol;
   }
 

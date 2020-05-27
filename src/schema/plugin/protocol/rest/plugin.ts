@@ -41,10 +41,11 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
     return validateObject(schema, {
       description: {
         type: "string",
+        optional: true,
       },
       basePath: {
         type: "custom",
-        check(value) {
+        check(value: any) {
           if (HTTPRoute.isNonRootStaticPath(value)) {
             return true;
           }
@@ -62,7 +63,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
         empty: false,
         items: {
           type: "custom",
-          check(value) {
+          check(value: any) {
             const idx = schema.routes.indexOf(value);
             if (typeof value !== "object") {
               return [{

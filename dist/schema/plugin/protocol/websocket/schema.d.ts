@@ -1,7 +1,7 @@
 import { CallConnectorSchema, ConnectorCatalog, PublishConnectorSchema, SubscribeConnectorSchema } from "../../connector";
 import { IProtocolPluginSchema, IProtocolPluginCatalog } from "../plugin";
 export declare type WebSocketProtocolPluginSchema = IProtocolPluginSchema & {
-    description: string;
+    description?: string;
     basePath: string;
     routes: WebSocketRouteSchema[];
 };
@@ -20,7 +20,7 @@ export declare type WebSocketStreamingRouteSchema = {
 };
 export declare type WebSocketProtocolPluginCatalog = IProtocolPluginCatalog & {
     schema: WebSocketProtocolPluginSchema;
-    description: string;
+    description: string | null;
     entries: {
         path: string;
         description: string | null;

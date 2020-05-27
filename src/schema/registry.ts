@@ -71,7 +71,7 @@ export class SchemaRegistry {
       this.plugin.protocol.push(new PluginConstructor({
         logger: this.props.logger.getChild(`protocol/${pluginKey}`),
         policyPlugins: this.plugin.policy,
-      }, pluginOptions));
+      }, pluginOptions ? pluginOptions : undefined));
     }
   }
 
@@ -220,7 +220,7 @@ export class SchemaRegistry {
           props[plugin.key] = {
             type: "custom",
             optional: true,
-            check(value) {
+            check(value: any) {
               const errs = plugin.validateSchema(value);
               return errs.length === 0 ? true : errs.map(err => {
                 err.field = `api.protocol.${plugin.key}.${err.field}`;
@@ -248,7 +248,7 @@ export class SchemaRegistry {
                 policyItemProps[plugin.key] = {
                   type: "custom",
                   optional: true,
-                  check(value) {
+                  check(value: any) {
                     const idx = schema.policy[connectorType]!.indexOf(value);
                     const errs = plugin.validateSchema(value);
                     return errs.length === 0 ? true : errs.map(err => {
@@ -280,7 +280,7 @@ export class SchemaRegistry {
     return errors.map(({type, message, field, actual, expected, location, ...otherProps}) => {
       const err = {
         type: kleur.bold(kleur.red(type)),
-        message: kleur.yellow(message),
+        message: message ? kleur.yellow(message) : undefined,
         field: kleur.bold(kleur.cyan(field)),
         expected,
         actual,

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var registry_1 = require("./registry");
-exports.SchemaRegistry = registry_1.SchemaRegistry;
+Object.defineProperty(exports, "SchemaRegistry", { enumerable: true, get: function () { return registry_1.SchemaRegistry; } });
 var branch_1 = require("./branch");
-exports.Branch = branch_1.Branch;
+Object.defineProperty(exports, "Branch", { enumerable: true, get: function () { return branch_1.Branch; } });
 var version_1 = require("./version");
-exports.Version = version_1.Version;
+Object.defineProperty(exports, "Version", { enumerable: true, get: function () { return version_1.Version; } });
 /*
 const example: ServiceAPISchema = {
   branch: "master",

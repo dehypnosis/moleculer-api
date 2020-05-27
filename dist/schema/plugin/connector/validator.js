@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ConnectorValidator = void 0;
 const interface_1 = require("../../../interface");
 /* common validation schema */
 const map = {

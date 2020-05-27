@@ -7,8 +7,8 @@ export * from "./plugin";
 export * from "./filter";
 export * from "./scope";
 export declare const PolicyPluginConstructors: {
-    [FilterPolicyPlugin.key]: typeof FilterPolicyPlugin;
-    [ScopePolicyPlugin.key]: typeof ScopePolicyPlugin;
+    filter: typeof FilterPolicyPlugin;
+    scope: typeof ScopePolicyPlugin;
 };
 export declare type PolicyPluginConstructorOptions = {
     [FilterPolicyPlugin.key]: RecursivePartial<FilterPolicyPluginOptions> | false;

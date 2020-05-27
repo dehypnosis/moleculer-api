@@ -1,5 +1,5 @@
 import url from "url";
-import { createBrokerOptions } from "moleculer-qmit";
+import { moleculer } from "qmit-sdk";
 import { config } from "./config";
 import { APIGateway, Logger } from "../../";
 import { APIRequestContextSource, AuthContext, createAuthContextOIDCParser } from "../../server";
@@ -9,7 +9,12 @@ const { oidc, isDebug, isDev } = config;
 export const gateway = new APIGateway({
   brokers: [
     {
-      moleculer: createBrokerOptions(),
+      moleculer: moleculer.createServiceBrokerOptions({
+        tracing: {
+          // TODO: dig into what causes GC crash for stopping broker when tracing enabled...
+          enabled: false,
+        },
+      }),
     },
   ],
   schema: {

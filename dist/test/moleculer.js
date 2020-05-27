@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MoleculerServiceSchemaFactory = exports.getMoleculerServiceBroker = void 0;
 const tslib_1 = require("tslib");
 const _ = tslib_1.__importStar(require("lodash"));
 const Moleculer = tslib_1.__importStar(require("moleculer"));
@@ -33,7 +34,7 @@ exports.MoleculerServiceSchemaFactory = {
                 name: String
               }
             `,
-                            resolvers: {
+                            resolvers: schemaAdjust && schemaAdjust.protocol && schemaAdjust.protocol.GraphQL && schemaAdjust.protocol.GraphQL.typeDefs ? {} : {
                                 Query: {
                                     name: `() => 'name-string'`,
                                 },

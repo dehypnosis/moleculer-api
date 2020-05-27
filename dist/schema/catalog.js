@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ServiceCatalog = void 0;
 class ServiceCatalog {
     constructor(map) {
         this.serviceIdItemsMap = map || new Map();

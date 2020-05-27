@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.GraphQLSubscriptionHandler = void 0;
 const tslib_1 = require("tslib");
 const subscriptions_transport_ws_1 = require("subscriptions-transport-ws");
 const message_types_1 = tslib_1.__importDefault(require("subscriptions-transport-ws/dist/message-types"));
