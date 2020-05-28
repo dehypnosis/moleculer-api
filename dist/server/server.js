@@ -96,8 +96,9 @@ class APIServer {
             }
             // start schema registry and connect handler update methods
             yield this.props.schema.start({
-                // update handler is debounced for performance's sake
-                updated: lodash_1.default.debounce(this.app.mountBranchHandler.bind(this.app), 1000 * this.opts.update.debouncedSeconds, { maxWait: 1000 * this.opts.update.maxDebouncedSeconds }),
+                // TODO: enhance 'updated' handler to be debounced with each of branchs, keyword: memorizedDebounce
+                // wrong code: _.debounce(this.app.mountBranchHandler.bind(this.app), 1000 * this.opts.update.debouncedSeconds, {maxWait: 1000 * this.opts.update.maxDebouncedSeconds}),
+                updated: this.app.mountBranchHandler.bind(this.app),
                 removed: this.app.unmountBranchHandler.bind(this.app),
             });
         });

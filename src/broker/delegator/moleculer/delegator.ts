@@ -46,6 +46,7 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
 
   /* lifecycle */
   public async start(): Promise<void> {
+    await this.service._start();
     await this.broker.start();
 
     // emit local node discovery event
@@ -118,10 +119,10 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
       if (!isReadStream(stream)) {
         throw new Error("invalid stream request"); // TODO: normalize error
       }
-      response = await ctx.call(action.id, stream, {nodeID: node.id, meta, parentCtx: context});
+      response = await ctx.call(action.id, stream, {nodeID: node?.id, meta, parentCtx: context});
     } else {
       // normal request
-      response = await ctx.call(action.id, params, {nodeID: node.id, parentCtx: context});
+      response = await ctx.call(action.id, params, {nodeID: node?.id, parentCtx: context});
     }
 
     // streaming response (can obtain other props from ctx.meta in streaming response)

@@ -28,6 +28,27 @@ function createMoleculerServiceSchema(props) {
                 props.emitEvent({ event, params, groups, broadcast, from });
             },
             /* service discovery */
+            "$node.updated": (ctx) => {
+                const node = ctx.params.node;
+                // remove old services
+                const oldServices = discoveryMap.get(node.id);
+                for (const service of oldServices) {
+                    if (service.id === serviceName) {
+                        continue; // will not discover "this" services
+                    }
+                    props.emitServiceDisconnected(service, node.id);
+                }
+                discoveryMap.delete(node.id);
+                // add latest services
+                const latestServices = discover_1.proxyMoleculerServiceDiscovery(node);
+                discoveryMap.set(node.id, latestServices);
+                for (const service of latestServices) {
+                    if (service.id === serviceName) {
+                        continue; // will not discover "this" services
+                    }
+                    props.emitServiceConnected(service);
+                }
+            },
             "$node.connected": (ctx) => {
                 const node = ctx.params.node;
                 const services = discover_1.proxyMoleculerServiceDiscovery(node);

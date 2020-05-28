@@ -34,6 +34,29 @@ export function createMoleculerServiceSchema(props: ServiceBrokerDelegatorProps)
       },
 
       /* service discovery */
+      "$node.updated": (ctx: any) => {
+        const node = (ctx.params as any).node as Moleculer.BrokerNode;
+
+        // remove old services
+        const oldServices = discoveryMap.get(node.id)!;
+        for (const service of oldServices) {
+          if (service.id === serviceName) {
+            continue; // will not discover "this" services
+          }
+          props.emitServiceDisconnected(service, node.id);
+        }
+        discoveryMap.delete(node.id);
+
+        // add latest services
+        const latestServices = proxyMoleculerServiceDiscovery(node);
+        discoveryMap.set(node.id, latestServices);
+        for (const service of latestServices) {
+          if (service.id === serviceName) {
+            continue; // will not discover "this" services
+          }
+          props.emitServiceConnected(service);
+        }
+      },
       "$node.connected": (ctx: Moleculer.Context) => {
         const node = (ctx.params as any).node as Moleculer.BrokerNode;
         const services = proxyMoleculerServiceDiscovery(node);

@@ -34,6 +34,7 @@ let MoleculerServiceBrokerDelegator = /** @class */ (() => {
         /* lifecycle */
         start() {
             return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield this.service._start();
                 yield this.broker.start();
                 // emit local node discovery event
                 this.broker.getLocalNodeInfo();
@@ -97,11 +98,11 @@ let MoleculerServiceBrokerDelegator = /** @class */ (() => {
                     if (!interface_1.isReadStream(stream)) {
                         throw new Error("invalid stream request"); // TODO: normalize error
                     }
-                    response = yield ctx.call(action.id, stream, { nodeID: node.id, meta, parentCtx: context });
+                    response = yield ctx.call(action.id, stream, { nodeID: node === null || node === void 0 ? void 0 : node.id, meta, parentCtx: context });
                 }
                 else {
                     // normal request
-                    response = yield ctx.call(action.id, params, { nodeID: node.id, parentCtx: context });
+                    response = yield ctx.call(action.id, params, { nodeID: node === null || node === void 0 ? void 0 : node.id, parentCtx: context });
                 }
                 // streaming response (can obtain other props from ctx.meta in streaming response)
                 if (interface_1.isReadStream(response)) {
