@@ -61,7 +61,11 @@ export class Service {
   }
 
   public toString(): string {
-    return `${kleur.blue(`${this.props.id}:${this.shortHash}`)}${kleur.cyan("@")}${kleur.green(this.nodeIdMap.size > 0 ? Array.from(this.nodeIdMap.keys()).join(",") : "empty-node-pool")}`;
+    return `${kleur.blue(`${this.props.id}:${this.shortHash}`)}${kleur.cyan("@")}${kleur.green(this.empty ? "empty-node-pool" : Array.from(this.nodeIdMap.keys()).join(","))}`;
+  }
+
+  public get empty() {
+    return this.nodeIdMap.size === 0;
   }
 
   public addNode(node: ServiceNodeProps): void {

@@ -67,7 +67,7 @@ export class Version {
 
   public getRetryableIntegrations(): Readonly<ServiceAPIIntegration>[] {
     const retryableIntegrations = this.$integrations
-      .filter(integration => integration.status !== ServiceAPIIntegration.Status.Succeed);
+      .filter(integration => integration.status !== ServiceAPIIntegration.Status.Succeed && !integration.service.empty);
 
     for (const integration of retryableIntegrations) {
       this.$integrations.splice(this.$integrations.indexOf(integration), 1);

@@ -38,7 +38,10 @@ class Service {
         this.$broker = broker;
     }
     toString() {
-        return `${kleur.blue(`${this.props.id}:${this.shortHash}`)}${kleur.cyan("@")}${kleur.green(this.nodeIdMap.size > 0 ? Array.from(this.nodeIdMap.keys()).join(",") : "empty-node-pool")}`;
+        return `${kleur.blue(`${this.props.id}:${this.shortHash}`)}${kleur.cyan("@")}${kleur.green(this.empty ? "empty-node-pool" : Array.from(this.nodeIdMap.keys()).join(","))}`;
+    }
+    get empty() {
+        return this.nodeIdMap.size === 0;
     }
     addNode(node) {
         this.nodeIdMap.set(node.id, new index_1.ServiceNode(node));

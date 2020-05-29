@@ -28,6 +28,7 @@ export declare class Service {
     get broker(): Readonly<ServiceBroker> | null;
     setBroker(broker: Readonly<ServiceBroker> | null): void;
     toString(): string;
+    get empty(): boolean;
     addNode(node: ServiceNodeProps): void;
     healthCheck(): Promise<Readonly<ServiceStatus>>;
     addAction(action: Omit<ServiceActionProps, "service">): ServiceAction;
