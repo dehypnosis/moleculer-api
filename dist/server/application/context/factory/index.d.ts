@@ -6,6 +6,7 @@ import { IPContextFactory, IPContextFactoryOptions } from "./ip";
 import { LocaleContextFactory, LocaleContextFactoryOptions } from "./locale";
 import { IDContextFactory, IDContextFactoryOptions } from "./id";
 import { UserAgentContextFactory, UserAgentContextFactoryOptions } from "./user-agent";
+import { RequestContextFactory, RequestContextFactoryOptions } from "./request";
 import { AuthContextFactory, AuthContextFactoryOptions } from "./auth";
 export { AuthContext, AuthContextParser } from "./auth";
 export { createAuthContextOIDCParser, AuthContextOIDCParserOptions } from "./auth.preset";
@@ -15,6 +16,7 @@ export declare const APIRequestContextFactoryConstructors: {
     locale: typeof LocaleContextFactory;
     cookie: typeof CookieContextFactory;
     userAgent: typeof UserAgentContextFactory;
+    request: typeof RequestContextFactory;
     auth: typeof AuthContextFactory;
 };
 export declare type APIRequestContextFactoryConstructorOptions = {
@@ -23,6 +25,7 @@ export declare type APIRequestContextFactoryConstructorOptions = {
     [LocaleContextFactory.key]: RecursivePartial<LocaleContextFactoryOptions> | false;
     [CookieContextFactory.key]: RecursivePartial<CookieContextFactoryOptions> | false;
     [UserAgentContextFactory.key]: RecursivePartial<UserAgentContextFactoryOptions> | false;
+    [RequestContextFactory.key]: RecursivePartial<RequestContextFactoryOptions> | false;
     [AuthContextFactory.key]: RecursivePartial<AuthContextFactoryOptions> | false;
 };
 export declare const defaultAPIRequestContextFactoryConstructorOptions: APIRequestContextFactoryConstructorOptions;

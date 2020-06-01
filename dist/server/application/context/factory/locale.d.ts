@@ -1,10 +1,8 @@
-import { PickOptions as PickLanguageOptions } from "accept-language-parser";
 import { RecursivePartial } from "../../../../interface";
 import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFactoryProps } from "./factory";
 export declare type LocaleContextFactoryOptions = {
-    supported: string[];
-    fallback: string;
-} & PickLanguageOptions;
+    fallbackLanguage: string;
+};
 export declare class LocaleContextFactory extends APIRequestContextFactory<{
     language: string;
     region: string | null;

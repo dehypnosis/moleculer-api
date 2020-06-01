@@ -319,11 +319,13 @@ let RESTProtocolPlugin = /** @class */ (() => {
         sendResponse(res, result) {
             if (result === null || typeof result === "undefined") {
                 res.status(200).end();
+                return;
             }
-            else if (typeof result === "object") {
+            if (typeof result === "object") {
+                const { $status, $headers, $body, createReadStream } = result, resultProps = tslib_1.__rest(result, ["$status", "$headers", "$body", "createReadStream"]);
                 // response header modification
-                if (typeof result.$headers === "object") {
-                    for (const [k, v] of Object.entries(result.$headers)) {
+                if (typeof $headers === "object") {
+                    for (const [k, v] of Object.entries($headers)) {
                         if (typeof k !== "string") {
                             continue;
                         }
@@ -331,12 +333,12 @@ let RESTProtocolPlugin = /** @class */ (() => {
                     }
                 }
                 // response code modification
-                if (typeof result.$status === "number") {
-                    res.status(result.$status);
+                if (typeof $status === "number") {
+                    res.status($status);
                 }
                 // streaming support
-                if (typeof result.createReadStream === "function") {
-                    const stream = result.createReadStream();
+                if (typeof createReadStream === "function") {
+                    const stream = createReadStream();
                     if (!interface_1.isReadStream(stream)) {
                         throw new Error("invalid read stream"); // TODO: normalize error
                     }
@@ -347,15 +349,19 @@ let RESTProtocolPlugin = /** @class */ (() => {
                         res.setHeader("Transfer-Encoding", "chunked");
                     }
                     stream.pipe(res);
+                    return;
                 }
-                else {
-                    const { $status, $headers } = result, otherProps = tslib_1.__rest(result, ["$status", "$headers"]);
-                    res.json(otherProps);
+                // raw body response support (eg. with text/html content-type)
+                if (typeof $body !== "undefined") {
+                    res.send($body);
+                    return;
                 }
+                // normal response as json
+                res.json(resultProps);
+                return;
             }
-            else {
-                res.status(200).json(result);
-            }
+            res.status(200).send(result);
+            return;
         }
     }
     RESTProtocolPlugin.key = "REST";

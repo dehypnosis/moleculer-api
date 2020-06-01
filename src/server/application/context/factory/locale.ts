@@ -1,12 +1,11 @@
 import * as _ from "lodash";
-import { PickOptions as PickLanguageOptions, pick as pickLanguage } from "accept-language-parser";
+import { parse as parseAcceptLanguage, Language } from "accept-language-parser";
 import { RecursivePartial } from "../../../../interface";
 import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFactoryProps } from "./factory";
 
 export type LocaleContextFactoryOptions = {
-  supported: string[];
-  fallback: string;
-} & PickLanguageOptions;
+  fallbackLanguage: string;
+};
 
 /*
   Locale Context Factory
@@ -20,9 +19,7 @@ export class LocaleContextFactory extends APIRequestContextFactory<{
 }> {
   public static readonly key = "locale";
   public static readonly autoLoadOptions: LocaleContextFactoryOptions = {
-    supported: ["en", "ko"],
-    fallback: "en",
-    loose: true,
+    fallbackLanguage: "en",
   };
   private readonly opts: LocaleContextFactoryOptions;
 
@@ -32,18 +29,18 @@ export class LocaleContextFactory extends APIRequestContextFactory<{
   }
 
   public create({ headers }: APIRequestContextSource) {
-    const { fallback, supported, ...pickOpts } = this.opts;
-    let locale: string | null = null;
-    if (headers["accept-language"]) {
-      locale = pickLanguage(supported, headers["accept-language"], pickOpts);
-    }
-    if (!locale) {
-      locale = fallback;
+    const { fallbackLanguage  } = this.opts;
+    const languages = parseAcceptLanguage(headers["accept-language"] || "");
+    let language: string = fallbackLanguage;
+    let region: string | null = null;
+    if (languages.length > 0) {
+      language = languages[0].code;
+      region = languages.find(l => !!l.region)?.region || null;
     }
 
     return {
-      language: locale.substr(0, 2),
-      region: locale.split("-")[1] || null,
+      language,
+      region,
     };
   }
 }

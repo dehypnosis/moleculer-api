@@ -7,6 +7,7 @@ import { IPContextFactory, IPContextFactoryOptions } from "./ip";
 import { LocaleContextFactory, LocaleContextFactoryOptions } from "./locale";
 import { IDContextFactory, IDContextFactoryOptions } from "./id";
 import { UserAgentContextFactory, UserAgentContextFactoryOptions } from "./user-agent";
+import { RequestContextFactory, RequestContextFactoryOptions } from "./request";
 import { AuthContextFactory, AuthContextFactoryOptions } from "./auth";
 
 export { AuthContext, AuthContextParser } from "./auth";
@@ -18,6 +19,7 @@ export const APIRequestContextFactoryConstructors = {
   [LocaleContextFactory.key]: LocaleContextFactory,
   [CookieContextFactory.key]: CookieContextFactory,
   [UserAgentContextFactory.key]: UserAgentContextFactory,
+  [RequestContextFactory.key]: RequestContextFactory,
   [AuthContextFactory.key]: AuthContextFactory,
 };
 
@@ -27,6 +29,7 @@ export type APIRequestContextFactoryConstructorOptions = {
   [LocaleContextFactory.key]: RecursivePartial<LocaleContextFactoryOptions> | false,
   [CookieContextFactory.key]: RecursivePartial<CookieContextFactoryOptions> | false,
   [UserAgentContextFactory.key]: RecursivePartial<UserAgentContextFactoryOptions> | false,
+  [RequestContextFactory.key]: RecursivePartial<RequestContextFactoryOptions> | false,
   [AuthContextFactory.key]: RecursivePartial<AuthContextFactoryOptions> | false,
 };
 
@@ -36,6 +39,7 @@ export const defaultAPIRequestContextFactoryConstructorOptions: APIRequestContex
   [LocaleContextFactory.key]: LocaleContextFactory.autoLoadOptions,
   [CookieContextFactory.key]: CookieContextFactory.autoLoadOptions,
   [UserAgentContextFactory.key]: UserAgentContextFactory.autoLoadOptions,
+  [RequestContextFactory.key]: RequestContextFactory.autoLoadOptions,
   [AuthContextFactory.key]: AuthContextFactory.autoLoadOptions,
 };
 

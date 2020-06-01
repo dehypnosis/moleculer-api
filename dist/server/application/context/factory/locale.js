@@ -18,25 +18,24 @@ let LocaleContextFactory = /** @class */ (() => {
             this.opts = _.defaultsDeep(opts || {}, LocaleContextFactory.autoLoadOptions);
         }
         create({ headers }) {
-            const _a = this.opts, { fallback, supported } = _a, pickOpts = tslib_1.__rest(_a, ["fallback", "supported"]);
-            let locale = null;
-            if (headers["accept-language"]) {
-                locale = accept_language_parser_1.pick(supported, headers["accept-language"], pickOpts);
-            }
-            if (!locale) {
-                locale = fallback;
+            var _a;
+            const { fallbackLanguage } = this.opts;
+            const languages = accept_language_parser_1.parse(headers["accept-language"] || "");
+            let language = fallbackLanguage;
+            let region = null;
+            if (languages.length > 0) {
+                language = languages[0].code;
+                region = ((_a = languages.find(l => !!l.region)) === null || _a === void 0 ? void 0 : _a.region) || null;
             }
             return {
-                language: locale.substr(0, 2),
-                region: locale.split("-")[1] || null,
+                language,
+                region,
             };
         }
     }
     LocaleContextFactory.key = "locale";
     LocaleContextFactory.autoLoadOptions = {
-        supported: ["en", "ko"],
-        fallback: "en",
-        loose: true,
+        fallbackLanguage: "en",
     };
     return LocaleContextFactory;
 })();

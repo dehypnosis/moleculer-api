@@ -492,6 +492,7 @@ window.addEventListener('load', function (event) {
   GraphQLPlayground.init(root, {
     settings: {
       "schema.disableComments": false,
+      endpoint: location.href,
       /* ref: https://github.com/prisma-labs/graphql-playground/blob/master/packages/graphql-playground-react/src/localDevIndex.tsx
         endpoint?: string
         endpointUrl?: string

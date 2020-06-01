@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { parse as parseUserAgent, Details as UserAgent } from "express-useragent";
+import { parse as parseUserAgent, Details as UserAgentDetails } from "express-useragent";
 import { RecursivePartial } from "../../../../interface";
 import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFactoryProps } from "./factory";
 
@@ -9,6 +9,8 @@ export type UserAgentContextFactoryOptions = {};
   UserAgent Context Factory
   ref: https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/express-useragent/index.d.ts#L18
 */
+
+export type UserAgent = Pick<UserAgentDetails, "os"|"platform"|"browser"|"source"|"isMobile">;
 
 export class UserAgentContextFactory extends APIRequestContextFactory<UserAgent> {
   public static readonly key = "userAgent";
@@ -21,6 +23,7 @@ export class UserAgentContextFactory extends APIRequestContextFactory<UserAgent>
   }
 
   public create({headers}: APIRequestContextSource) {
-    return parseUserAgent(headers["user-agent"] || "");
+    const { os, platform, browser, source, isMobile } = parseUserAgent(headers["user-agent"] || "");
+    return { os, platform, browser, source, isMobile };
   }
 }

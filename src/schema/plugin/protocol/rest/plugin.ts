@@ -355,10 +355,15 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
   private sendResponse(res: HTTPRouteResponse, result: any) {
     if (result === null || typeof result === "undefined") {
       res.status(200).end();
-    } else if (typeof result === "object") {
+      return;
+    }
+
+    if (typeof result === "object") {
+      const { $status, $headers, $body, createReadStream, ...resultProps } = result;
+
       // response header modification
-      if (typeof result.$headers === "object") {
-        for (const [k, v] of Object.entries(result.$headers)) {
+      if (typeof $headers === "object") {
+        for (const [k, v] of Object.entries($headers)) {
           if (typeof k !== "string") {
             continue;
           }
@@ -367,13 +372,13 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
       }
 
       // response code modification
-      if (typeof result.$status === "number") {
-        res.status(result.$status);
+      if (typeof $status === "number") {
+        res.status($status);
       }
 
       // streaming support
-      if (typeof result.createReadStream === "function") {
-        const stream = result.createReadStream() as ReadableStream;
+      if (typeof createReadStream === "function") {
+        const stream = createReadStream() as ReadableStream;
         if (!isReadStream(stream)) {
           throw new Error("invalid read stream"); // TODO: normalize error
         }
@@ -384,12 +389,21 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
           res.setHeader("Transfer-Encoding", "chunked");
         }
         stream.pipe(res);
-      } else {
-        const { $status, $headers, ...otherProps } = result;
-        res.json(otherProps);
+        return;
       }
-    } else {
-      res.status(200).json(result);
+
+      // raw body response support (eg. with text/html content-type)
+      if (typeof $body !== "undefined") {
+        res.send($body);
+        return;
+      }
+
+      // normal response as json
+      res.json(resultProps);
+      return;
     }
+
+    res.status(200).send(result);
+    return;
   }
 }
