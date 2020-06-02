@@ -27,10 +27,10 @@ export const createAuthContextOIDCParser = (opts: AuthContextOIDCParserOptions):
         discoverError = err;
       });
 
-    // refresh issuer info for every 10min
+    // refresh issuer info for every 5min
     setTimeout(() => {
       discoverIssuer();
-    }, 1000 * 60 * 10);
+    }, 1000 * 60 * 5);
   }
 
   discoverIssuer();

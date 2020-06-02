@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "dev": "nodemon",
-    "build": "rm -rf ./dist && tsc -p tsconfig.json --skipLibCheck && copyfiles -u 1 src/**/*.html src/**/*.css dist/",
+    "build": "rm -rf ./dist && tsc -p tsconfig.json --skipLibCheck && cpy '**/*' '!**/*.ts' ../dist/ --cwd=src/ --parents",
     "lint": "tslint -p tsconfig.json",
     "deps": "yarn-check -u",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
@@ -99,8 +99,8 @@
     "@types/uuid": "^3.4.9",
     "apollo-client": "^2.6.10",
     "benchmarkify": "^2.1.2",
-    "copyfiles": "^2.2.0",
     "coveralls": "^3.1.0",
+    "cpy-cli": "^3.1.1",
     "install": "^0.13.0",
     "jest": "^25.5.4",
     "jest-cli": "^25.5.4",
