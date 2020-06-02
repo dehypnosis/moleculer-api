@@ -6,7 +6,7 @@ import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFac
 export declare type AuthRawToken = string;
 export declare type AuthContext = {
     scope: string[];
-    user: any | void;
+    identity: any | void;
     client: string | void;
     token: Token | void;
 };

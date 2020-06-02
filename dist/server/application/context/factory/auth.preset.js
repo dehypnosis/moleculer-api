@@ -18,10 +18,10 @@ exports.createAuthContextOIDCParser = (opts) => {
             .catch(err => {
             discoverError = err;
         });
-        // refresh issuer info for every 10min
+        // refresh issuer info for every 5min
         setTimeout(() => {
             discoverIssuer();
-        }, 1000 * 60 * 10);
+        }, 1000 * 60 * 5);
     }
     discoverIssuer();
     return (token, logger) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
@@ -29,15 +29,15 @@ exports.createAuthContextOIDCParser = (opts) => {
             logger.error(`failed to connect to OIDC provider: ${opts.issuer}`, discoverError);
             return;
         }
-        let user;
+        let identity;
         let scope;
         let client;
         let maxAge;
-        // get user
+        // get identity
         if (token && token.scheme === "Bearer" && typeof token.token === "string") {
             yield oidcClient.userinfo(token.token)
                 .then(res => {
-                user = res;
+                identity = res;
             })
                 .catch(error => {
                 const err = new Error(error.message); // TODO: normalize error
@@ -60,7 +60,7 @@ exports.createAuthContextOIDCParser = (opts) => {
                 throw err;
             });
         }
-        return { user, scope, client, maxAge };
+        return { identity, scope, client, maxAge };
     });
 };
 //# sourceMappingURL=auth.preset.js.map

@@ -7,7 +7,7 @@ import { Logger } from "../../../../logger";
 import { APIRequestContextFactory, APIRequestContextSource, APIRequestContextFactoryProps } from "./factory";
 
 export type AuthRawToken = string;
-export type AuthContext = { scope: string[], user: any | void, client: string | void, token: Token | void };
+export type AuthContext = { scope: string[], identity: any | void, client: string | void, token: Token | void };
 export type AuthContextParser = (token: Token | void, logger: Logger) => Promise<Partial<AuthContext & { maxAge: number }> | void>;
 export type AuthContextImpersonator = (source: APIRequestContextSource, auth: AuthContext, logger: Logger) => Promise<Partial<AuthContext & { maxAge: number }> | void>;
 export type AuthContextFactoryOptions = {
@@ -78,7 +78,7 @@ export class AuthContextFactory extends APIRequestContextFactory<AuthContext> {
         parsedContext || {},
         {
           scope: [],
-          user: null,
+          identity: null,
           client: null,
           token,
         },

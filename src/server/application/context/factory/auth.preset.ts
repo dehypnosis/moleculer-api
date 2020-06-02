@@ -40,16 +40,16 @@ export const createAuthContextOIDCParser = (opts: AuthContextOIDCParserOptions):
       logger.error(`failed to connect to OIDC provider: ${opts.issuer}`, discoverError);
       return;
     }
-    let user: any;
+    let identity: any;
     let scope: any;
     let client: any;
     let maxAge: any;
 
-    // get user
+    // get identity
     if (token && token.scheme === "Bearer" && typeof token.token === "string") {
       await oidcClient.userinfo(token.token)
         .then(res => {
-          user = res;
+          identity = res;
         })
         .catch(error => {
           const err: any = new Error(error.message); // TODO: normalize error
@@ -74,6 +74,6 @@ export const createAuthContextOIDCParser = (opts: AuthContextOIDCParserOptions):
         });
     }
 
-    return {user, scope, client, maxAge};
+    return {identity, scope, client, maxAge};
   };
 };

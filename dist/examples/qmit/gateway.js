@@ -50,12 +50,12 @@ exports.gateway = new __1.APIGateway({
             auth: {
                 parser: server_1.createAuthContextOIDCParser(oidc),
                 impersonator: (source, auth, logger) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-                    if (auth.user && auth.user.impersonator === true && source.url) {
+                    if (auth.identity && auth.identity.impersonator === true && source.url) {
                         const parsedURL = url_1.default.parse(source.url, true);
                         if (parsedURL.query.impersonation) {
-                            auth.user._impersonator_sub = auth.user.sub;
-                            auth.user.sub = parsedURL.query.impersonation;
-                            logger.warn(`${auth.user._impersonator_sub}:${auth.user.email} has impersonated as ${auth.user.sub}`);
+                            auth.identity._impersonator_sub = auth.identity.sub;
+                            auth.identity.sub = parsedURL.query.impersonation;
+                            logger.warn(`${auth.identity._impersonator_sub}:${auth.identity.email} has impersonated as ${auth.identity.sub}`);
                         }
                     }
                 }),

@@ -48,12 +48,12 @@ export const gateway = new APIGateway({
       auth: {
         parser: createAuthContextOIDCParser(oidc),
         impersonator: async (source: APIRequestContextSource, auth: AuthContext, logger: Logger) => {
-          if (auth.user && auth.user.impersonator === true && source.url) {
+          if (auth.identity && auth.identity.impersonator === true && source.url) {
             const parsedURL = url.parse(source.url, true);
             if (parsedURL.query.impersonation) {
-              auth.user._impersonator_sub = auth.user.sub;
-              auth.user.sub = parsedURL.query.impersonation;
-              logger.warn(`${auth.user._impersonator_sub}:${auth.user.email} has impersonated as ${auth.user.sub}`);
+              auth.identity._impersonator_sub = auth.identity.sub;
+              auth.identity.sub = parsedURL.query.impersonation;
+              logger.warn(`${auth.identity._impersonator_sub}:${auth.identity.email} has impersonated as ${auth.identity.sub}`);
             }
           }
         },

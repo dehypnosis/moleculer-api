@@ -47,7 +47,7 @@ let AuthContextFactory = /** @class */ (() => {
                     const parsedContext = yield this.opts.parser(token, this.props.logger);
                     context = _.defaultsDeep(parsedContext || {}, {
                         scope: [],
-                        user: null,
+                        identity: null,
                         client: null,
                         token,
                     });
