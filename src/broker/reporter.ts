@@ -62,7 +62,7 @@ export class Reporter {
       })), tbl);
     } catch (error) {
       this.props.logger.info(`failed to deliver report to origin service:\n${tbl}`);
-      this.props.logger.debug(error);
+      this.props.logger.error(error);
     }
     this.clear();
   }
@@ -164,17 +164,28 @@ export class Reporter {
 * rearrange indent multiline texts like GraphQL Schema
 */
 const nonPreferedToStrings = [Object.prototype.toString, Array.prototype.toString, Error.prototype.toString];
-function peekObject(value: any, path: string = "", padEnd: number = 10): any {
+function peekObject(value: any, path: string = "", padEnd: number = 10, depth = 1): any {
+
   if (typeof value === "object" && value !== null) {
-    if (!nonPreferedToStrings.includes(value.toString)) {
-      value = value.toString();
-      padEnd += 4;
+    let stopReading = depth > 4;
+    if (stopReading) {
+      value = "[...]";
     } else {
-      return Object.getOwnPropertyNames(value)
-        .filter(key => !(key === "stack" && value instanceof Error))
-        .reduce((items, key) => items.concat(peekObject(value[key], path ? `${path}.${key}` : key, path ? padEnd + 4 : padEnd)), [] as any[])
-        .filter(item => !!item)
-        .join("\n");
+      if (value.toString && !nonPreferedToStrings.includes(value.toString)) {
+        const tempStr = value.toString();
+        stopReading = tempStr !== "[object Object]";
+        if (stopReading) {
+          padEnd += 4;
+        }
+      }
+
+      if (!stopReading) {
+        return Object.getOwnPropertyNames(value)
+          .filter(key => !(key === "stack" && value instanceof Error))
+          .reduce((items, key) => items.concat(peekObject(value[key], path ? `${path}.${key}` : key, path ? padEnd + 4 : padEnd, depth + 1)), [] as any[])
+          .filter(item => !!item)
+          .join("\n");
+      }
     }
   }
 

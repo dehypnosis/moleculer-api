@@ -73,7 +73,7 @@ function removeANSIColor(message) {
         else {
             const obj = {};
             for (const [key, value] of Object.entries(message)) {
-                obj[key] = removeANSIColor(value);
+                obj[key] = typeof value === "string" ? removeANSIColor(value) : value;
             }
             return obj;
         }

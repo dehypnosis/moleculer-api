@@ -82,7 +82,7 @@ export function removeANSIColor(message: any): any {
     } else {
       const obj: any = {};
       for (const [key,value] of Object.entries(message)) {
-        obj[key] = removeANSIColor(value);
+        obj[key] = typeof value === "string" ? removeANSIColor(value) : value;
       }
       return obj;
     }
