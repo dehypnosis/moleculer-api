@@ -22,6 +22,7 @@ export declare abstract class Route {
     static readonly rootStaticPathRegExp: RegExp;
     static isRootStaticPath(path: string): boolean;
     constructor(props: RouteProps);
+    get information(): any;
     get protocol(): string;
     get path(): string;
     static mergePaths(...paths: string[]): string;

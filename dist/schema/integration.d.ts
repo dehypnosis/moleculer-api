@@ -33,6 +33,13 @@ export declare class ServiceAPIIntegration {
     constructor(props: ServiceAPIIntegrationProps);
     clone(): Readonly<ServiceAPIIntegration>;
     toString(): string;
+    get information(): {
+        type: "remove" | "add";
+        status: "queued" | "failed" | "succeed" | "skipped";
+        hash: string;
+        schema: Readonly<ServiceAPISchema>;
+        service: string;
+    };
     get type(): "remove" | "add";
     get schema(): Readonly<ServiceAPISchema>;
     get schemaHash(): string;

@@ -16,6 +16,16 @@ class Service {
         // clear nodes props for garbage collection
         this.props.nodes.splice(0);
     }
+    get information() {
+        return {
+            id: this.id,
+            hash: this.hash,
+            name: this.displayName,
+            description: this.description,
+            meta: this.meta,
+            nodes: [...this.nodeIdMap.keys()],
+        };
+    }
     get hash() {
         return this.props.hash;
     }

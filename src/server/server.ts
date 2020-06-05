@@ -3,7 +3,15 @@ import _ from "lodash";
 import { RecursivePartial } from "../interface";
 import { Logger } from "../logger";
 import { SchemaRegistry } from "../schema";
-import { ServerApplication, ServerApplicationOptions, APIRequestContextFactoryConstructors, APIRequestContextFactoryConstructorOptions, defaultAPIRequestContextFactoryConstructorOptions, APIRequestContextFactory } from "./application";
+import {
+  ServerApplication,
+  ServerApplicationOptions,
+  APIRequestContextFactoryConstructors,
+  APIRequestContextFactoryConstructorOptions,
+  defaultAPIRequestContextFactoryConstructorOptions,
+  APIRequestContextFactory,
+  Route, HTTPRoute
+} from "./application";
 import { ServerMiddlewareConstructorOptions, defaultServerMiddlewareConstructorOptions, ServerMiddlewareConstructors } from "./middleware";
 import { ServerProtocol, ServerProtocolConstructorOptions, defaultServerProtocolConstructorOptions, ServerProtocolConstructors } from "./protocol";
 
@@ -133,6 +141,18 @@ export class APIServer {
       updated: this.app.mountBranchHandler.bind(this.app),
       removed: this.app.unmountBranchHandler.bind(this.app),
     });
+
+    // add information route for debugging
+    // this.app.addStaticRoute(
+    //   new HTTPRoute({
+    //     path: "/~",
+    //     method: "GET",
+    //     description: "",
+    //     handler: (ctx, req, res) => {
+    //       res.json(this.props.schema.information);
+    //     },
+    //   }),
+    // );
   }
 
   public async stop() {

@@ -1,5 +1,6 @@
 import * as kleur from "kleur";
 import PathToRegExp, { pathToRegexp } from "path-to-regexp";
+import { removeANSIColor } from "../../../interface";
 import { Branch, Version } from "../../../schema";
 
 export type BranchHandlerMap<ApplicationRoute extends Route> = Map<Readonly<Branch>, VersionHandlerMap<ApplicationRoute>>;
@@ -46,6 +47,10 @@ export abstract class Route {
   }
 
   constructor(protected readonly props: RouteProps) {
+  }
+
+  public get information() {
+    return removeANSIColor(this.toString());
   }
 
   public get protocol() {

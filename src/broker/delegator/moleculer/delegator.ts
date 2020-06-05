@@ -322,7 +322,7 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
     const action = `${service.id}.$report`;
     const params = {messages, table};
     const payloads = Array.from(service.nodeIdMap.keys())
-      .map(nodeID => ({action, params, nodeID}));
+      .map(nodeID => ({action, params, nodeID, retries: 0 }));
     await this.broker.mcall(payloads);
   }
 }

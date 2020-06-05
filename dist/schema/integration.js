@@ -16,6 +16,15 @@ let ServiceAPIIntegration = /** @class */ (() => {
         toString() {
             return `(${this.type === ServiceAPIIntegration.Type.Add ? "+" : "-"}) ${this.service} ${kleur[ServiceAPIIntegration.StatusColor[this.status]](this.status)}`;
         }
+        get information() {
+            return {
+                type: this.type,
+                status: this.status,
+                hash: this.schemaHash,
+                schema: this.schema,
+                service: this.service.id,
+            };
+        }
         get type() {
             return this.props.type;
         }

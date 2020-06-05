@@ -137,6 +137,16 @@ export class SchemaRegistry {
     }
   }
 
+  public get information() {
+    return {
+      plugins: {
+        policy: this.plugin.policy.map(plugin => plugin.key),
+        protocol: this.plugin.protocol.map(plugin => plugin.key),
+      },
+      branches: [...this.branchMap.values()].map(branch => branch.information),
+    };
+  }
+
   /* service discovery */
   private lock = new AsyncLock({maxPending: 1000, timeout: 30 * 1000});
   private serviceReporterMap = new Map<Readonly<Service>, Reporter>();

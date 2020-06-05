@@ -39,6 +39,16 @@ export class ServiceAPIIntegration {
     return `(${this.type === ServiceAPIIntegration.Type.Add ? "+" : "-"}) ${this.service} ${kleur[ServiceAPIIntegration.StatusColor[this.status] as keyof kleur.Kleur](this.status)}`;
   }
 
+  public get information() {
+    return {
+      type: this.type,
+      status: this.status,
+      hash: this.schemaHash,
+      schema: this.schema,
+      service: this.service.id,
+    };
+  }
+
   public get type() {
     return this.props.type;
   }
@@ -92,6 +102,7 @@ export class ServiceAPIIntegration {
           from: version.parentVersion && version.parentVersion.toString(),
           to: version.toString(),
         },
+        integrations: version.integrations,
         updates,
       });
     }

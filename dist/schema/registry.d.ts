@@ -1,6 +1,7 @@
 import { RecursivePartial } from "../interface";
 import { ServiceBroker } from "../broker";
 import { Logger } from "../logger";
+import { ServiceAPISchema } from "./index";
 import { Branch, BranchOptions } from "./branch";
 import { SchemaPluginConstructorOptions } from "./plugin";
 export declare type SchemaRegistryProps = {
@@ -24,6 +25,38 @@ export declare class SchemaRegistry {
     constructor(props: SchemaRegistryProps, opts?: RecursivePartial<SchemaRegistryOptions>);
     start(listeners: SchemaRegistryListeners): Promise<void>;
     stop(): Promise<void>;
+    get information(): {
+        plugins: {
+            policy: string[];
+            protocol: string[];
+        };
+        branches: {
+            branch: string;
+            latestUsedAt: Date;
+            services: {
+                id: string;
+                hash: string;
+                name: string;
+                description: string | null;
+                meta: object | null;
+                nodes: string[];
+            }[];
+            parentVersion: string | null;
+            latestVersion: string;
+            versions: {
+                version: string;
+                fullVersion: string;
+                routes: any[];
+                integrations: {
+                    type: "remove" | "add";
+                    status: "queued" | "failed" | "succeed" | "skipped";
+                    hash: string;
+                    schema: Readonly<ServiceAPISchema>;
+                    service: string;
+                }[];
+            }[];
+        }[];
+    };
     private lock;
     private serviceReporterMap;
     private serviceConnected;

@@ -4,6 +4,7 @@ exports.Route = void 0;
 const tslib_1 = require("tslib");
 const kleur = tslib_1.__importStar(require("kleur"));
 const path_to_regexp_1 = require("path-to-regexp");
+const interface_1 = require("../../../interface");
 let Route = /** @class */ (() => {
     class Route {
         constructor(props) {
@@ -19,6 +20,9 @@ let Route = /** @class */ (() => {
         }
         static isRootStaticPath(path) {
             return typeof path === "string" && Route.rootStaticPathRegExp.test(path);
+        }
+        get information() {
+            return interface_1.removeANSIColor(this.toString());
         }
         get protocol() {
             return this.props.protocol;

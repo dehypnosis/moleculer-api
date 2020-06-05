@@ -3,7 +3,15 @@ import { FatalError } from "tslint/lib/error";
 import { RecursivePartial } from "../../interface";
 import { Logger } from "../../logger";
 import { Branch, Version } from "../../schema";
-import { BranchHandlerMap, Route, RouteHandlerMap, ServerApplicationComponent, ServerApplicationComponentConstructorOptions, ServerApplicationComponentConstructors, ServerApplicationComponentModules } from "./component";
+import {
+  Route,
+  BranchHandlerMap,
+  RouteHandlerMap,
+  ServerApplicationComponent,
+  ServerApplicationComponentConstructorOptions,
+  ServerApplicationComponentConstructors,
+  ServerApplicationComponentModules
+} from "./component";
 import { APIRequestContext, APIRequestContextFactory } from "./context";
 
 export type ServerApplicationProps = {
@@ -17,6 +25,7 @@ export class ServerApplication {
   public readonly components: ReadonlyArray<ServerApplicationComponent<Route>>;
   private readonly componentBranchHandlerMap = new Map<ServerApplicationComponent<Route>, BranchHandlerMap<Route>>();
   private readonly componentsAliasedVersions = new Map<ServerApplicationComponent<Route>, Readonly<Version>[]>();
+  private readonly staticRoutes: Route[] = [];
 
   constructor(protected readonly props: ServerApplicationProps, opts?: RecursivePartial<ServerApplicationOptions>) {
     // create application components
@@ -109,7 +118,10 @@ export class ServerApplication {
             }
 
             // create route handlers and mount
-            const routes = version.routes.filter(component.canHandleRoute.bind(component));
+            const routes = [
+              ...version.routes,
+              ...this.staticRoutes,
+            ].filter(component.canHandleRoute.bind(component));
             const routeHandlerMap = component.mountRoutes(routes, pathPrefixes, createContext);
             versionHandlerMap.set(version, routeHandlerMap);
           }
@@ -163,6 +175,11 @@ export class ServerApplication {
     }));
   }
 
+  public addStaticRoute(route: Route) {
+    this.staticRoutes.push(route);
+    return this;
+  }
+
   public get routes() {
     const items: { branch: Readonly<Branch>, version: Readonly<Version>, route: Readonly<Route> }[] = [];
     for (const branchHandlerMap of this.componentBranchHandlerMap.values()) {
@@ -171,6 +188,9 @@ export class ServerApplication {
           for (const route of routeHandlerMap.keys()) {
             items.push({branch, version, route});
           }
+
+          // add static routes
+          items.push(...this.staticRoutes.map(route => ({ branch, version, route })));
         }
       }
     }

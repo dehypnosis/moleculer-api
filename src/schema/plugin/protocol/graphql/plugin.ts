@@ -342,6 +342,7 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
       hashes.push(hashObject([schema.typeDefs, schema.resolvers, integration.service.hash], true));
     }
 
+
     const routeHash = hashObject(hashes, false);
     const subscriptionRouteHash = `${routeHash}@subscription`;
     const playgroundRouteHash = `static@graphql-playground`;

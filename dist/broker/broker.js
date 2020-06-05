@@ -123,8 +123,8 @@ let ServiceBroker = /** @class */ (() => {
                     this.props.logger.error(`service broker has been disconnected from non-registered service node: ${service} (${nodeId})`);
                 }
                 else if (foundService.nodeIdMap.size === 0) { // service disconnected
-                    yield this.discoveryPubSub.publish("disconnected", foundService);
                     this.registry.removeServiceByHash(foundService.hash);
+                    yield this.discoveryPubSub.publish("disconnected", foundService);
                 }
                 else { // node pool updated
                     yield this.discoveryPubSub.publish("nodePoolUpdated", foundService);

@@ -32,6 +32,17 @@ export class Service {
     this.props.nodes.splice(0);
   }
 
+  public get information() {
+    return {
+      id: this.id,
+      hash: this.hash,
+      name: this.displayName,
+      description: this.description,
+      meta: this.meta,
+      nodes: [...this.nodeIdMap.keys()],
+    };
+  }
+
   public get hash() {
     return this.props.hash;
   }

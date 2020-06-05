@@ -13,6 +13,7 @@ export declare class ServerApplication {
     readonly components: ReadonlyArray<ServerApplicationComponent<Route>>;
     private readonly componentBranchHandlerMap;
     private readonly componentsAliasedVersions;
+    private readonly staticRoutes;
     constructor(props: ServerApplicationProps, opts?: RecursivePartial<ServerApplicationOptions>);
     get componentModules(): ServerApplicationComponentModules;
     start(): Promise<void>;
@@ -20,6 +21,7 @@ export declare class ServerApplication {
     private readonly lock;
     mountBranchHandler(branch: Branch): Promise<void>;
     unmountBranchHandler(branch: Branch): Promise<void>;
+    addStaticRoute(route: Route): this;
     get routes(): {
         branch: Readonly<Branch>;
         version: Readonly<Version>;

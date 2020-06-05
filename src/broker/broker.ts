@@ -158,8 +158,8 @@ export class ServiceBroker<DelegatorContext = any> {
     if (!foundService || !foundService.nodeIdMap.delete(nodeId)) { // unknown service
       this.props.logger.error(`service broker has been disconnected from non-registered service node: ${service} (${nodeId})`);
     } else if (foundService.nodeIdMap.size === 0) { // service disconnected
-      await this.discoveryPubSub.publish("disconnected", foundService);
       this.registry.removeServiceByHash(foundService.hash);
+      await this.discoveryPubSub.publish("disconnected", foundService);
     } else { // node pool updated
       await this.discoveryPubSub.publish("nodePoolUpdated", foundService);
     }

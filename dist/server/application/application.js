@@ -11,6 +11,7 @@ class ServerApplication {
         this.props = props;
         this.componentBranchHandlerMap = new Map();
         this.componentsAliasedVersions = new Map();
+        this.staticRoutes = [];
         /* handler update */
         this.lock = new async_lock_1.default({ maxPending: 1000, timeout: 1000 });
         // create application components
@@ -91,7 +92,10 @@ class ServerApplication {
                                 aliasedVersions.push(version);
                             }
                             // create route handlers and mount
-                            const routes = version.routes.filter(component.canHandleRoute.bind(component));
+                            const routes = [
+                                ...version.routes,
+                                ...this.staticRoutes,
+                            ].filter(component.canHandleRoute.bind(component));
                             const routeHandlerMap = component.mountRoutes(routes, pathPrefixes, createContext);
                             versionHandlerMap.set(version, routeHandlerMap);
                         }
@@ -142,6 +146,10 @@ class ServerApplication {
             })));
         });
     }
+    addStaticRoute(route) {
+        this.staticRoutes.push(route);
+        return this;
+    }
     get routes() {
         const items = [];
         for (const branchHandlerMap of this.componentBranchHandlerMap.values()) {
@@ -150,6 +158,8 @@ class ServerApplication {
                     for (const route of routeHandlerMap.keys()) {
                         items.push({ branch, version, route });
                     }
+                    // add static routes
+                    items.push(...this.staticRoutes.map(route => ({ branch, version, route })));
                 }
             }
         }

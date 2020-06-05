@@ -30,6 +30,32 @@ export declare class Branch {
     private emitter;
     constructor(props: BranchProps, opts?: RecursivePartial<BranchOptions>);
     toString(): string;
+    get information(): {
+        branch: string;
+        latestUsedAt: Date;
+        services: {
+            id: string;
+            hash: string;
+            name: string;
+            description: string | null;
+            meta: object | null;
+            nodes: string[];
+        }[];
+        parentVersion: string | null;
+        latestVersion: string;
+        versions: {
+            version: string;
+            fullVersion: string;
+            routes: any[];
+            integrations: {
+                type: "remove" | "add";
+                status: "queued" | "failed" | "succeed" | "skipped";
+                hash: string;
+                schema: Readonly<import(".").ServiceAPISchema>;
+                service: string;
+            }[];
+        }[];
+    };
     get name(): string;
     get isMaster(): boolean;
     private latestUsedAt;

@@ -105,6 +105,15 @@ let SchemaRegistry = /** @class */ (() => {
                 }
             });
         }
+        get information() {
+            return {
+                plugins: {
+                    policy: this.plugin.policy.map(plugin => plugin.key),
+                    protocol: this.plugin.protocol.map(plugin => plugin.key),
+                },
+                branches: [...this.branchMap.values()].map(branch => branch.information),
+            };
+        }
         serviceConnected(service) {
             this.lock.acquire("discovery", () => tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.props.logger.info(`${service} service has been connected`);

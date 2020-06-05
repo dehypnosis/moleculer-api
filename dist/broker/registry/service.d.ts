@@ -20,6 +20,14 @@ export declare class Service {
     readonly shortHash: string;
     private $broker;
     constructor(props: ServiceProps);
+    get information(): {
+        id: string;
+        hash: string;
+        name: string;
+        description: string | null;
+        meta: object | null;
+        nodes: string[];
+    };
     get hash(): string;
     get id(): string;
     get displayName(): string;

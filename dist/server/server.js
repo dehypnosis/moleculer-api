@@ -101,6 +101,17 @@ class APIServer {
                 updated: this.app.mountBranchHandler.bind(this.app),
                 removed: this.app.unmountBranchHandler.bind(this.app),
             });
+            // add information route for debugging
+            // this.app.addStaticRoute(
+            //   new HTTPRoute({
+            //     path: "/~",
+            //     method: "GET",
+            //     description: "",
+            //     handler: (ctx, req, res) => {
+            //       res.json(this.props.schema.information);
+            //     },
+            //   }),
+            // );
         });
     }
     stop() {

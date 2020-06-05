@@ -36,6 +36,17 @@ let Branch = /** @class */ (() => {
         toString() {
             return `${kleur.bold(kleur.cyan(this.name))} ${kleur.cyan(`(${this.serviceCatalog.size} services)`)}`;
         }
+        get information() {
+            return {
+                branch: this.name,
+                latestUsedAt: this.latestUsedAt,
+                services: this.serviceCatalog.services.map(service => service.information),
+                parentVersion: this.props.parentVersion ? this.props.parentVersion.shortHash : null,
+                latestVersion: this.$latestVersion.shortHash,
+                versions: this.versions.map(v => v.information),
+            };
+        }
+        ;
         get name() {
             return this.props.name;
         }
@@ -216,13 +227,13 @@ let Branch = /** @class */ (() => {
                         return this.retryFailedIntegrationsFrom(parentVersion);
                     }
                     // compile new schemata as new routeHashMap
-                    const requiredIntegrations = Array.from(schemaHashMap.values());
+                    const mergedIntegrations = Array.from(schemaHashMap.values());
                     const routeHashes = new Array();
                     const routes = new Array();
                     const errors = [];
                     for (const plugin of this.props.protocolPlugins) {
                         try {
-                            const pluginIntegrations = requiredIntegrations.filter(integration => integration.schema.protocol && integration.schema.protocol[plugin.key]);
+                            const pluginIntegrations = mergedIntegrations.filter(integration => integration.schema.protocol && integration.schema.protocol[plugin.key]);
                             const pluginResult = plugin.compileSchemata(routeHashMapCache, pluginIntegrations);
                             for (const { hash, route } of pluginResult) {
                                 const routeHashIndex = routeHashes.indexOf(hash);
@@ -258,8 +269,8 @@ let Branch = /** @class */ (() => {
                     }
                     // failed: report errors and process as failed jobs
                     if (errors.length > 0) {
-                        for (const integration of requiredIntegrations) {
-                            integration.setFailed(this, parentVersion, errors, requiredIntegrations);
+                        for (const integration of integrations) {
+                            integration.setFailed(this, parentVersion, errors, integrations);
                         }
                         if (initialCompile) { // throw errors when failed in initial compile
                             throw new error_1.FatalError("failed to compile empty schemata initially", errors); // TODO: normalize error
@@ -267,7 +278,7 @@ let Branch = /** @class */ (() => {
                         else {
                             const at = new Date();
                             const errorsTable = broker_1.Reporter.getTable(errors.map(message => ({ type: "error", message, at })));
-                            this.props.logger.error(`${this} branch failed ${parentVersion} -> (new) version compile:\n${requiredIntegrations.join("\n")}${errorsTable}`);
+                            this.props.logger.error(`${this} branch failed ${parentVersion} -> (new) version compile:\n${integrations.join("\n")}${errorsTable}`);
                         }
                         // will not retry on failure
                         return;
@@ -303,11 +314,11 @@ let Branch = /** @class */ (() => {
                     for (const r of updatedRoutes) {
                         updates.push(`(+) ${r}`);
                     }
-                    for (const integration of requiredIntegrations) {
+                    for (const integration of integrations) {
                         integration.setSucceed(this, version, updates);
                     }
                     // log
-                    this.props.logger.info(`${this} branch succeeded ${parentVersion} -> ${version} version compile:\n${[...requiredIntegrations, ...updates].join("\n")}`);
+                    this.props.logger.info(`${this} branch succeeded ${parentVersion} -> ${version} version compile:\n${[...integrations, ...updates].join("\n")}`);
                     // forget old parent versions if need
                     for (let cur = this.$latestVersion, parent = cur.parentVersion, i = 1; parent; cur = parent, parent = cur.parentVersion, i++) {
                         // v1 / v2 / 1
@@ -340,7 +351,7 @@ let Branch = /** @class */ (() => {
                 // retry merging failed integrations from history
                 const retryableIntegrations = version.getRetryableIntegrations();
                 if (retryableIntegrations.length > 0) {
-                    this.props.logger.info(`${this} branch will retry merging ${retryableIntegrations.length} failed/skipped integrations`);
+                    this.props.logger.info(`${this} branch will retry merging ${retryableIntegrations.length} failed integrations`);
                     return this.consumeIntegrations(retryableIntegrations, false);
                 }
             });

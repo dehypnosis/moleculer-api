@@ -13,6 +13,18 @@ export declare class Version {
     private readonly $integrations;
     constructor(props: VersionProps);
     toString(): string;
+    get information(): {
+        version: string;
+        fullVersion: string;
+        routes: any[];
+        integrations: {
+            type: "remove" | "add";
+            status: "queued" | "failed" | "succeed" | "skipped";
+            hash: string;
+            schema: Readonly<import(".").ServiceAPISchema>;
+            service: string;
+        }[];
+    };
     getChildVersionProps(): {
         schemaHashMap: Map<string, Readonly<ServiceAPIIntegration>>;
         routeHashMapCache: Readonly<Map<string, Readonly<Route>>>;
@@ -22,6 +34,5 @@ export declare class Version {
     get parentVersion(): Readonly<Version> | null;
     get routes(): Readonly<Route>[];
     get integrations(): ReadonlyArray<Readonly<ServiceAPIIntegration>>;
-    get derivedIntegrations(): ReadonlyArray<Readonly<ServiceAPIIntegration>>;
     getRetryableIntegrations(): Readonly<ServiceAPIIntegration>[];
 }

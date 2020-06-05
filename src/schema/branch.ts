@@ -9,7 +9,7 @@ import { Logger } from "../logger";
 import { ServiceCatalog } from "./catalog";
 import { ProtocolPlugin } from "./plugin";
 import { ServiceAPIIntegration, ServiceAPIIntegrationSource } from "./integration";
-import { Route } from "../server";
+import { HTTPRouteHandler, Route } from "../server";
 import { Version } from "./version";
 
 export type BranchProps = {
@@ -60,6 +60,17 @@ export class Branch {
   public toString(): string {
     return `${kleur.bold(kleur.cyan(this.name))} ${kleur.cyan(`(${this.serviceCatalog.size} services)`)}`;
   }
+
+  public get information() {
+    return {
+      branch: this.name,
+      latestUsedAt: this.latestUsedAt,
+      services: this.serviceCatalog.services.map(service => service.information),
+      parentVersion: this.props.parentVersion ? this.props.parentVersion.shortHash : null,
+      latestVersion: this.$latestVersion.shortHash,
+      versions: this.versions.map(v => v.information),
+    };
+  };
 
   public get name() {
     return this.props.name;
@@ -266,13 +277,13 @@ export class Branch {
       }
 
       // compile new schemata as new routeHashMap
-      const requiredIntegrations = Array.from(schemaHashMap.values());
+      const mergedIntegrations = Array.from(schemaHashMap.values());
       const routeHashes = new Array<string>();
       const routes = new Array<Readonly<Route>>();
       const errors: ValidationError[] = [];
       for (const plugin of this.props.protocolPlugins) {
         try {
-          const pluginIntegrations = requiredIntegrations.filter(integration => integration.schema.protocol && (integration.schema.protocol as any)[plugin.key]);
+          const pluginIntegrations = mergedIntegrations.filter(integration => integration.schema.protocol && (integration.schema.protocol as any)[plugin.key]);
           const pluginResult = plugin.compileSchemata(routeHashMapCache, pluginIntegrations);
           for (const {hash, route} of pluginResult) {
             const routeHashIndex = routeHashes.indexOf(hash);
@@ -310,8 +321,8 @@ export class Branch {
 
       // failed: report errors and process as failed jobs
       if (errors.length > 0) {
-        for (const integration of requiredIntegrations) {
-          integration.setFailed(this, parentVersion, errors, requiredIntegrations);
+        for (const integration of integrations) {
+          integration.setFailed(this, parentVersion, errors, integrations);
         }
 
         if (initialCompile) { // throw errors when failed in initial compile
@@ -319,7 +330,7 @@ export class Branch {
         } else {
           const at = new Date();
           const errorsTable = Reporter.getTable(errors.map(message => ({type: "error", message, at})));
-          this.props.logger.error(`${this} branch failed ${parentVersion} -> (new) version compile:\n${requiredIntegrations.join("\n")}${errorsTable}`);
+          this.props.logger.error(`${this} branch failed ${parentVersion} -> (new) version compile:\n${integrations.join("\n")}${errorsTable}`);
         }
 
         // will not retry on failure
@@ -362,12 +373,12 @@ export class Branch {
         updates.push(`(+) ${r}`);
       }
 
-      for (const integration of requiredIntegrations) {
+      for (const integration of integrations) {
         integration.setSucceed(this, version, updates);
       }
 
       // log
-      this.props.logger.info(`${this} branch succeeded ${parentVersion} -> ${version} version compile:\n${[...requiredIntegrations, ...updates].join("\n")}`);
+      this.props.logger.info(`${this} branch succeeded ${parentVersion} -> ${version} version compile:\n${[...integrations, ...updates].join("\n")}`);
 
       // forget old parent versions if need
       for (let cur = this.$latestVersion, parent = cur.parentVersion, i = 1; parent; cur = parent, parent = cur.parentVersion, i++) {
@@ -401,7 +412,7 @@ export class Branch {
     // retry merging failed integrations from history
     const retryableIntegrations = version.getRetryableIntegrations();
     if (retryableIntegrations.length > 0) {
-      this.props.logger.info(`${this} branch will retry merging ${retryableIntegrations.length} failed/skipped integrations`);
+      this.props.logger.info(`${this} branch will retry merging ${retryableIntegrations.length} failed integrations`);
       return this.consumeIntegrations(retryableIntegrations, false);
     }
   }

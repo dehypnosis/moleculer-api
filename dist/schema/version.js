@@ -16,6 +16,15 @@ let Version = /** @class */ (() => {
         toString() {
             return kleur.yellow(`${this.shortHash} (${this.props.schemaHashMap.size} schemata, ${this.props.routeHashMap.size} routes)`);
         }
+        get information() {
+            return {
+                version: this.shortHash,
+                fullVersion: this.hash,
+                routes: this.routes.map(route => route.information),
+                integrations: this.integrations.map(integration => integration.information),
+            };
+        }
+        ;
         getChildVersionProps() {
             return {
                 schemaHashMap: new Map(this.props.schemaHashMap),
@@ -40,12 +49,12 @@ let Version = /** @class */ (() => {
             return Array.from(this.props.schemaHashMap.values());
         }
         // own integrations derived from current version
-        get derivedIntegrations() {
-            return this.$integrations;
-        }
+        // public get derivedIntegrations(): ReadonlyArray<Readonly<ServiceAPIIntegration>> {
+        //   return this.$integrations;
+        // }
         getRetryableIntegrations() {
             const retryableIntegrations = this.$integrations
-                .filter(integration => integration.status !== integration_1.ServiceAPIIntegration.Status.Succeed && !integration.service.empty);
+                .filter(integration => integration.status === integration_1.ServiceAPIIntegration.Status.Failed && !integration.service.empty);
             for (const integration of retryableIntegrations) {
                 this.$integrations.splice(this.$integrations.indexOf(integration), 1);
             }
