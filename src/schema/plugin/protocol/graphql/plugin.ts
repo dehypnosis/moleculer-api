@@ -60,11 +60,26 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
         typeDefs: {
           type: "custom",
           check(value: any) {
+            // parse graphql.documentNode which can be generated with gql` ... `
+            if (typeof value === "object" && value !== null) {
+              try {
+                value = printGraphQLSchema(value);
+              } catch (error) {
+                return [{
+                  field: `typeDefs`,
+                  type: "typeDefsSyntax",
+                  message: error.message,
+                  actual: value,
+                }];
+              }
+            }
+
+            // parse string
             if (typeof value !== "string") {
               return [{
                 field: `typeDefs`,
-                type: "type",
-                message: "type definitions must be a string",
+                type: "typeDefsSyntax",
+                message: "type definitions must be string or valid graphql.DocumentNode",
                 actual: value,
               }];
             }
@@ -375,7 +390,7 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
     let resolvers: IResolvers = {};
     for (const integration of integrations) {
       const schema: GraphQLProtocolPluginSchema = (integration.schema.protocol as any)[this.key];
-      typeDefs.push(schema.typeDefs);
+      typeDefs.push(typeof schema.typeDefs === "string" ? schema.typeDefs : printGraphQLSchema(schema.typeDefs));
       resolvers = _.merge<IResolvers, IResolvers>(resolvers, this.createGraphQLResolvers(schema.resolvers, integration));
     }
 

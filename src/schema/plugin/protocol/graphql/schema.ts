@@ -1,12 +1,11 @@
-import { GraphQLResolveInfo } from "graphql";
-export { GraphQLResolveInfo } from "graphql";
+import { GraphQLResolveInfo, DocumentNode } from "graphql";
 import { CallConnectorSchema, ConnectorCatalog, MapConnectorSchema, PublishConnectorSchema, SubscribeConnectorSchema } from "../../connector";
 import { IProtocolPluginCatalog, IProtocolPluginSchema } from "../plugin";
 
 /* GraphQL Protocol Plugin */
 export type GraphQLProtocolPluginSchema = IProtocolPluginSchema & {
   description?: string;
-  typeDefs: string;
+  typeDefs: string | DocumentNode;
   resolvers: GraphQLProtocolResolversSchema;
 };
 

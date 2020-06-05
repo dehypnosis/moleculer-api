@@ -34,11 +34,26 @@ let GraphQLProtocolPlugin = /** @class */ (() => {
                 typeDefs: {
                     type: "custom",
                     check(value) {
+                        // parse graphql.documentNode which can be generated with gql` ... `
+                        if (typeof value === "object" && value !== null) {
+                            try {
+                                value = language_1.print(value);
+                            }
+                            catch (error) {
+                                return [{
+                                        field: `typeDefs`,
+                                        type: "typeDefsSyntax",
+                                        message: error.message,
+                                        actual: value,
+                                    }];
+                            }
+                        }
+                        // parse string
                         if (typeof value !== "string") {
                             return [{
                                     field: `typeDefs`,
-                                    type: "type",
-                                    message: "type definitions must be a string",
+                                    type: "typeDefsSyntax",
+                                    message: "type definitions must be string or valid graphql.DocumentNode",
                                     actual: value,
                                 }];
                         }
@@ -327,7 +342,7 @@ let GraphQLProtocolPlugin = /** @class */ (() => {
             let resolvers = {};
             for (const integration of integrations) {
                 const schema = integration.schema.protocol[this.key];
-                typeDefs.push(schema.typeDefs);
+                typeDefs.push(typeof schema.typeDefs === "string" ? schema.typeDefs : language_1.print(schema.typeDefs));
                 resolvers = _.merge(resolvers, this.createGraphQLResolvers(schema.resolvers, integration));
             }
             const { handler, subscriptionHandler, playgroundHandler } = new handler_1.GraphQLHandlers((message) => {
