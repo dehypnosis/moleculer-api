@@ -242,12 +242,14 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
                           objectStrict: "GraphQLPublishableFieldResolverSchema cannot be with other connectors",
                         },
                       };
+                    } else if (typeof fieldResolver === "string") {
+                      rule = ConnectorValidator.map;
                     } else {
                       errors.push({
                         field: `resolvers.${typeName}.${fieldName}`,
                         type: typeof fieldResolver === "undefined" ? "fieldResolverRequired" : "fieldResolverInvalid",
-                        message: `${typeName} should have an ${fieldName} field resolver which is an object having either call or publish property`,
-                        expected: `Omit<GraphQLCallableFieldResolverSchema, "ignoreError"> | GraphQLPublishableFieldResolverSchema`,
+                        message: `${typeName} should have an ${fieldName} field resolver which is an object having either call, publish property or a string which denotes a JavaScript function`,
+                        expected: `Omit<GraphQLCallableFieldResolverSchema, "ignoreError"> | GraphQLPublishableFieldResolverSchema | GraphQLMappableFieldResolverSchema`,
                       });
                     }
                     break;

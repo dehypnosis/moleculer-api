@@ -209,12 +209,15 @@ let GraphQLProtocolPlugin = /** @class */ (() => {
                                                 },
                                             };
                                         }
+                                        else if (typeof fieldResolver === "string") {
+                                            rule = connector_1.ConnectorValidator.map;
+                                        }
                                         else {
                                             errors.push({
                                                 field: `resolvers.${typeName}.${fieldName}`,
                                                 type: typeof fieldResolver === "undefined" ? "fieldResolverRequired" : "fieldResolverInvalid",
-                                                message: `${typeName} should have an ${fieldName} field resolver which is an object having either call or publish property`,
-                                                expected: `Omit<GraphQLCallableFieldResolverSchema, "ignoreError"> | GraphQLPublishableFieldResolverSchema`,
+                                                message: `${typeName} should have an ${fieldName} field resolver which is an object having either call, publish property or a string which denotes a JavaScript function`,
+                                                expected: `Omit<GraphQLCallableFieldResolverSchema, "ignoreError"> | GraphQLPublishableFieldResolverSchema | GraphQLMappableFieldResolverSchema`,
                                             });
                                         }
                                         break;

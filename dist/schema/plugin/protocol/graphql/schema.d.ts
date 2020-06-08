@@ -17,7 +17,7 @@ export declare type GraphQLProtocolQueryTypeResolverSchema = {
     [fieldName: string]: GraphQLCallableFieldResolverSchema | GraphQLMappableFieldResolverSchema;
 };
 export declare type GraphQLProtocolMutationTypeResolverSchema = {
-    [fieldName: string]: Omit<GraphQLCallableFieldResolverSchema, "ignoreError"> | GraphQLPublishableFieldResolverSchema;
+    [fieldName: string]: Omit<GraphQLCallableFieldResolverSchema, "ignoreError"> | GraphQLPublishableFieldResolverSchema | GraphQLMappableFieldResolverSchema;
 };
 export declare type GraphQLProtocolSubscriptionTypeResolverSchema = {
     [fieldName: string]: GraphQLSubscribableFieldResolverSchema;
