@@ -69,7 +69,7 @@ let ServiceAPIIntegration = /** @class */ (() => {
                         from: version.parentVersion && version.parentVersion.toString(),
                         to: version.toString(),
                     },
-                    integrations: version.integrations,
+                    integrations: version.integrations.map(int => int.toString()),
                     updates,
                 });
             }

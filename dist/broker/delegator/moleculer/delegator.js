@@ -298,7 +298,7 @@ let MoleculerServiceBrokerDelegator = /** @class */ (() => {
                 const params = { messages, table };
                 const payloads = Array.from(service.nodeIdMap.keys())
                     .map(nodeID => ({ action, params, nodeID }));
-                yield this.broker.mcall(payloads, { retries: 0, timeout: 5000 });
+                yield this.broker.mcall(payloads, { retries: 3, timeout: 3000 });
             });
         }
     }

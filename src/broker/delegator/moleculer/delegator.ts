@@ -323,6 +323,6 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
     const params = {messages, table};
     const payloads = Array.from(service.nodeIdMap.keys())
       .map(nodeID => ({action, params, nodeID }));
-    await this.broker.mcall(payloads, { retries: 0, timeout: 5000 });
+    await this.broker.mcall(payloads, { retries: 3, timeout: 3000 });
   }
 }
