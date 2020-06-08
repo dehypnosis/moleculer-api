@@ -444,18 +444,16 @@ let GraphQLProtocolPlugin = /** @class */ (() => {
             });
             const { ignoreError } = schema;
             return (source, args, context, info) => {
-                try {
-                    const mappableArgs = { source, args, context, info };
-                    return callConnector(context, mappableArgs);
-                }
-                catch (error) {
+                const mappableArgs = { source, args, context, info };
+                return callConnector(context, mappableArgs)
+                    .catch(error => {
                     if (ignoreError) {
                         return null;
                     }
                     else {
                         throw error;
                     }
-                }
+                });
             };
         }
         createGraphQLFieldResolverFromPublishConnectorSchema(schema, integration) {
