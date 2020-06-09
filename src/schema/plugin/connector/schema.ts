@@ -48,7 +48,7 @@ export type CallConnectorSchema<MappableArgs extends { [key: string]: any } = an
   params: ParamsConnectorSchema<MappableArgs>;
 
   // response mapper
-  map?: MapConnectorSchema<(args: CallConnectorResponseMappableArgs) => any>; // default behavior: ({ contect, action, params, response }) => response
+  map?: MapConnectorSchema<(args: CallConnectorResponseMappableArgs) => any>; // default behavior: ({ context, action, params, response }) => response
 };
 
 export type PublishConnectorResponseMappableArgs = { context: any } & Omit<EventPacket, "from">;

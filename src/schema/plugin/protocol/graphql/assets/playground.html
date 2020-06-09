@@ -492,32 +492,39 @@ window.addEventListener('load', function (event) {
   GraphQLPlayground.init(root, {
     settings: {
       "schema.disableComments": false,
-      endpoint: location.href,
-      /* ref: https://github.com/prisma-labs/graphql-playground/blob/master/packages/graphql-playground-react/src/localDevIndex.tsx
-        endpoint?: string
-        endpointUrl?: string
-        subscriptionEndpoint?: string
-        settings?: ISettings
-        folderName?: string
-        configString?: string
-        isElectron?: boolean
-        canSaveConfig?: boolean
-        onSaveConfig?: (configString: string) => void
-        onNewWorkspace?: () => void
-        getRef?: (ref: any) => void
-        platformToken?: string
-        env?: any
-        config?: GraphQLConfig
-        configPath?: string
-        injectedState?: any
-        createApolloLink?: (session: Session) => ApolloLink
-        tabs?: Tab[]
-        schema?: { __schema: any } // introspection result
-        codeTheme?: EditorColours
-        workspaceName?: string
-        headers?: any
-      */
+      "schema.polling.endpointFilter": "**",
+      "schema.polling.enable": true,
+      "schema.polling.interval": 5000,
+      "editor.reuseHeaders": true,
     },
+    headers: {
+      "Authorization": location.search.startsWith("?auth=") ? decodeURIComponent(location.search.substr(6)) : undefined,
+      "X-GraphQL-Playground": "TRUE"
+    },
+
+    /* ref: https://github.com/prisma-labs/graphql-playground/blob/master/packages/graphql-playground-react/src/localDevIndex.tsx
+      endpoint?: string
+      endpointUrl?: string
+      subscriptionEndpoint?: string
+      settings?: ISettings
+      folderName?: string
+      configString?: string
+      isElectron?: boolean
+      canSaveConfig?: boolean
+      onSaveConfig?: (configString: string) => void
+      onNewWorkspace?: () => void
+      getRef?: (ref: any) => void
+      platformToken?: string
+      env?: any
+      config?: GraphQLConfig
+      configPath?: string
+      injectedState?: any
+      createApolloLink?: (session: Session) => ApolloLink
+      tabs?: Tab[]
+      schema?: { __schema: any } // introspection result
+      codeTheme?: EditorColours
+      workspaceName?: string
+    */
   });
 })
 </script>
