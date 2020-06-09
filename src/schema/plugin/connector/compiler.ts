@@ -63,10 +63,20 @@ export const ConnectorCompiler = {
     // to map call params
     let paramsMapper: ParamsMapper<MappableArgs>;
 
+    // to filter request
+    const ifMapper = schema.if ? broker.createInlineFunction<MappableArgs, boolean>({
+      function: schema.if,
+      mappableKeys: opts.explicitMappableKeys,
+      reporter: integration.reporter.getChild({
+        field: kleur.bold(kleur.cyan(field + ".if")),
+        schema: schema.if,
+      }),
+    }) : null;
+
     // to map response
     const responseMapper = schema.map ? broker.createInlineFunction<CallConnectorResponseMappableArgs, any>({
       function: schema.map,
-      mappableKeys: ["context", "action", "params", "response"],
+      mappableKeys: ["request", "response"],
       reporter: integration.reporter.getChild({
         field: kleur.bold(kleur.cyan(field + ".map")),
         schema: schema.map,
@@ -77,8 +87,6 @@ export const ConnectorCompiler = {
     const policies = integration.schema.policy && Array.isArray(integration.schema.policy.call)
       ? integration.schema.policy.call.filter(policy => policy.actions.some(actionNamePattern => broker.matchActionName(actionId, actionNamePattern)))
       : [];
-
-    const baseArgs = {action: actionId};
 
     const connector: CallConnector<MappableArgs> = async (context, mappableArgs, injectedParams): Promise<any> => {
       // dynamically load action before first call
@@ -93,7 +101,7 @@ export const ConnectorCompiler = {
         paramsMapper = broker.createParamsMapper<MappableArgs>({
           explicitMappableKeys: opts.explicitMappableKeys,
           explicitMapping: schema.params,
-          implicitMappableKeys: opts.implicitMappableKeys,
+          implicitMappableKeys: schema.implicitParams === false ? null : opts.implicitMappableKeys,
           batchingEnabled: opts.batchingEnabled,
           paramsSchema: action.paramsSchema,
           reporter: integration.reporter.getChild({
@@ -103,12 +111,17 @@ export const ConnectorCompiler = {
         });
       }
 
+      // test if
+      if (ifMapper && ifMapper(mappableArgs) !== true) {
+        return null;
+      }
+
       // map params
       const {params, batchingParams} = paramsMapper.map(mappableArgs);
 
       // test policy
-      const args: CallPolicyArgs = {...baseArgs, context, params: {...params, ...batchingParams}};
-      if (testCallPolicy(policyPlugins, policies, args) !== true) {
+      const request: CallPolicyArgs<MappableArgs> = {...mappableArgs, params: {...params, ...batchingParams} };
+      if (testCallPolicy(policyPlugins, policies, request) !== true) {
         throw new Error("forbidden call"); // TODO: normalize error
       }
 
@@ -121,7 +134,7 @@ export const ConnectorCompiler = {
       });
 
       // map response
-      return responseMapper ? responseMapper({...args, response}) : response;
+      return responseMapper ? responseMapper({request, response}) : response;
     };
 
     return withLabel(connector, `callConnector`);

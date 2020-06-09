@@ -41,7 +41,13 @@ export const ConnectorValidator: { [connector in "call" | "params" | "publish" |
       action: {
         type: "string",
       },
+      implicitParams: {
+        type: "boolean",
+        default: true,
+        optional: true,
+      },
       params,
+      if: map,
       map,
     },
   },

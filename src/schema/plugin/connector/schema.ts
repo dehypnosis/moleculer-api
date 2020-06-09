@@ -39,7 +39,7 @@ export type MapConnectorSchema<Fn extends (mappableArgs: any) => any = (mappable
   }
  */
 
-export type CallConnectorResponseMappableArgs = { context: any, action: string, params: any, response: any };
+export type CallConnectorResponseMappableArgs<MappableArgs extends { [key: string]: any } = any> = { request: MappableArgs & { params: any }, response: any };
 export type CallConnectorSchema<MappableArgs extends { [key: string]: any } = any> = {
   // action name
   action: string;
@@ -47,8 +47,14 @@ export type CallConnectorSchema<MappableArgs extends { [key: string]: any } = an
   // call params mapper
   params: ParamsConnectorSchema<MappableArgs>;
 
+  // to disable implicit params mapping set false
+  implicitParams?: boolean;
+
+  // call invocation filter but it return null when failed rather throw 401 error as like policies do
+  if?: MapConnectorSchema<(args: MappableArgs) => boolean>;
+
   // response mapper
-  map?: MapConnectorSchema<(args: CallConnectorResponseMappableArgs) => any>; // default behavior: ({ context, action, params, response }) => response
+  map?: MapConnectorSchema<(args: CallConnectorResponseMappableArgs<MappableArgs>) => any>; // default behavior: ({ context, action, params, response }) => response
 };
 
 export type PublishConnectorResponseMappableArgs = { context: any } & Omit<EventPacket, "from">;
@@ -124,7 +130,7 @@ export type MapConnectorCatalog = {
 export type ConnectorCatalog = CallConnectorCatalog | PublishConnectorCatalog | SubscribeConnectorCatalog | MapConnectorCatalog;
 
 /* Policy */
-export type CallPolicyArgs = Omit<CallConnectorResponseMappableArgs, "response">;
+export type CallPolicyArgs<MappableArgs extends { [key: string]: any } = any> = CallConnectorResponseMappableArgs<MappableArgs>["request"];
 export type CallPolicySchema = {
   description: string;
   actions: string[];

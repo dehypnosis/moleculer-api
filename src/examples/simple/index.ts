@@ -369,7 +369,7 @@ const services = getMoleculerServiceBroker({
                       params: {
                         file: "@args.file",
                       },
-                      map: `({ params }) => params.file`,
+                      map: `({ request }) => request.params.file`,
                     },
                   },
                 },

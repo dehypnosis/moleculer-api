@@ -390,7 +390,10 @@ let GraphQLProtocolPlugin = /** @class */ (() => {
             if (Mutation) {
                 const typeResolver = resolvers.Mutation = {};
                 for (const [fieldName, fieldSchema] of Object.entries(Mutation)) {
-                    if (fieldSchema && fieldSchema.call) {
+                    if (typeof fieldSchema === "string") {
+                        typeResolver[fieldName] = this.createGraphQLFieldResolverFromMapConnectorSchema(fieldSchema, integration);
+                    }
+                    else if (fieldSchema && fieldSchema.call) {
                         typeResolver[fieldName] = this.createGraphQLFieldResolverFromCallConnectorSchema(fieldSchema, integration);
                     }
                     else if (fieldSchema && fieldSchema.publish) {
