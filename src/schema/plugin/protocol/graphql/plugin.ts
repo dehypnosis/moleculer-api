@@ -446,7 +446,9 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
     if (Mutation) {
       const typeResolver = resolvers.Mutation = {} as IResolverObject;
       for (const [fieldName, fieldSchema] of Object.entries(Mutation)) {
-        if (fieldSchema && (fieldSchema as GraphQLCallableFieldResolverSchema).call) {
+        if (typeof fieldSchema === "string") {
+          typeResolver[fieldName] = this.createGraphQLFieldResolverFromMapConnectorSchema(fieldSchema, integration);
+        } else if (fieldSchema && (fieldSchema as GraphQLCallableFieldResolverSchema).call) {
           typeResolver[fieldName] = this.createGraphQLFieldResolverFromCallConnectorSchema(fieldSchema as GraphQLCallableFieldResolverSchema, integration);
         } else if (fieldSchema && (fieldSchema as GraphQLPublishableFieldResolverSchema).publish) {
           typeResolver[fieldName] = this.createGraphQLFieldResolverFromPublishConnectorSchema(fieldSchema as GraphQLPublishableFieldResolverSchema, integration);

@@ -489,7 +489,9 @@ window.addEventListener('load', function (event) {
   loadingWrapper.classList.add('fadeOut');
   const root = document.getElementById('root');
   root.classList.add('playgroundIn');
+
   GraphQLPlayground.init(root, {
+    shareEnabled: true,
     settings: {
       "schema.disableComments": false,
       "schema.polling.endpointFilter": "**",
@@ -499,7 +501,6 @@ window.addEventListener('load', function (event) {
     },
     headers: {
       "Authorization": location.search.startsWith("?auth=") ? decodeURIComponent(location.search.substr(6)) : undefined,
-      "X-GraphQL-Playground": "TRUE"
     },
 
     /* ref: https://github.com/prisma-labs/graphql-playground/blob/master/packages/graphql-playground-react/src/localDevIndex.tsx
