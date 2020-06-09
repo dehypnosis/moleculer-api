@@ -208,7 +208,7 @@ export class ServiceBroker<DelegatorContext = any> {
     const ctx = this.getDelegatorContext(context);
     const {action, params, batchingParams, disableCache} = args;
     const node = this.delegator.selectActionTargetNode(ctx, action)!;
-    console.assert(node && action, "there are no available nodes to call the action");
+    // console.assert(node && action, "there are no available nodes to call the action");
 
     // do batching
     if (batchingParams) {

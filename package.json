@@ -1,6 +1,6 @@
 {
   "name": "moleculer-api",
-  "version": "0.2.16",
+  "version": "0.2.17",
   "description": "A dynamic API Gateway for MoleculerJS which updates REST endpoints and aggregated GraphQL schema, access control policy for each action calls from metadata of remote services schema without restart or deployment.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -106,7 +106,7 @@
     "jest-cli": "^25.5.4",
     "memorystream": "^0.3.1",
     "nodemon": "^2.0.4",
-    "qmit-sdk": "^1.0.16",
+    "qmit-sdk": "^1.0.23",
     "ts-jest": "^25.10.0-alpha.2",
     "ts-node": "^8.10.1",
     "tslint": "^6.1.2",
