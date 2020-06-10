@@ -26,10 +26,12 @@ export declare type ParamsConnectorSchema<MappableArgs extends {
 export declare type MapConnectorSchema<Fn extends (mappableArgs: any) => any = (mappableArgs: {
     [key: string]: any;
 }) => any> = string;
-export declare type CallConnectorResponseMappableArgs = {
-    context: any;
-    action: string;
-    params: any;
+export declare type CallConnectorResponseMappableArgs<MappableArgs extends {
+    [key: string]: any;
+} = any> = {
+    request: MappableArgs & {
+        params: any;
+    };
     response: any;
 };
 export declare type CallConnectorSchema<MappableArgs extends {
@@ -37,7 +39,9 @@ export declare type CallConnectorSchema<MappableArgs extends {
 } = any> = {
     action: string;
     params: ParamsConnectorSchema<MappableArgs>;
-    map?: MapConnectorSchema<(args: CallConnectorResponseMappableArgs) => any>;
+    implicitParams?: boolean;
+    if?: MapConnectorSchema<(args: MappableArgs) => boolean>;
+    map?: MapConnectorSchema<(args: CallConnectorResponseMappableArgs<MappableArgs>) => any>;
 };
 export declare type PublishConnectorResponseMappableArgs = {
     context: any;
@@ -98,7 +102,9 @@ export declare type MapConnectorCatalog = {
     map: string;
 };
 export declare type ConnectorCatalog = CallConnectorCatalog | PublishConnectorCatalog | SubscribeConnectorCatalog | MapConnectorCatalog;
-export declare type CallPolicyArgs = Omit<CallConnectorResponseMappableArgs, "response">;
+export declare type CallPolicyArgs<MappableArgs extends {
+    [key: string]: any;
+} = any> = CallConnectorResponseMappableArgs<MappableArgs>["request"];
 export declare type CallPolicySchema = {
     description: string;
     actions: string[];

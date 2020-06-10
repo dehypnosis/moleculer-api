@@ -153,7 +153,7 @@ let ParamsMapper = /** @class */ (() => {
             // apply implicit mapping for rest params with hinted schema
             if (paramsSchema && implicitMappableKeys && implicitMappableKeys.length > 0) {
                 const implicitMappableParamNames = Object.keys(paramsSchema)
-                    .filter(paramName => !mappedParamNames.includes(paramName));
+                    .filter(paramName => !mappedParamNames.includes(paramName) && paramName !== "$$strict");
                 if (implicitMappableParamNames.length > 0) {
                     for (const paramName of implicitMappableParamNames) {
                         info[paramName] = {

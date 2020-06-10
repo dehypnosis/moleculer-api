@@ -29,10 +29,19 @@ exports.ConnectorCompiler = {
         const actionId = schema.action;
         // to map call params
         let paramsMapper;
+        // to filter request
+        const ifMapper = schema.if ? broker.createInlineFunction({
+            function: schema.if,
+            mappableKeys: opts.explicitMappableKeys,
+            reporter: integration.reporter.getChild({
+                field: kleur.bold(kleur.cyan(field + ".if")),
+                schema: schema.if,
+            }),
+        }) : null;
         // to map response
         const responseMapper = schema.map ? broker.createInlineFunction({
             function: schema.map,
-            mappableKeys: ["context", "action", "params", "response"],
+            mappableKeys: ["request", "response"],
             reporter: integration.reporter.getChild({
                 field: kleur.bold(kleur.cyan(field + ".map")),
                 schema: schema.map,
@@ -42,7 +51,6 @@ exports.ConnectorCompiler = {
         const policies = integration.schema.policy && Array.isArray(integration.schema.policy.call)
             ? integration.schema.policy.call.filter(policy => policy.actions.some(actionNamePattern => broker.matchActionName(actionId, actionNamePattern)))
             : [];
-        const baseArgs = { action: actionId };
         const connector = (context, mappableArgs, injectedParams) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             // dynamically load action before first call
             if (!action) {
@@ -54,7 +62,7 @@ exports.ConnectorCompiler = {
                 paramsMapper = broker.createParamsMapper({
                     explicitMappableKeys: opts.explicitMappableKeys,
                     explicitMapping: schema.params,
-                    implicitMappableKeys: opts.implicitMappableKeys,
+                    implicitMappableKeys: schema.implicitParams === false ? null : opts.implicitMappableKeys,
                     batchingEnabled: opts.batchingEnabled,
                     paramsSchema: action.paramsSchema,
                     reporter: integration.reporter.getChild({
@@ -63,11 +71,15 @@ exports.ConnectorCompiler = {
                     }),
                 });
             }
+            // test if
+            if (ifMapper && ifMapper(mappableArgs) !== true) {
+                return null;
+            }
             // map params
             const { params, batchingParams } = paramsMapper.map(mappableArgs);
             // test policy
-            const args = Object.assign(Object.assign({}, baseArgs), { context, params: Object.assign(Object.assign({}, params), batchingParams) });
-            if (policy_1.testCallPolicy(policyPlugins, policies, args) !== true) {
+            const request = Object.assign(Object.assign({}, mappableArgs), { params: Object.assign(Object.assign({}, params), batchingParams) });
+            if (policy_1.testCallPolicy(policyPlugins, policies, request) !== true) {
                 throw new Error("forbidden call"); // TODO: normalize error
             }
             // call
@@ -78,7 +90,7 @@ exports.ConnectorCompiler = {
                 disableCache: opts.disableCache,
             });
             // map response
-            return responseMapper ? responseMapper(Object.assign(Object.assign({}, args), { response })) : response;
+            return responseMapper ? responseMapper({ request, response }) : response;
         });
         return withLabel(connector, `callConnector`);
     },

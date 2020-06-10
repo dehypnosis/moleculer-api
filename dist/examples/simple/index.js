@@ -355,7 +355,7 @@ const services = test_1.getMoleculerServiceBroker({
                                             params: {
                                                 file: "@args.file",
                                             },
-                                            map: `({ params }) => params.file`,
+                                            map: `({ request }) => request.params.file`,
                                         },
                                     },
                                 },
