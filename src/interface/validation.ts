@@ -71,11 +71,12 @@ function recNormalizeValidationSchema(paramSchema: ValidationSchema[string]): No
     }
   } else if (Array.isArray(paramSchema)) {
     // normalize array syntax
+    const items = paramSchema.map(s => recNormalizeValidationSchema(s));
     schema = {
       type: "oneOf",
       deprecated: false,
       description: null,
-      optional: false,
+      optional: items.every(item => item.optional),
       items: paramSchema.map(s => recNormalizeValidationSchema(s)),
     };
   } else if (paramSchema && typeof paramSchema === "object") {
@@ -103,7 +104,7 @@ function recNormalizeValidationSchema(paramSchema: ValidationSchema[string]): No
   // normalize optional props
   if (!schema.description) schema.description = null;
   schema.deprecated = !!schema.deprecated;
-  schema.optional = !!schema.optional;
+  schema.optional = !!schema.optional || typeof schema.default !== "undefined";
   return schema;
 }
 

@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { HTTPRouteRequest, HTTPRouteResponse } from "../../../../../server";
-declare type Upload = {
+export declare type Upload = {
     filename: string;
     encoding: string;
     mimetype: string;
@@ -20,4 +20,3 @@ export declare class MultipartFormDataHandler {
     } | null>;
     private wasteStream;
 }
-export {};

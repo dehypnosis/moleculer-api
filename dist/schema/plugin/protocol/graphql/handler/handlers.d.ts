@@ -13,4 +13,5 @@ export declare class GraphQLHandlers extends ApolloServer {
     readonly handler: HTTPRouteHandler;
     readonly subscriptionHandler?: WebSocketRouteHandler;
     readonly playgroundHandler?: HTTPRouteHandler;
+    private waitForPromisedVariables;
 }

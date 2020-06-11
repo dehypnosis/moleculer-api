@@ -35,8 +35,8 @@ class GraphQLHandlers extends apollo_server_express_1.ApolloServer {
             // context injection
             context: ({ context }) => context }));
         // create graphql request handler
-        const uploadsConfig = typeof uploads !== "object" ? {} : uploads;
         const optionsFactory = this.createGraphQLServerOptionsWithContext.bind(this);
+        const uploadsConfig = typeof uploads !== "object" ? {} : uploads;
         const handler = (context, req, res) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 // process upload
@@ -44,6 +44,7 @@ class GraphQLHandlers extends apollo_server_express_1.ApolloServer {
                 if (uploads !== false && contentType && contentType.toLowerCase().startsWith("multipart/form-data")) {
                     try {
                         req.body = yield apollo_server_core_1.processFileUploads(req, res, uploadsConfig);
+                        req.body.variables = yield this.waitForPromisedVariables(req.body.variables); // ref: https://github.com/jaydenseric/graphql-upload#upload-instance-property-promise
                     }
                     catch (error) {
                         if (error.status && error.expose) {
@@ -103,6 +104,24 @@ class GraphQLHandlers extends apollo_server_express_1.ApolloServer {
         });
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return _super.graphQLServerOptions.call(this, { context, req, res });
+        });
+    }
+    waitForPromisedVariables(v) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            if (Array.isArray(v)) {
+                return Promise.all(v.map((vv) => this.waitForPromisedVariables(vv)));
+            }
+            else if (typeof v === "object" && v !== null) {
+                if (typeof v.then === "function") {
+                    return yield v;
+                }
+                return Promise.all(Object.entries(v).map(([kk, vv]) => tslib_1.__awaiter(this, void 0, void 0, function* () { return [kk, yield this.waitForPromisedVariables(vv)]; })))
+                    .then((entries) => entries.reduce((obj, [kk, vv]) => {
+                    obj[kk] = vv;
+                    return obj;
+                }, {}));
+            }
+            return v;
         });
     }
 }

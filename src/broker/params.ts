@@ -5,7 +5,7 @@ import { Reporter } from "./reporter";
 export type ParamsMappingInfo = {
   [paramName: string]: ({
     strategy: "explicit";
-    typecasting: "boolean" | "number" | null;
+    typecasting: "boolean" | "number" | "string" | null; // actually string is not required but for clearness
     batching: boolean;
     path: string;
   } | {
@@ -101,7 +101,7 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
                 batchingParamNames.push(paramName);
 
               } else { // batching is disabled for this mapper
-                const err: any = new Error("this params mapper does not support batching");
+                const err: any = new Error("a params mapper of current protocol does not support batching");
                 err.paramName = paramName;
                 err.paramMapping = paramMapping;
                 err.paramPath = paramPath;
@@ -111,13 +111,16 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
             // => body, body.foo, body@, body..., body.bar:boolean, body.zzz:number, body:number, body.id
 
             // prepare typecasting
-            let typecasting: "boolean" | "number" | null = null;
+            let typecasting: "boolean" | "number" | "string" | null = null;
             if (paramPath.endsWith(":boolean")) {
               paramPath = paramPath.substr(0, paramPath.length - 8);
               typecasting = "boolean";
             } else if (paramPath.endsWith(":number")) {
-              paramPath = paramPath.substr(0, paramPath.length - 8);
+              paramPath = paramPath.substr(0, paramPath.length - 7);
               typecasting = "number";
+            } else if (paramPath.endsWith(":string")) {
+              paramPath = paramPath.substr(0, paramPath.length - 7);
+              typecasting = "string";
             }
             // => body, body.foo, body@, body..., body.bar, body.zzz, body.id
 
@@ -130,32 +133,38 @@ export class ParamsMapper<MappableArgs extends { [key: string]: any }> {
               mapper = args => {
                 let paramValue: any = _.get(args, paramPath);
                 if (typeof paramValue === "undefined") {
-                  const err: any = new Error("cannot map params with property path");
-                  err.paramName = paramName;
-                  err.paramMapping = paramMapping;
-                  err.paramPath = paramPath;
-                  err.args = args;
-                  reporter.warn(err);
-                } else {
-                  switch (typecasting) {
-                    case "boolean":
-                      paramValue = !(paramValue === false || paramValue === 0 || paramValue === "false" || paramValue === "0");
-                      break;
-                    case "number":
-                      const castedParamValue = parseFloat(paramValue);
-                      if (isNaN(castedParamValue)) {
-                        const err: any = new Error("cannot map params with number typecasting");
-                        err.paramName = paramName;
-                        err.paramMapping = paramMapping;
-                        err.paramPath = paramPath;
-                        err.paramValue = paramValue;
-                        err.args = args;
-                        reporter.warn(err);
-                      } else {
-                        paramValue = castedParamValue;
-                      }
-                      break;
+                  if (!(paramsSchema && paramsSchema[paramName] && paramsSchema[paramName].optional)) {
+                    const err: any = new Error("cannot map params with property path");
+                    err.paramName = paramName;
+                    err.paramMapping = paramMapping;
+                    err.paramPath = paramPath;
+                    err.args = args;
+                    reporter.warn(err);
                   }
+                  return prevMapper(args);
+                }
+
+                switch (typecasting) {
+                  case "string":
+                    // nothing...
+                    break;
+                  case "boolean":
+                    paramValue = !(paramValue === false || paramValue === 0 || paramValue === "false" || paramValue === "0");
+                    break;
+                  case "number":
+                    const castedParamValue = parseFloat(paramValue);
+                    if (isNaN(castedParamValue)) {
+                      const err: any = new Error("cannot map params with number typecasting");
+                      err.paramName = paramName;
+                      err.paramMapping = paramMapping;
+                      err.paramPath = paramPath;
+                      err.paramValue = paramValue;
+                      err.args = args;
+                      reporter.warn(err);
+                    } else {
+                      paramValue = castedParamValue;
+                    }
+                    break;
                 }
 
                 // merge params

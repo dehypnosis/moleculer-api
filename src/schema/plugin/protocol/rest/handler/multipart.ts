@@ -2,7 +2,7 @@ import Busboy from "busboy";
 import { WriteStream } from "fs-capacitor";
 import { HTTPRouteRequest, HTTPRouteResponse } from "../../../../../server";
 
-type Upload = {
+export type Upload = {
   filename: string;
   encoding: string;
   mimetype: string;

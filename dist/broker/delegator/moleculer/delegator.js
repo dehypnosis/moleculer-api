@@ -17,14 +17,18 @@ let MoleculerServiceBrokerDelegator = /** @class */ (() => {
             /* action/event name matching for call, publish, subscribe, clear cache */
             this.actionNameResolver = name_1.defaultNamePatternResolver;
             this.eventNameResolver = name_1.defaultNamePatternResolver;
-            if (!opts)
-                opts = {};
-            opts.logger = logger_1.createMoleculerLoggerOptions(this.props.logger);
-            opts.skipProcessEventRegistration = true;
-            this.broker = new Moleculer.ServiceBroker(opts);
-            // create optional moleculer services
-            if (opts.services) {
-                for (const serviceSchema of opts.services) {
+            const _a = opts || {}, { services = [], streamingCallTimeout = 1000 * 3600, streamingToStringEncoding = "base64" } = _a, moleculerBrokerOptions = tslib_1.__rest(_a, ["services", "streamingCallTimeout", "streamingToStringEncoding"]);
+            this.opts = {
+                streamingCallTimeout,
+                streamingToStringEncoding,
+            };
+            const bOpts = moleculerBrokerOptions;
+            bOpts.logger = logger_1.createMoleculerLoggerOptions(this.props.logger);
+            bOpts.skipProcessEventRegistration = true;
+            this.broker = new Moleculer.ServiceBroker(bOpts);
+            // create optional moleculer services with this broker
+            if (services) {
+                for (const serviceSchema of services) {
                     this.broker.createService(serviceSchema);
                 }
             }
@@ -91,18 +95,30 @@ let MoleculerServiceBrokerDelegator = /** @class */ (() => {
                 let response;
                 // create child context
                 const ctx = Moleculer.Context.create(this.broker);
-                // streaming request
+                // streaming request for root stream params
                 if (params && typeof params.createReadStream === "function") {
                     const { createReadStream } = params, meta = tslib_1.__rest(params, ["createReadStream"]);
                     const stream = params.createReadStream();
                     if (!interface_1.isReadStream(stream)) {
                         throw new Error("invalid stream request"); // TODO: normalize error
                     }
-                    response = yield ctx.call(action.id, stream, { nodeID: node === null || node === void 0 ? void 0 : node.id, meta, parentCtx: context });
+                    response = yield ctx.call(action.id, stream, {
+                        meta,
+                        nodeID: node === null || node === void 0 ? void 0 : node.id,
+                        parentCtx: context,
+                        retries: 0,
+                        timeout: this.opts.streamingCallTimeout,
+                    });
                 }
                 else {
-                    // normal request
-                    response = yield ctx.call(action.id, params, { nodeID: node === null || node === void 0 ? void 0 : node.id, parentCtx: context });
+                    // read all file streams as buffer for child stream params (just parse direct children props)
+                    const hasNestedStream = yield this.parseNestedStreamAsBuffer(params);
+                    response = yield ctx.call(action.id, params, {
+                        nodeID: node === null || node === void 0 ? void 0 : node.id,
+                        parentCtx: context,
+                        retries: hasNestedStream ? 0 : undefined,
+                        timeout: hasNestedStream ? this.opts.streamingCallTimeout : undefined,
+                    });
                 }
                 // streaming response (can obtain other props from ctx.meta in streaming response)
                 if (interface_1.isReadStream(response)) {
@@ -112,6 +128,44 @@ let MoleculerServiceBrokerDelegator = /** @class */ (() => {
                     // normal response
                     return response;
                 }
+            });
+        }
+        parseNestedStreamAsBuffer(params) {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                let hasNestedStream = false;
+                for (const v of Object.values(params)) {
+                    if (Array.isArray(v)) {
+                        const result = yield Promise.all(v.map((vv) => this.parseNestedStreamAsBuffer(vv)));
+                        if (!hasNestedStream) {
+                            hasNestedStream = result.some(p => !!p);
+                        }
+                    }
+                    else if (typeof v === "object" && v !== null && typeof v.createReadStream === "function") {
+                        const stream = v.createReadStream();
+                        delete v.createReadStream;
+                        if (!interface_1.isReadStream(stream)) {
+                            throw new Error("invalid stream request"); // TODO: normalize error
+                        }
+                        yield new Promise((resolve, reject) => {
+                            const chunks = [];
+                            stream
+                                .on("data", chunk => chunks.push(chunk))
+                                .on("error", reject)
+                                .on("end", () => {
+                                try {
+                                    v.buffer = Buffer.concat(chunks).toString(this.opts.streamingToStringEncoding);
+                                    v.encoding = this.opts.streamingToStringEncoding;
+                                    resolve();
+                                }
+                                catch (err) {
+                                    reject(err);
+                                }
+                            });
+                        });
+                        hasNestedStream = true;
+                    }
+                }
+                return hasNestedStream;
             });
         }
         /* publish event */

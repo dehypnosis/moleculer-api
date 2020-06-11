@@ -1,4 +1,5 @@
 import * as Moleculer from "moleculer";
+import fs from "fs";
 import { ServiceMetaDataSchema } from "../../../schema";
 import { APIRequestContext } from "../../../server";
 import { isReadStream } from "../../../interface";
@@ -10,9 +11,15 @@ import { proxyMoleculerServiceDiscovery } from "./discover";
 import { createMoleculerLoggerOptions } from "./logger";
 import { createMoleculerServiceSchema } from "./service";
 
-export type MoleculerServiceBrokerDelegatorOptions = Moleculer.BrokerOptions & {
-  services?: (Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema })[];
-};
+export type MoleculerServiceBrokerDelegatorOwnOptions = {
+  streamingCallTimeout: number; // ms, default is one hour
+  streamingToStringEncoding: "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "latin1" | "binary" | "hex"; // default is base64, check your transporter on malformed streaming
+}
+
+export type MoleculerServiceBrokerDelegatorOptions = Moleculer.BrokerOptions
+  & Partial<MoleculerServiceBrokerDelegatorOwnOptions & {
+    services: (Moleculer.ServiceSchema & { metadata?: ServiceMetaDataSchema })[];
+  }>;
 
 type Context = Moleculer.Context;
 
@@ -20,18 +27,30 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
   public static readonly key = "moleculer";
   public readonly broker: Moleculer.ServiceBroker;
   private readonly service: Moleculer.Service;
+  private readonly opts: MoleculerServiceBrokerDelegatorOwnOptions;
 
   constructor(protected readonly props: ServiceBrokerDelegatorProps, opts?: MoleculerServiceBrokerDelegatorOptions) {
     super(props);
 
-    if (!opts) opts = {};
-    opts.logger = createMoleculerLoggerOptions(this.props.logger);
-    opts.skipProcessEventRegistration = true;
-    this.broker = new Moleculer.ServiceBroker(opts);
+    const {
+      services = [],
+      streamingCallTimeout = 1000 * 3600,
+      streamingToStringEncoding = "base64",
+      ...moleculerBrokerOptions
+    } = opts || {};
 
-    // create optional moleculer services
-    if (opts.services) {
-      for (const serviceSchema of opts.services) {
+    this.opts = {
+      streamingCallTimeout,
+      streamingToStringEncoding,
+    };
+    const bOpts = moleculerBrokerOptions as Moleculer.BrokerOptions;
+    bOpts.logger = createMoleculerLoggerOptions(this.props.logger);
+    bOpts.skipProcessEventRegistration = true;
+    this.broker = new Moleculer.ServiceBroker(bOpts);
+
+    // create optional moleculer services with this broker
+    if (services) {
+      for (const serviceSchema of services) {
         this.broker.createService(serviceSchema);
       }
     }
@@ -112,17 +131,30 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
     // create child context
     const ctx = Moleculer.Context.create(this.broker);
 
-    // streaming request
+    // streaming request for root stream params
     if (params && typeof params.createReadStream === "function") {
       const {createReadStream, ...meta} = params;
       const stream = params.createReadStream();
       if (!isReadStream(stream)) {
         throw new Error("invalid stream request"); // TODO: normalize error
       }
-      response = await ctx.call(action.id, stream, {nodeID: node?.id, meta, parentCtx: context});
+      response = await ctx.call(action.id, stream, {
+        meta,
+        nodeID: node?.id,
+        parentCtx: context,
+        retries: 0,
+        timeout: this.opts.streamingCallTimeout,
+      });
     } else {
-      // normal request
-      response = await ctx.call(action.id, params, {nodeID: node?.id, parentCtx: context});
+      // read all file streams as buffer for child stream params (just parse direct children props)
+      const hasNestedStream = await this.parseNestedStreamAsBuffer(params);
+
+      response = await ctx.call(action.id, params, {
+        nodeID: node?.id,
+        parentCtx: context,
+        retries: hasNestedStream ? 0 : undefined,
+        timeout: hasNestedStream ? this.opts.streamingCallTimeout : undefined,
+      });
     }
 
     // streaming response (can obtain other props from ctx.meta in streaming response)
@@ -135,6 +167,43 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
       // normal response
       return response;
     }
+  }
+
+  private async parseNestedStreamAsBuffer(params: any): Promise<boolean> {
+    let hasNestedStream = false;
+    for (const v of Object.values(params)) {
+      if (Array.isArray(v)) {
+        const result = await Promise.all(v.map((vv: any) => this.parseNestedStreamAsBuffer(vv)));
+        if (!hasNestedStream) {
+          hasNestedStream = result.some(p => !!p);
+        }
+      } else if (typeof v === "object" && v !== null && typeof (v as any).createReadStream === "function") {
+        const stream: fs.ReadStream = (v as any).createReadStream();
+        delete (v as any).createReadStream;
+        if (!isReadStream(stream)) {
+          throw new Error("invalid stream request"); // TODO: normalize error
+        }
+
+        await new Promise<string>((resolve, reject) => {
+          const chunks: any[] = [];
+          stream
+            .on("data", chunk => chunks.push(chunk))
+            .on("error", reject)
+            .on("end", () => {
+              try {
+                (v as any).buffer = Buffer.concat(chunks).toString(this.opts.streamingToStringEncoding);
+                (v as any).encoding = this.opts.streamingToStringEncoding;
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            })
+        });
+
+        hasNestedStream = true;
+      }
+    }
+    return hasNestedStream;
   }
 
   /* publish event */

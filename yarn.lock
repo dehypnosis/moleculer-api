@@ -1501,6 +1501,11 @@ auth-header@^1.0.0:
   resolved "https://registry.yarnpkg.com/auth-header/-/auth-header-1.0.0.tgz#ea24fdc5588e1eb8b750df8655a396aa48fc9076"
   integrity sha512-CPPazq09YVDUNNVWo4oSPTQmtwIzHusZhQmahCKvIsk0/xH6U3QsMAv3sM+7+Q0B1K2KJ/Q38OND317uXs4NHA==
 
+awesome-phonenumber@^2.34.0:
+  version "2.34.0"
+  resolved "https://registry.yarnpkg.com/awesome-phonenumber/-/awesome-phonenumber-2.34.0.tgz#c5170e40173b6c506d28a3ca79d3439ca71671c6"
+  integrity sha512-P2ckagK5jen79wOqT+vEngJ1Zx5PCRaaBtu2CiCOBjaVjIDm27hewDiAMqxEwZ3fhtzq6l0WDtIiK56lTvC5dA==
+
 aws-sign2@~0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.7.0.tgz#b46e890934a9591f2d2f6f86d7e6a9f1b3fe76a8"
@@ -6264,17 +6269,19 @@ pupa@^2.0.1:
   dependencies:
     escape-goat "^2.0.0"
 
-qmit-sdk@^1.0.23:
-  version "1.0.23"
-  resolved "https://registry.yarnpkg.com/qmit-sdk/-/qmit-sdk-1.0.23.tgz#4c5ac96c7e45dc18e32a8b3de8daeeacff46bfec"
-  integrity sha512-XsV0/qL99pdo1cC0w2qwmPVMT4sv8MgdHza4bbT5Bl7NLh6tPEJjdazJlFZfsTQrgQEcHHNS2B8w6o6sk7279A==
+qmit-sdk@^1.0.24:
+  version "1.0.24"
+  resolved "https://registry.yarnpkg.com/qmit-sdk/-/qmit-sdk-1.0.24.tgz#a73dcf90c23e09f1459d5ce916d0573a4e20b4d4"
+  integrity sha512-pOT8CWBqXPZJx45r72R5bQQlxKUa37QlghdPdP/NQISLBRpUVcMVfU7bgbCerMMCXrr0JI5ZYiBw0VcdCoZzgQ==
   dependencies:
     "@types/child-process-promise" "^2.2.1"
+    awesome-phonenumber "^2.34.0"
     child-process-promise "^2.2.1"
     ioredis "^4.17.1"
     lodash "^4.17.15"
     moleculer "^0.14.6"
     moleculer-repl "^0.6.4"
+    moment "^2.26.0"
     open "^7.0.4"
     redlock "^4.1.0"
     vault-sync "^2.0.4"

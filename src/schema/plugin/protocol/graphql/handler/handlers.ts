@@ -1,5 +1,6 @@
+import fs from "fs";
 import * as path from "path";
-import { convertNodeHttpToRequest, HttpQueryError, runHttpQuery, processFileUploads, formatApolloErrors, GraphQLOptions } from "apollo-server-core";
+import { convertNodeHttpToRequest, runHttpQuery, processFileUploads, formatApolloErrors, GraphQLOptions } from "apollo-server-core";
 import { SubscriptionServerOptions } from "apollo-server-core/src/types";
 import { ApolloServer, Config as ApolloServerConfig, makeExecutableSchema } from "apollo-server-express";
 import { execute, subscribe } from "graphql";
@@ -49,8 +50,9 @@ export class GraphQLHandlers extends ApolloServer {
     });
 
     // create graphql request handler
-    const uploadsConfig = typeof uploads !== "object" ? {} : uploads;
     const optionsFactory = this.createGraphQLServerOptionsWithContext.bind(this);
+
+    const uploadsConfig = typeof uploads !== "object" ? {} : uploads;
     const handler: HTTPRouteHandler = async (context, req, res) => {
       try {
         // process upload
@@ -58,6 +60,7 @@ export class GraphQLHandlers extends ApolloServer {
         if (uploads !== false && contentType && contentType.toLowerCase().startsWith("multipart/form-data")) {
           try {
             req.body = await processFileUploads!(req, res, uploadsConfig);
+            req.body.variables = await this.waitForPromisedVariables(req.body.variables); // ref: https://github.com/jaydenseric/graphql-upload#upload-instance-property-promise
           } catch (error) {
             if (error.status && error.expose) {
               res.status(error.status);
@@ -129,4 +132,20 @@ export class GraphQLHandlers extends ApolloServer {
   public readonly handler: HTTPRouteHandler;
   public readonly subscriptionHandler?: WebSocketRouteHandler;
   public readonly playgroundHandler?: HTTPRouteHandler;
+
+  private async waitForPromisedVariables(v: any): Promise<any> {
+    if (Array.isArray(v)) {
+      return Promise.all(v.map((vv: any) => this.waitForPromisedVariables(vv)));
+    } else if (typeof v === "object" && v !== null) {
+      if (typeof v.then === "function") {
+        return await v;
+      }
+      return Promise.all(Object.entries(v).map(async ([kk, vv]: any) => [kk, await this.waitForPromisedVariables(vv)]))
+        .then((entries) => entries.reduce((obj, [kk, vv]) => {
+          obj[kk] = vv;
+          return obj;
+        }, {} as any));
+    }
+    return v;
+  }
 }

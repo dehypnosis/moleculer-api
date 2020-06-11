@@ -5,17 +5,22 @@ import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../../regist
 import { Report } from "../../reporter";
 import { NamePatternResolver } from "../../name";
 import { ServiceBrokerDelegator, ServiceBrokerDelegatorProps, DelegatedCallArgs, DelegatedEventPublishArgs } from "../delegator";
-export declare type MoleculerServiceBrokerDelegatorOptions = Moleculer.BrokerOptions & {
-    services?: (Moleculer.ServiceSchema & {
+export declare type MoleculerServiceBrokerDelegatorOwnOptions = {
+    streamingCallTimeout: number;
+    streamingToStringEncoding: "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "latin1" | "binary" | "hex";
+};
+export declare type MoleculerServiceBrokerDelegatorOptions = Moleculer.BrokerOptions & Partial<MoleculerServiceBrokerDelegatorOwnOptions & {
+    services: (Moleculer.ServiceSchema & {
         metadata?: ServiceMetaDataSchema;
     })[];
-};
+}>;
 declare type Context = Moleculer.Context;
 export declare class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Context> {
     protected readonly props: ServiceBrokerDelegatorProps;
     static readonly key = "moleculer";
     readonly broker: Moleculer.ServiceBroker;
     private readonly service;
+    private readonly opts;
     constructor(props: ServiceBrokerDelegatorProps, opts?: MoleculerServiceBrokerDelegatorOptions);
     readonly actionNameResolver: NamePatternResolver;
     readonly eventNameResolver: NamePatternResolver;
@@ -25,6 +30,7 @@ export declare class MoleculerServiceBrokerDelegator extends ServiceBrokerDelega
     clearContext(context: Context): void;
     selectActionTargetNode(context: Context, action: Readonly<ServiceAction>): Readonly<ServiceNode> | null;
     call(context: Context, args: DelegatedCallArgs): Promise<any>;
+    private parseNestedStreamAsBuffer;
     publish(context: Context, args: DelegatedEventPublishArgs): Promise<void>;
     clearActionCache(action: Readonly<ServiceAction>): Promise<boolean>;
     clearServiceCache(service: Readonly<Service>): Promise<boolean>;

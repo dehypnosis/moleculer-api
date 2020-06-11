@@ -3,7 +3,7 @@ import { Reporter } from "./reporter";
 export declare type ParamsMappingInfo = {
     [paramName: string]: ({
         strategy: "explicit";
-        typecasting: "boolean" | "number" | null;
+        typecasting: "boolean" | "number" | "string" | null;
         batching: boolean;
         path: string;
     } | {
