@@ -131,31 +131,35 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
     // create child context
     const ctx = Moleculer.Context.create(this.broker);
 
-    // streaming request for root stream params
-    if (params && typeof params.createReadStream === "function") {
-      const {createReadStream, ...meta} = params;
-      const stream = params.createReadStream();
-      if (!isReadStream(stream)) {
-        throw new Error("invalid stream request"); // TODO: normalize error
-      }
-      response = await ctx.call(action.id, stream, {
-        meta,
-        nodeID: node?.id,
-        parentCtx: context,
-        retries: 0,
-        timeout: this.opts.streamingCallTimeout,
-      });
-    } else {
-      // read all file streams as buffer for child stream params (just parse direct children props)
-      const hasNestedStream = await this.parseNestedStreamAsBuffer(params);
+    // prepare streaming request
+    let callParams = params;
+    const callOpts: any = {
+      nodeID: node?.id,
+      parentCtx: context,
+    };
+    if (typeof params === "object" && params !== null) {
+      // pipe streaming data only when root object has stream
+      if (typeof params.createReadStream === "function") {
+        const {createReadStream, ...meta} = params;
+        const stream = params.createReadStream();
+        if (!isReadStream(stream)) {
+          throw new Error("invalid stream request"); // TODO: normalize error
+        }
 
-      response = await ctx.call(action.id, params, {
-        nodeID: node?.id,
-        parentCtx: context,
-        retries: hasNestedStream ? 0 : undefined,
-        timeout: hasNestedStream ? this.opts.streamingCallTimeout : undefined,
-      });
+        callParams = stream;
+        callOpts.meta = meta;
+        callOpts.retries = 0;
+        callOpts.timeout = this.opts.streamingCallTimeout;
+
+      // read all file streams as buffer for child stream params
+      } else if (await this.parseNestedStreamAsBuffer(callParams)) {
+        callOpts.retries = 0;
+        callOpts.timeout = this.opts.streamingCallTimeout;
+      }
     }
+
+    // call the action
+    response = await ctx.call(action.id, callParams, callOpts);
 
     // streaming response (can obtain other props from ctx.meta in streaming response)
     if (isReadStream(response)) {
@@ -169,21 +173,22 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
     }
   }
 
-  private async parseNestedStreamAsBuffer(params: any): Promise<boolean> {
-    let hasNestedStream = false;
-    for (const v of Object.values(params)) {
-      if (Array.isArray(v)) {
-        const result = await Promise.all(v.map((vv: any) => this.parseNestedStreamAsBuffer(vv)));
-        if (!hasNestedStream) {
-          hasNestedStream = result.some(p => !!p);
-        }
-      } else if (typeof v === "object" && v !== null && typeof (v as any).createReadStream === "function") {
+  private async parseNestedStreamAsBuffer(v: any): Promise<boolean> {
+    if (Array.isArray(v)) {
+      // return either any props had a stream or not.
+      return (await Promise.all(v.map((vv: any) => this.parseNestedStreamAsBuffer(vv)))).some(p => !!p);
+
+    } else if (typeof v === "object" && v !== null) {
+
+      // found a stream object
+      if (typeof (v as any).createReadStream === "function") {
         const stream: fs.ReadStream = (v as any).createReadStream();
         delete (v as any).createReadStream;
         if (!isReadStream(stream)) {
           throw new Error("invalid stream request"); // TODO: normalize error
         }
 
+        // read stream as buffer string with given encoding
         await new Promise<string>((resolve, reject) => {
           const chunks: any[] = [];
           stream
@@ -199,11 +204,15 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
               }
             })
         });
+        return true;
 
-        hasNestedStream = true;
+      } else {
+        // return either any props had a stream or not.
+        return (await Promise.all(Object.values(v).map(vv => this.parseNestedStreamAsBuffer(vv)))).some(p => !!p);
       }
     }
-    return hasNestedStream;
+
+    return false;
   }
 
   /* publish event */
