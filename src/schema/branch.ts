@@ -9,7 +9,7 @@ import { Logger } from "../logger";
 import { ServiceCatalog } from "./catalog";
 import { ProtocolPlugin } from "./plugin";
 import { ServiceAPIIntegration, ServiceAPIIntegrationSource } from "./integration";
-import { HTTPRouteHandler, Route } from "../server";
+import { Route } from "../server";
 import { Version } from "./version";
 
 export type BranchProps = {
@@ -365,20 +365,20 @@ export class Branch {
       updatedRoutes.sort((a, b) => a.path > b.path && a.protocol > b.protocol ? 1 : 0);
       removedRoutes.sort((a, b) => a.path > b.path && a.protocol > b.protocol ? 1 : 0);
 
-      const updates: string[] = [];
+      const routeIntegrations: string[] = [];
       for (const r of removedRoutes) {
-        updates.push(`(-) ${r}`);
+        routeIntegrations.push(`(-) ${r}`);
       }
       for (const r of updatedRoutes) {
-        updates.push(`(+) ${r}`);
+        routeIntegrations.push(`(+) ${r}`);
       }
 
       for (const integration of integrations) {
-        integration.setSucceed(this, version, updates);
+        integration.setSucceed(this, version, routeIntegrations);
       }
 
       // log
-      this.props.logger.info(`${this} branch succeeded ${parentVersion} -> ${version} version compile:\n${[...integrations, ...updates].join("\n")}`);
+      this.props.logger.info(`${this} branch succeeded ${parentVersion} -> ${version} version compile:\n${[...integrations, ...routeIntegrations].join("\n")}`);
 
       // forget old parent versions if need
       for (let cur = this.$latestVersion, parent = cur.parentVersion, i = 1; parent; cur = parent, parent = cur.parentVersion, i++) {
@@ -413,7 +413,7 @@ export class Branch {
     // retry merging failed integrations from history
     const retryableIntegrations = version.getRetryableIntegrations();
     if (retryableIntegrations.length > 0) {
-      this.props.logger.info(`${this} branch will retry merging ${retryableIntegrations.length} failed integrations`);
+      this.props.logger.info(`${this} branch will retry merging ${retryableIntegrations.length} failed integrations:\n${retryableIntegrations.join("\n")}`);
       return this.consumeIntegrations(retryableIntegrations, false);
     }
   }

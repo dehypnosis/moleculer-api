@@ -2,7 +2,7 @@ import * as kleur from "kleur";
 import _ from "lodash";
 import { RecursivePartial } from "../interface";
 import { Logger } from "../logger";
-import { SchemaRegistry } from "../schema";
+import { Branch, SchemaRegistry } from "../schema";
 import {
   ServerApplication,
   ServerApplicationOptions,
@@ -135,11 +135,34 @@ export class APIServer {
     }
 
     // start schema registry and connect handler update methods
+    const debouncedBranchUpdateHandlers = new Map<Branch, () => Promise<void>>();
+    const debouncedBranchRemovedHandlers = new Map<Branch, () => Promise<void>>();
     await this.props.schema.start({
-      // TODO: enhance 'updated' handler to be debounced with each of branchs, keyword: memorizedDebounce
-      // wrong code: _.debounce(this.app.mountBranchHandler.bind(this.app), 1000 * this.opts.update.debouncedSeconds, {maxWait: 1000 * this.opts.update.maxDebouncedSeconds}),
-      updated: this.app.mountBranchHandler.bind(this.app),
-      removed: this.app.unmountBranchHandler.bind(this.app),
+      // enhance 'updated', 'removed' handler to be debounced for each of branches
+      updated: (branch) => {
+        let handler = debouncedBranchUpdateHandlers.get(branch);
+        if (!handler) {
+          handler = _.debounce(() => {
+            return this.app.mountBranchHandler(branch);
+          }, 1000 * this.opts.update.debouncedSeconds, {maxWait: 1000 * this.opts.update.maxDebouncedSeconds});
+          debouncedBranchUpdateHandlers.set(branch, handler);
+        }
+        return handler();
+      },
+      removed: (branch) => {
+        let handler = debouncedBranchRemovedHandlers.get(branch);
+        if (!handler) {
+          handler = _.debounce(() => {
+            return this.app.unmountBranchHandler(branch)
+              .finally(() => {
+                debouncedBranchUpdateHandlers.delete(branch);
+                debouncedBranchRemovedHandlers.delete(branch);
+              });
+          }, 1000 * this.opts.update.debouncedSeconds, {maxWait: 1000 * this.opts.update.maxDebouncedSeconds});
+          debouncedBranchRemovedHandlers.set(branch, handler);
+        }
+        return handler();
+      },
     });
 
     // add information route for debugging

@@ -97,6 +97,7 @@ export class ServerWebSocketApplication extends ServerApplicationComponent<WebSo
     };
 
     this.module = Object.assign(server, {upgradeEventHandler});
+    this.module.setMaxListeners(100); // TODO: this number is quite arbitrary...
   }
 
   public async start(): Promise<void> {
