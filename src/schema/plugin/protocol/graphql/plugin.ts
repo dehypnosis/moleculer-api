@@ -128,12 +128,20 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
             }
 
             const errors: ValidationError[] = [];
-            for (let typeDef of typeDefs) {
+            const typeDefsByName = typeDefs.reduce((obj, typeDef) => {
               const typeName = typeDef.name.value;
+              if (!obj[typeName]) {
+                obj[typeName] = [];
+              }
+              obj[typeName].push(typeDef as any);
+              return obj;
+            }, {} as {[name: string]: (ObjectTypeDefinitionNode | ObjectTypeExtensionNode)[]})
+
+            for (const [typeName, partialTypeDefs] of Object.entries(typeDefsByName)) {
               const typeResolver = value[typeName];
 
               // not a type which can have resolver
-              if (!GraphQLProtocolPlugin.resolverAllowedDefKinds.includes(typeDef.kind)) {
+              if (!partialTypeDefs.every(def => GraphQLProtocolPlugin.resolverAllowedDefKinds.includes(def.kind))) {
                 // this type should not have resolver
                 if (typeof typeResolver !== "undefined") {
                   errors.push({
@@ -147,8 +155,12 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
                 continue;
               }
 
-              typeDef = typeDef as ObjectTypeDefinitionNode | ObjectTypeExtensionNode;
-              const typeFieldNames = typeDef.fields ? typeDef.fields.map(f => f.name.value) : [];
+              const typeFieldNames = partialTypeDefs.reduce((fieldNames, typeDef) => {
+                if (typeDef.fields) {
+                  fieldNames.push(...typeDef.fields.map(f => f.name.value));
+                }
+                return fieldNames;
+              }, [] as string[]);
               const typeForbiddenFieldNames = typeFieldNames.filter(f => GraphQLProtocolPlugin.forbiddenFieldNames.includes(f));
 
               // type has forbidden fields
@@ -164,7 +176,13 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
               }
 
               // __isTypeOf field resolver is required for interface implementation
-              const isTypeOfFieldResolverRequired = typeDef.interfaces && typeDef.interfaces.length > 0;
+              const interfaceNames = partialTypeDefs.reduce((interfaceNames, typeDef) => {
+                if (typeDef.interfaces) {
+                  interfaceNames.push(...typeDef.interfaces.map(i => i.name.value));
+                }
+                return interfaceNames;
+              }, [] as string[]);
+              const isTypeOfFieldResolverRequired = interfaceNames.length > 0;
               if (isTypeOfFieldResolverRequired) {
                 typeFieldNames.push(GraphQLProtocolPlugin.isTypeOfFieldName);
               }
@@ -208,7 +226,7 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
                     errors.push({
                       field: `resolvers.${typeName}.${fieldName}`,
                       type: typeof fieldResolver === "undefined" ? "fieldResolverRequired" : "fieldResolverInvalid",
-                      message: `${typeName} should have an ${fieldName} field resolver which is a string denotes a JavaScript function to distinguish the type among types which implement interfaces: ${typeDef.interfaces!.map(i => i.name.value).join(", ")}`,
+                      message: `${typeName} should have an ${fieldName} field resolver which is a string denotes a JavaScript function to distinguish the type among types which implement interfaces: ${interfaceNames.join(", ")}`,
                       actual: fieldResolver,
                       expected: `GraphQLIsTypeOfFieldResolverSchema`,
                     });

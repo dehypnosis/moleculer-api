@@ -386,9 +386,10 @@ export class Branch {
         // v2 / v3 / 2
         // v3 / null / 3
         if (i >= this.opts.maxVersions) {
-          for (const integration of parent.integrations) {
-            integration.reportRemoved(this, cur);
-          }
+          // for (const integration of parent.integrations) {
+          //   integration.reportRemoved(this, cur);
+          // }
+          parent.integrations[0]?.reportRemoved(this, cur);
           cur.forgetParentVersion();
           this.props.logger.info(`${this} branch have forgotten versions older than ${cur}`);
           break;
