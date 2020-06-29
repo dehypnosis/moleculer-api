@@ -32,7 +32,7 @@ steps:
       - '-c'
       - |
         (docker pull ${_IMAGE}:latest || true) \
-          && docker build . -f ./src/examples/qmit/Dockerfile -t ${_IMAGE}:ci-${SHORT_SHA} --cache-from ${_IMAGE}:latest \
+          && docker build . -f ./Dockerfile -t ${_IMAGE}:ci-${SHORT_SHA} --cache-from ${_IMAGE}:latest \
           && docker push ${_IMAGE}:ci-${SHORT_SHA} \
           && echo "DONE: ${_IMAGE}:ci-${SHORT_SHA} pushed"
 

@@ -7,27 +7,24 @@ const factory_1 = require("./factory");
 /*
   IP Address Context Factory
 */
-let IPContextFactory = /** @class */ (() => {
-    class IPContextFactory extends factory_1.APIRequestContextFactory {
-        constructor(props, opts) {
-            super(props);
-            this.props = props;
-            this.opts = _.defaultsDeep(opts || {}, IPContextFactory.autoLoadOptions);
-            this.opts.forwardedHeaderName = this.opts.forwardedHeaderName.toLowerCase();
-        }
-        create(source) {
-            const { forwardedHeaderName } = this.opts;
-            if (typeof source.headers[forwardedHeaderName] === "string") {
-                return source.headers[forwardedHeaderName];
-            }
-            return source.socket.remoteAddress;
-        }
+class IPContextFactory extends factory_1.APIRequestContextFactory {
+    constructor(props, opts) {
+        super(props);
+        this.props = props;
+        this.opts = _.defaultsDeep(opts || {}, IPContextFactory.autoLoadOptions);
+        this.opts.forwardedHeaderName = this.opts.forwardedHeaderName.toLowerCase();
     }
-    IPContextFactory.key = "ip";
-    IPContextFactory.autoLoadOptions = {
-        forwardedHeaderName: "X-Forwarded-For",
-    };
-    return IPContextFactory;
-})();
+    create(source) {
+        const { forwardedHeaderName } = this.opts;
+        if (typeof source.headers[forwardedHeaderName] === "string") {
+            return source.headers[forwardedHeaderName];
+        }
+        return source.socket.remoteAddress;
+    }
+}
 exports.IPContextFactory = IPContextFactory;
+IPContextFactory.key = "ip";
+IPContextFactory.autoLoadOptions = {
+    forwardedHeaderName: "X-Forwarded-For",
+};
 //# sourceMappingURL=ip.js.map

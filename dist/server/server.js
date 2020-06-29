@@ -95,11 +95,34 @@ class APIServer {
                 this.props.logger.error(`gateway server has been started but there are ${kleur.red("no bound network interfaces")}`);
             }
             // start schema registry and connect handler update methods
+            const debouncedBranchUpdateHandlers = new Map();
+            const debouncedBranchRemovedHandlers = new Map();
             yield this.props.schema.start({
-                // TODO: enhance 'updated' handler to be debounced with each of branchs, keyword: memorizedDebounce
-                // wrong code: _.debounce(this.app.mountBranchHandler.bind(this.app), 1000 * this.opts.update.debouncedSeconds, {maxWait: 1000 * this.opts.update.maxDebouncedSeconds}),
-                updated: this.app.mountBranchHandler.bind(this.app),
-                removed: this.app.unmountBranchHandler.bind(this.app),
+                // enhance 'updated', 'removed' handler to be debounced for each of branches
+                updated: (branch) => {
+                    let handler = debouncedBranchUpdateHandlers.get(branch);
+                    if (!handler) {
+                        handler = lodash_1.default.debounce(() => {
+                            return this.app.mountBranchHandler(branch);
+                        }, 1000 * this.opts.update.debouncedSeconds, { maxWait: 1000 * this.opts.update.maxDebouncedSeconds });
+                        debouncedBranchUpdateHandlers.set(branch, handler);
+                    }
+                    return handler();
+                },
+                removed: (branch) => {
+                    let handler = debouncedBranchRemovedHandlers.get(branch);
+                    if (!handler) {
+                        handler = lodash_1.default.debounce(() => {
+                            return this.app.unmountBranchHandler(branch)
+                                .finally(() => {
+                                debouncedBranchUpdateHandlers.delete(branch);
+                                debouncedBranchRemovedHandlers.delete(branch);
+                            });
+                        }, 1000 * this.opts.update.debouncedSeconds, { maxWait: 1000 * this.opts.update.maxDebouncedSeconds });
+                        debouncedBranchRemovedHandlers.set(branch, handler);
+                    }
+                    return handler();
+                },
             });
             // add information route for debugging
             // this.app.addStaticRoute(

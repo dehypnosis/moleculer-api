@@ -1,5 +1,5 @@
 import { ValidationSchema, ValidationRuleObject, ValidationRule, ValidationError, MessagesType } from "fastest-validator";
-import { RecursivePartial } from "./index";
+import { RecursivePartial } from "./ts";
 declare module "fastest-validator" {
     interface RuleCustom {
         deprecated?: boolean;

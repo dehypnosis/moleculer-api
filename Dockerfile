@@ -4,8 +4,8 @@ WORKDIR /usr/src/app
 ENV NODE_ENV=production
 ENV PATH="${PATH}:./node_modules/.bin"
 
-COPY package*.json ./
-RUN NODE_ENV=development npm i
+COPY package.json yarn.lock ./
+RUN NODE_ENV=development yarn
 COPY . .
 
 CMD [ "node", "dist/examples/qmit/" ]

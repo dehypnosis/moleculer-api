@@ -8,27 +8,24 @@ const factory_1 = require("./factory");
 /*
   ID Context Factory
 */
-let IDContextFactory = /** @class */ (() => {
-    class IDContextFactory extends factory_1.APIRequestContextFactory {
-        constructor(props, opts) {
-            super(props);
-            this.props = props;
-            this.opts = _.defaultsDeep(opts || {}, IDContextFactory.autoLoadOptions);
-            this.opts.requestIdHeaderName = this.opts.requestIdHeaderName.toLowerCase();
-        }
-        create({ headers }) {
-            const { requestIdHeaderName, factory } = this.opts;
-            if (typeof headers[requestIdHeaderName] === "string")
-                return headers[requestIdHeaderName];
-            return factory();
-        }
+class IDContextFactory extends factory_1.APIRequestContextFactory {
+    constructor(props, opts) {
+        super(props);
+        this.props = props;
+        this.opts = _.defaultsDeep(opts || {}, IDContextFactory.autoLoadOptions);
+        this.opts.requestIdHeaderName = this.opts.requestIdHeaderName.toLowerCase();
     }
-    IDContextFactory.key = "id";
-    IDContextFactory.autoLoadOptions = {
-        requestIdHeaderName: "X-Request-Id",
-        factory: () => uuid.v4().split("-").join(""),
-    };
-    return IDContextFactory;
-})();
+    create({ headers }) {
+        const { requestIdHeaderName, factory } = this.opts;
+        if (typeof headers[requestIdHeaderName] === "string")
+            return headers[requestIdHeaderName];
+        return factory();
+    }
+}
 exports.IDContextFactory = IDContextFactory;
+IDContextFactory.key = "id";
+IDContextFactory.autoLoadOptions = {
+    requestIdHeaderName: "X-Request-Id",
+    factory: () => uuid.v4().split("-").join(""),
+};
 //# sourceMappingURL=id.js.map

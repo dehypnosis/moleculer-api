@@ -9,28 +9,25 @@ const middleware_1 = require("./middleware");
   This middleware parse application/json or application/x-www-form-urlencoded
   Will not parse multipart/form-data
 */
-let BodyParserMiddleware = /** @class */ (() => {
-    class BodyParserMiddleware extends middleware_1.ServerMiddleware {
-        constructor(props, opts) {
-            super(props);
-            this.props = props;
-            this.opts = _.defaultsDeep(opts || {}, BodyParserMiddleware.autoLoadOptions);
-        }
-        apply(modules) {
-            modules.http.use(bodyParser.json(this.opts.json));
-            modules.http.use(bodyParser.urlencoded(this.opts.urlencoded));
-        }
+class BodyParserMiddleware extends middleware_1.ServerMiddleware {
+    constructor(props, opts) {
+        super(props);
+        this.props = props;
+        this.opts = _.defaultsDeep(opts || {}, BodyParserMiddleware.autoLoadOptions);
     }
-    BodyParserMiddleware.key = "bodyParser";
-    BodyParserMiddleware.autoLoadOptions = {
-        json: {
-            strict: false,
-        },
-        urlencoded: {
-            extended: true,
-        },
-    };
-    return BodyParserMiddleware;
-})();
+    apply(modules) {
+        modules.http.use(bodyParser.json(this.opts.json));
+        modules.http.use(bodyParser.urlencoded(this.opts.urlencoded));
+    }
+}
 exports.BodyParserMiddleware = BodyParserMiddleware;
+BodyParserMiddleware.key = "bodyParser";
+BodyParserMiddleware.autoLoadOptions = {
+    json: {
+        strict: false,
+    },
+    urlencoded: {
+        extended: true,
+    },
+};
 //# sourceMappingURL=body-parser.js.map

@@ -7,7 +7,7 @@ export declare type LoggingMiddlewareOptions = {
     httpFormat: string;
     wsFormat: string;
     level: LogLevel;
-} & Omit<morgan.Options, "stream">;
+} & Omit<morgan.Options<any, any>, "stream">;
 export declare class LoggingMiddleware extends ServerMiddleware {
     protected readonly props: ServerMiddlewareProps;
     static readonly key = "logging";

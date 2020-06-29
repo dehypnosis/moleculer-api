@@ -1,4 +1,4 @@
-import { RecursivePartial } from "./index";
+import { RecursivePartial } from "./ts";
 declare type SanitizeObjectOptions = {
     streamNotation: string;
     omittedLimit: number;

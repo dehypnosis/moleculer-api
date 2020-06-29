@@ -5,7 +5,7 @@
 import * as _ from "lodash";
 import Validator, { ValidationSchema, ValidationRuleObject, ValidationRule, RuleObject, RuleArray, RuleCustom, RuleOneOf, ValidationError, MessagesType } from "fastest-validator";
 import * as vm from "vm";
-import { RecursivePartial } from "./index";
+import { RecursivePartial } from "./ts";
 
 // add oneOf rule and additional props to normalize schema
 declare module "fastest-validator" {
@@ -19,7 +19,9 @@ declare module "fastest-validator" {
     type: "oneOf";
     items: ValidationRuleObject[];
   }
+  // @ts-ignore
   export type ValidationRuleName = ValidationRuleName | "oneOf";
+  // @ts-ignore
   export type ValidationRuleObject = ValidationRuleObject | RuleOneOf;
   export interface ValidationError {
     location?: any;

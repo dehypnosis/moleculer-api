@@ -14,7 +14,7 @@ const schema = getSchemaRegistry({
   logger: {
     level: "error",
     label: "gateway",
-    silent: true, /* YOU MAY MISSED IT! */
+    silent: false, /* YOU MAY MISSED IT! */
   },
   delegator: {moleculer: {...moleculer, nodeID: "gateway"}},
 });

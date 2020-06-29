@@ -12,7 +12,7 @@ export type LoggingMiddlewareOptions = {
   httpFormat: string;
   wsFormat: string;
   level: LogLevel;
-} & Omit<morgan.Options, "stream">;
+} & Omit<morgan.Options<any, any>, "stream">;
 
 /*
   Access Logging middleware

@@ -251,14 +251,18 @@ export class Branch {
       let shouldCompile = initialCompile;
       for (const integration of integrations) {
         if (integration.type === Add) {
-          if (!schemaHashMap.has(integration.schemaHash)) {
+          if (!schemaHashMap.has(integration.schemaHash) || integration.status === ServiceAPIIntegration.Status.Failed) {
             shouldCompile = true;
+          } else {
+            // this.props.logger.warn(`${integration.schemaHash} is not the part of ${[...schemaHashMap.keys()]}`);
           }
           schemaHashMap.set(integration.schemaHash, integration); // override schema
         } else if (integration.type === Remove) {
-          if (schemaHashMap.has(integration.schemaHash)) {
+          if (schemaHashMap.has(integration.schemaHash) || integration.status === ServiceAPIIntegration.Status.Failed) {
             shouldCompile = true;
             schemaHashMap.delete(integration.schemaHash); // remove
+          } else {
+            // this.props.logger.warn(`${integration.schemaHash} is not the part of ${[...schemaHashMap.keys()]}`);
           }
         } else {
           console.assert(false, "invalid integration type");
@@ -272,7 +276,7 @@ export class Branch {
         }
         this.props.logger.info(`${this} branch skipped ${parentVersion} -> (new) version compile due to no changes:\n${integrations.concat(compensatedIntegrations).join("\n")}`);
 
-        // retry failed jobs or finish
+        // retry
         return this.retryFailedIntegrationsFrom(parentVersion);
       }
 

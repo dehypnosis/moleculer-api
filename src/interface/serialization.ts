@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 // @ts-ignore
 import removeCircular from "smart-circular";
-import { RecursivePartial } from "./index";
+import { RecursivePartial } from "./ts";
 import { isStream } from "./stream";
 
 type SanitizeObjectOptions = {

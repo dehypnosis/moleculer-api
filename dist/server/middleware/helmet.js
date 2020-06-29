@@ -9,22 +9,19 @@ const middleware_1 = require("./middleware");
   Security middleware
   ref: https://github.com/helmetjs/helmet
 */
-let HelmetMiddleware = /** @class */ (() => {
-    class HelmetMiddleware extends middleware_1.ServerMiddleware {
-        constructor(props, opts) {
-            super(props);
-            this.props = props;
-            this.opts = _.defaultsDeep(opts || {}, {
-            // ...
-            });
-        }
-        apply(modules) {
-            modules.http.use(helmet_1.default(this.opts));
-        }
+class HelmetMiddleware extends middleware_1.ServerMiddleware {
+    constructor(props, opts) {
+        super(props);
+        this.props = props;
+        this.opts = _.defaultsDeep(opts || {}, {
+        // ...
+        });
     }
-    HelmetMiddleware.key = "helmet";
-    HelmetMiddleware.autoLoadOptions = false;
-    return HelmetMiddleware;
-})();
+    apply(modules) {
+        modules.http.use(helmet_1.default(this.opts));
+    }
+}
 exports.HelmetMiddleware = HelmetMiddleware;
+HelmetMiddleware.key = "helmet";
+HelmetMiddleware.autoLoadOptions = false;
 //# sourceMappingURL=helmet.js.map

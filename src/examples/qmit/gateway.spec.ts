@@ -1,5 +1,7 @@
 import { gateway } from "./gateway";
 
+jest.setTimeout(5 * 1000);
+
 describe("Test 'gateway'", () => {
   afterAll(() => gateway.stop());
 

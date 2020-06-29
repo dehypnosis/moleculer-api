@@ -15,7 +15,7 @@ const schema = test_1.getSchemaRegistry({
     logger: {
         level: "error",
         label: "gateway",
-        silent: true,
+        silent: false,
     },
     delegator: { moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "gateway" }) },
 });
