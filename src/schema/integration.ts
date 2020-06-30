@@ -85,7 +85,7 @@ export class ServiceAPIIntegration {
       message: "gateway has been failed to updated",
       branch: branch.toString(),
       version: version.toString(),
-      integrations,
+      integrations: integrations.map(int => int.toString()),
       errors,
     });
   }
@@ -104,7 +104,7 @@ export class ServiceAPIIntegration {
         },
         integrations: version.integrations.map(int => int.toString()),
         updates,
-      });
+      }, "integration-succeed");
     }
   }
 
@@ -119,7 +119,7 @@ export class ServiceAPIIntegration {
       message: "gateway found no changes",
       branch: branch.toString(),
       version: version.toString(),
-    });
+    }, "integration-no-changes");
   }
 
   public reportRemoved(branch: Readonly<Branch>, version: Readonly<Version>): void {
@@ -127,6 +127,6 @@ export class ServiceAPIIntegration {
       message: "gateway removed given integrated version",
       branch: branch.toString(),
       version: version.toString(),
-    });
+    }, "integration-removed");
   }
 }

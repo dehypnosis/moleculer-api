@@ -46,27 +46,31 @@ class Reporter {
         this.stack.splice(0, this.stack.length);
     }
     /* Push messages to stack */
-    push(type, message) {
+    push(type, message, duplicationKey) {
         if (this.props.props !== null) {
             message = _.defaults(typeof message === "object" && message !== null ? message : { original: message }, this.props.props);
+        }
+        if (duplicationKey) {
+            this.stack.splice(this.stack.findIndex(m => m.key === duplicationKey), 1);
         }
         this.stack.push({
             type,
             message,
             at: new Date(),
+            key: duplicationKey,
         });
         process.nextTick(this.debouncedFlush);
     }
-    info(message) {
-        this.push("info", message);
+    info(message, duplicationKey) {
+        this.push("info", message, duplicationKey);
     }
-    debug(message) {
-        this.push("debug", message);
+    debug(message, duplicationKey) {
+        this.push("debug", message, duplicationKey);
     }
-    warn(message) {
-        this.push("warn", message);
+    warn(message, duplicationKey) {
+        this.push("warn", message, duplicationKey);
     }
-    error(message) {
+    error(message, duplicationKey) {
         let err = message;
         if (!(message instanceof Error)) {
             if (typeof message === "string") {
@@ -79,7 +83,7 @@ class Reporter {
                 }
             }
         }
-        this.push("error", err);
+        this.push("error", err, duplicationKey);
     }
     /* Draw message stack as table */
     peekTable() {
@@ -112,7 +116,7 @@ class Reporter {
             }
             return [
                 kleur[Reporter.tableTypeLabelColors[type]](kleur.bold(type)),
-                content,
+                kleur.dim(at.toISOString()) + "\n" + content,
             ];
         });
     }
@@ -129,7 +133,7 @@ Reporter.tableTypeLabelColors = {
 * add field notation for object messages
 * rearrange indent multiline texts like GraphQL Schema
 */
-const nonPreferedToStrings = [Object.prototype.toString, Array.prototype.toString, Error.prototype.toString];
+const nonPreferredToStrings = [Object.prototype.toString, Array.prototype.toString, Error.prototype.toString];
 function peekObject(value, path = "", padEnd = 10, depth = 1) {
     if (typeof value === "object" && value !== null) {
         let stopReading = depth > 4;
@@ -137,7 +141,7 @@ function peekObject(value, path = "", padEnd = 10, depth = 1) {
             value = "[...]";
         }
         else {
-            if (value.toString && !nonPreferedToStrings.includes(value.toString)) {
+            if (value.toString && !nonPreferredToStrings.includes(value.toString)) {
                 const tempStr = value.toString();
                 stopReading = tempStr !== "[object Object]";
                 if (stopReading) {

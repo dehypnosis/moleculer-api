@@ -4,6 +4,7 @@ export declare type Report = {
     type: "info" | "warn" | "debug" | "error";
     message: any;
     at: Date;
+    key?: string;
 };
 export declare type ReporterProps = {
     logger: Logger;
@@ -29,10 +30,10 @@ export declare class Reporter {
     protected flush(): Promise<void>;
     private clear;
     private push;
-    info(message: any): void;
-    debug(message: any): void;
-    warn(message: any): void;
-    error(message: Error | any): void;
+    info(message: any, duplicationKey?: string): void;
+    debug(message: any, duplicationKey?: string): void;
+    warn(message: any, duplicationKey?: string): void;
+    error(message: Error | any, duplicationKey?: string): void;
     peekTable(): string;
     static getTable(reports: ReadonlyArray<Readonly<Report>>): string;
     private static tableTypeLabelColors;

@@ -53,7 +53,7 @@ class ServiceAPIIntegration {
             message: "gateway has been failed to updated",
             branch: branch.toString(),
             version: version.toString(),
-            integrations,
+            integrations: integrations.map(int => int.toString()),
             errors,
         });
     }
@@ -70,7 +70,7 @@ class ServiceAPIIntegration {
                 },
                 integrations: version.integrations.map(int => int.toString()),
                 updates,
-            });
+            }, "integration-succeed");
         }
     }
     get errors() {
@@ -83,14 +83,14 @@ class ServiceAPIIntegration {
             message: "gateway found no changes",
             branch: branch.toString(),
             version: version.toString(),
-        });
+        }, "integration-no-changes");
     }
     reportRemoved(branch, version) {
         this.props.source.reporter.info({
             message: "gateway removed given integrated version",
             branch: branch.toString(),
             version: version.toString(),
-        });
+        }, "integration-removed");
     }
 }
 exports.ServiceAPIIntegration = ServiceAPIIntegration;

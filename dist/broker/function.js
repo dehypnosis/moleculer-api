@@ -43,10 +43,8 @@ function createInlineFunction(props, opts) {
         if (props.returnTypeCheck && !props.returnTypeCheck(value)) {
             const error = new Error("return value of inline function has invalid type"); // TODO: normalize error
             if (props.returnTypeNotation) {
-                // @ts-ignore
                 error.expected = props.returnTypeNotation;
             }
-            // @ts-ignore
             error.actual = typeof value;
             props.reporter.error(error);
             throw error;

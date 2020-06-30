@@ -69,12 +69,10 @@ export function createInlineFunction<Args extends {[key: string]: any}, Return =
   return (args: Args): Return => {
     const value = script.runInNewContext({...sandbox, ...args});
     if (props.returnTypeCheck && !props.returnTypeCheck(value)) {
-      const error = new Error("return value of inline function has invalid type"); // TODO: normalize error
+      const error: any = new Error("return value of inline function has invalid type"); // TODO: normalize error
       if (props.returnTypeNotation) {
-        // @ts-ignore
         error.expected = props.returnTypeNotation;
       }
-      // @ts-ignore
       error.actual = typeof value;
       props.reporter.error(error);
       throw error;

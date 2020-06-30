@@ -10,6 +10,7 @@ export type Report = {
   type: "info" | "warn" | "debug" | "error";
   message: any;
   at: Date;
+  key?: string;
 };
 
 export type ReporterProps = {
@@ -72,31 +73,35 @@ export class Reporter {
   }
 
   /* Push messages to stack */
-  private push(type: Report["type"], message: any): void {
+  private push(type: Report["type"], message: any, duplicationKey?: string): void {
     if (this.props.props !== null) {
       message = _.defaults(typeof message === "object" && message !== null ? message : {original: message}, this.props.props);
+    }
+    if (duplicationKey) {
+      this.stack.splice(this.stack.findIndex(m => m.key === duplicationKey), 1);
     }
     this.stack.push({
       type,
       message,
       at: new Date(),
+      key: duplicationKey,
     });
     process.nextTick(this.debouncedFlush);
   }
 
-  public info(message: any): void {
-    this.push("info", message);
+  public info(message: any, duplicationKey?: string): void {
+    this.push("info", message, duplicationKey);
   }
 
-  public debug(message: any): void {
-    this.push("debug", message);
+  public debug(message: any, duplicationKey?: string): void {
+    this.push("debug", message, duplicationKey);
   }
 
-  public warn(message: any): void {
-    this.push("warn", message);
+  public warn(message: any, duplicationKey?: string): void {
+    this.push("warn", message, duplicationKey);
   }
 
-  public error(message: Error | any): void {
+  public error(message: Error | any, duplicationKey?: string): void {
     let err: any = message;
     if (!(message instanceof Error)) {
       if (typeof message === "string") {
@@ -108,7 +113,7 @@ export class Reporter {
         }
       }
     }
-    this.push("error", err);
+    this.push("error", err, duplicationKey);
   }
 
   /* Draw message stack as table */
@@ -151,7 +156,7 @@ export class Reporter {
       }
       return [
         kleur[Reporter.tableTypeLabelColors[type]](kleur.bold(type)),
-        content,
+        kleur.dim(at.toISOString()) + "\n" + content,
         // kleur.dim(at.toISOString()),
       ];
     });
@@ -163,7 +168,7 @@ export class Reporter {
 * add field notation for object messages
 * rearrange indent multiline texts like GraphQL Schema
 */
-const nonPreferedToStrings = [Object.prototype.toString, Array.prototype.toString, Error.prototype.toString];
+const nonPreferredToStrings = [Object.prototype.toString, Array.prototype.toString, Error.prototype.toString];
 function peekObject(value: any, path: string = "", padEnd: number = 10, depth = 1): any {
 
   if (typeof value === "object" && value !== null) {
@@ -171,7 +176,7 @@ function peekObject(value: any, path: string = "", padEnd: number = 10, depth = 
     if (stopReading) {
       value = "[...]";
     } else {
-      if (value.toString && !nonPreferedToStrings.includes(value.toString)) {
+      if (value.toString && !nonPreferredToStrings.includes(value.toString)) {
         const tempStr = value.toString();
         stopReading = tempStr !== "[object Object]";
         if (stopReading) {
