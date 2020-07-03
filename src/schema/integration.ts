@@ -77,7 +77,7 @@ export class ServiceAPIIntegration {
     return this.props.serviceCatalog.findAction(actionId);
   }
 
-  public setFailed(branch: Readonly<Branch>, version: Readonly<Version>, errors: ReadonlyArray<Readonly<ValidationError>>, integrations: ReadonlyArray<Readonly<ServiceAPIIntegration>>): void {
+  public setFailed(branch: Readonly<Branch>, version: Readonly<Version>, errors: ReadonlyArray<Readonly<ValidationError>>): void {
     this.$errors = [...errors];
     this.$status = ServiceAPIIntegration.Status.Failed;
     version.addIntegrationHistory(this);
@@ -85,27 +85,25 @@ export class ServiceAPIIntegration {
       message: "gateway has been failed to updated",
       branch: branch.toString(),
       version: version.toString(),
-      integrations: integrations.map(int => int.toString()),
+      integrations: version.integrations.map(int => int.toString()),
       errors,
     });
   }
 
-  public setSucceed(branch: Readonly<Branch>, version: Readonly<Version>, updates?: Readonly<string[]>): void {
+  public setSucceed(branch: Readonly<Branch>, version: Readonly<Version>, updates: Readonly<string[]>): void {
     this.$status = ServiceAPIIntegration.Status.Succeed;
     version.addIntegrationHistory(this);
 
-    if (updates) {
-      this.props.source.reporter.info({
-        message: "gateway has been updated successfully",
-        branch: branch.toString(),
-        version: {
-          from: version.parentVersion && version.parentVersion.toString(),
-          to: version.toString(),
-        },
-        integrations: version.integrations.map(int => int.toString()),
-        updates,
-      }, "integration-succeed");
-    }
+    this.props.source.reporter.info({
+      message: "gateway has been updated successfully",
+      branch: branch.toString(),
+      version: {
+        from: version.parentVersion && version.parentVersion.toString(),
+        to: version.toString(),
+      },
+      integrations: version.integrations.filter(int => int.status === ServiceAPIIntegration.Status.Succeed && int.type === ServiceAPIIntegration.Type.Add).map(int => int.service.toString()),
+      updates,
+    }, "integrated:" + branch.toString());
   }
 
   public get errors() {
@@ -119,7 +117,7 @@ export class ServiceAPIIntegration {
       message: "gateway found no changes",
       branch: branch.toString(),
       version: version.toString(),
-    }, "integration-no-changes");
+    }, "integration-skipped:" + branch.toString());
   }
 
   public reportRemoved(branch: Readonly<Branch>, version: Readonly<Version>): void {
@@ -127,6 +125,6 @@ export class ServiceAPIIntegration {
       message: "gateway removed given integrated version",
       branch: branch.toString(),
       version: version.toString(),
-    }, "integration-removed");
+    }, "integration-removed:" + branch.toString());
   }
 }

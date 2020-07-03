@@ -276,8 +276,7 @@ class ServiceBroker {
     /* service reporter */
     createReporter(service) {
         return new reporter_1.Reporter({
-            logger: this.props.logger.getChild(`${service}
-`),
+            logger: this.props.logger.getChild(`${service}\n`),
             service,
             props: null,
             send: (messages, table) => this.delegator.report(service, messages, table),

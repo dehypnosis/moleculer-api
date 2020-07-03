@@ -212,6 +212,17 @@ export class SchemaRegistry {
 
   private serviceNodePoolUpdated(service: Readonly<Service>): void {
     this.props.logger.info(`${service} service node pool has been updated`);
+    let reporter = this.serviceReporterMap.get(service);
+    if (!reporter && service.broker) {
+      reporter = service.broker.createReporter(service);
+      this.serviceReporterMap.set(service, reporter);
+    }
+    if (reporter) {
+      reporter.info({
+        message: `${service} service node pool has been updated`,
+        service: service.information,
+      }, "pool-updated");
+    }
   }
 
   /* schema management */

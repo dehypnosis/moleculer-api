@@ -324,8 +324,7 @@ export class ServiceBroker<DelegatorContext = any> {
   /* service reporter */
   public createReporter(service: Readonly<Service>): Reporter {
     return new Reporter({
-      logger: this.props.logger.getChild(`${service}
-`),
+      logger: this.props.logger.getChild(`${service}\n`),
       service,
       props: null,
       send: (messages, table) => this.delegator.report(service, messages, table),

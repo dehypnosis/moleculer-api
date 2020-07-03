@@ -52,7 +52,8 @@ export class ServiceCatalog {
     }
     const items = this.serviceIdItemsMap.get(serviceId)!;
     items.unshift(item);
-    items.sort((a, b) => b.priority - a.priority); // make descending order by priority
+    // make descending order by priority. And for the services having same priority will remain the relative orders between each others.
+    items.sort((a, b) => b.priority - a.priority);
     this.setActions(items[0].service, true);
   }
 

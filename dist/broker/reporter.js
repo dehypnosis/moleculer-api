@@ -83,7 +83,7 @@ class Reporter {
                 }
             }
         }
-        this.push("error", err, duplicationKey);
+        this.push("error", err, duplicationKey || interface_1.hashObject(err));
     }
     /* Draw message stack as table */
     peekTable() {
@@ -92,7 +92,7 @@ class Reporter {
             border: table_1.getBorderCharacters("norc"),
             columns: {
                 0: { alignment: "left", wrapWord: false },
-                1: { alignment: "left", wrapWord: false, width: Math.ceil(80 * this.opts.tableWidthZoomFactor) },
+                1: { alignment: "left", wrapWord: false, width: Math.ceil(100 * this.opts.tableWidthZoomFactor) },
             },
         });
     }

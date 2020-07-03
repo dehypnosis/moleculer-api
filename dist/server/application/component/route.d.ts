@@ -32,4 +32,5 @@ export declare abstract class Route {
     get handler(): RouteHandler<any>;
     isConflict(route: Readonly<Route>): boolean;
     toString(): string;
+    toStringWithoutDescription(): string;
 }

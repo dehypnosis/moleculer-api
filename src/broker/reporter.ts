@@ -2,7 +2,7 @@ import * as kleur from "kleur";
 import * as _ from "lodash";
 import * as os from "os";
 import { table, getBorderCharacters } from "table";
-import { removeANSIColor } from "../interface";
+import { hashObject, removeANSIColor } from "../interface";
 import { Service } from "./registry";
 import { Logger } from "../logger";
 
@@ -113,7 +113,7 @@ export class Reporter {
         }
       }
     }
-    this.push("error", err, duplicationKey);
+    this.push("error", err, duplicationKey || hashObject(err));
   }
 
   /* Draw message stack as table */
@@ -124,7 +124,7 @@ export class Reporter {
       border: getBorderCharacters("norc"),
       columns: {
         0: {alignment: "left", wrapWord: false},
-        1: {alignment: "left", wrapWord: false, width: Math.ceil(80 * this.opts!.tableWidthZoomFactor!)},
+        1: {alignment: "left", wrapWord: false, width: Math.ceil(100 * this.opts!.tableWidthZoomFactor!)},
       },
     });
   }

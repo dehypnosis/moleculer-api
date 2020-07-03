@@ -47,8 +47,8 @@ export declare class ServiceAPIIntegration {
     get reporter(): Readonly<Reporter>;
     get status(): "queued" | "failed" | "succeed" | "skipped";
     findAction(actionId: string): Readonly<ServiceAction> | null;
-    setFailed(branch: Readonly<Branch>, version: Readonly<Version>, errors: ReadonlyArray<Readonly<ValidationError>>, integrations: ReadonlyArray<Readonly<ServiceAPIIntegration>>): void;
-    setSucceed(branch: Readonly<Branch>, version: Readonly<Version>, updates?: Readonly<string[]>): void;
+    setFailed(branch: Readonly<Branch>, version: Readonly<Version>, errors: ReadonlyArray<Readonly<ValidationError>>): void;
+    setSucceed(branch: Readonly<Branch>, version: Readonly<Version>, updates: Readonly<string[]>): void;
     get errors(): ValidationError[] | null;
     setSkipped(branch: Readonly<Branch>, version: Readonly<Version>): void;
     reportRemoved(branch: Readonly<Branch>, version: Readonly<Version>): void;

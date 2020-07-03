@@ -45,7 +45,7 @@ class ServiceAPIIntegration {
     findAction(actionId) {
         return this.props.serviceCatalog.findAction(actionId);
     }
-    setFailed(branch, version, errors, integrations) {
+    setFailed(branch, version, errors) {
         this.$errors = [...errors];
         this.$status = ServiceAPIIntegration.Status.Failed;
         version.addIntegrationHistory(this);
@@ -53,25 +53,23 @@ class ServiceAPIIntegration {
             message: "gateway has been failed to updated",
             branch: branch.toString(),
             version: version.toString(),
-            integrations: integrations.map(int => int.toString()),
+            integrations: version.integrations.map(int => int.toString()),
             errors,
         });
     }
     setSucceed(branch, version, updates) {
         this.$status = ServiceAPIIntegration.Status.Succeed;
         version.addIntegrationHistory(this);
-        if (updates) {
-            this.props.source.reporter.info({
-                message: "gateway has been updated successfully",
-                branch: branch.toString(),
-                version: {
-                    from: version.parentVersion && version.parentVersion.toString(),
-                    to: version.toString(),
-                },
-                integrations: version.integrations.map(int => int.toString()),
-                updates,
-            }, "integration-succeed");
-        }
+        this.props.source.reporter.info({
+            message: "gateway has been updated successfully",
+            branch: branch.toString(),
+            version: {
+                from: version.parentVersion && version.parentVersion.toString(),
+                to: version.toString(),
+            },
+            integrations: version.integrations.filter(int => int.status === ServiceAPIIntegration.Status.Succeed && int.type === ServiceAPIIntegration.Type.Add).map(int => int.service.toString()),
+            updates,
+        }, "integrated:" + branch.toString());
     }
     get errors() {
         return this.$errors;
@@ -83,14 +81,14 @@ class ServiceAPIIntegration {
             message: "gateway found no changes",
             branch: branch.toString(),
             version: version.toString(),
-        }, "integration-no-changes");
+        }, "integration-skipped:" + branch.toString());
     }
     reportRemoved(branch, version) {
         this.props.source.reporter.info({
             message: "gateway removed given integrated version",
             branch: branch.toString(),
             version: version.toString(),
-        }, "integration-removed");
+        }, "integration-removed:" + branch.toString());
     }
 }
 exports.ServiceAPIIntegration = ServiceAPIIntegration;

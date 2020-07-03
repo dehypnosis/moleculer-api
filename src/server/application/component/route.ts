@@ -95,4 +95,8 @@ export abstract class Route {
   public toString(): string {
     return kleur.cyan(`${this.path} (${this.protocol})${this.props.description ? ": " + kleur.dim(this.props.description) : ""}`);
   }
+
+  public toStringWithoutDescription(): string {
+    return kleur.cyan(`${this.path} (${this.protocol})`);
+  }
 }

@@ -111,11 +111,13 @@ class Branch {
             const oldItem = this.serviceCatalog.get(service.id);
             this.serviceCatalog.add({ service, integration, priority });
             const newItem = this.serviceCatalog.get(service.id);
-            this.props.logger.info(`${this} branch connected ${newItem.service} service`);
             // on preferred service changes
             if (oldItem !== newItem) {
                 if (oldItem) {
-                    this.props.logger.info(`${this} branch disconnected ${oldItem.service} service`);
+                    this.props.logger.info(`${this} branch replaced ${oldItem.service} => ${newItem.service} service`);
+                }
+                else {
+                    this.props.logger.info(`${this} branch added ${newItem.service} service`);
                 }
                 // integrate API if has
                 const integrations = [];
@@ -147,31 +149,33 @@ class Branch {
                 return;
             }
             this.props.logger.info(`${this} branch disconnected ${oldItem.service} service`);
-            // on preferred service changes
             const newItem = this.serviceCatalog.get(service.id);
-            if (oldItem !== newItem) {
-                if (newItem) {
-                    this.props.logger.info(`${this} branch connected ${newItem.service} service`);
-                }
-                // integrate API if has
-                const integrations = [];
-                if (oldItem.integration) {
-                    integrations.push(new integration_1.ServiceAPIIntegration({
-                        type: Remove,
-                        serviceCatalog: this.serviceCatalog,
-                        source: oldItem.integration,
-                    }));
-                }
-                if (newItem && newItem.integration) {
-                    integrations.push(new integration_1.ServiceAPIIntegration({
-                        type: Add,
-                        serviceCatalog: this.serviceCatalog,
-                        source: newItem.integration,
-                    }));
-                }
-                if (integrations.length > 0) {
-                    yield this.consumeIntegrations(integrations);
-                }
+            // assert: preferred service changed or all the service connections has been removed
+            console.assert(oldItem !== newItem);
+            if (newItem) {
+                this.props.logger.info(`${this} branch replaced ${oldItem.service} => ${newItem.service} service`);
+            }
+            else {
+                this.props.logger.info(`${this} branch removed ${oldItem.service} service`);
+            }
+            // integrate API if has
+            const integrations = [];
+            if (oldItem.integration) {
+                integrations.push(new integration_1.ServiceAPIIntegration({
+                    type: Remove,
+                    serviceCatalog: this.serviceCatalog,
+                    source: oldItem.integration,
+                }));
+            }
+            if (newItem && newItem.integration) {
+                integrations.push(new integration_1.ServiceAPIIntegration({
+                    type: Add,
+                    serviceCatalog: this.serviceCatalog,
+                    source: newItem.integration,
+                }));
+            }
+            if (integrations.length > 0) {
+                yield this.consumeIntegrations(integrations);
             }
         }));
     }
@@ -189,9 +193,9 @@ class Branch {
                 if (compensatedIntegrations.length > 0) {
                     for (const integration of compensatedIntegrations) {
                         integrations.splice(integrations.indexOf(integration), 1);
-                        integration.setSucceed(this, parentVersion);
+                        integration.setSkipped(this, parentVersion);
                     }
-                    this.props.logger.info(`${this} branch ignores complementary integrations:\n${compensatedIntegrations.join("\n")}`);
+                    this.props.logger.info(`${this} branch will skip to integrate complementary integrations:\n${compensatedIntegrations.join("\n")}`);
                 }
                 // retry failed jobs or finish
                 if (integrations.length === 0 && !initialCompile) {
@@ -276,7 +280,7 @@ class Branch {
                 // failed: report errors and process as failed jobs
                 if (errors.length > 0) {
                     for (const integration of integrations) {
-                        integration.setFailed(this, parentVersion, errors, integrations);
+                        integration.setFailed(this, parentVersion, errors);
                     }
                     if (initialCompile) { // throw errors when failed in initial compile
                         throw new error_1.FatalError("failed to compile empty schemata initially", errors); // TODO: normalize error
@@ -315,7 +319,7 @@ class Branch {
                 removedRoutes.sort((a, b) => a.path > b.path && a.protocol > b.protocol ? 1 : 0);
                 const routeIntegrations = [];
                 for (const r of removedRoutes) {
-                    routeIntegrations.push(`(-) ${r}`);
+                    routeIntegrations.push(`(-) ${r.toStringWithoutDescription()}`);
                 }
                 for (const r of updatedRoutes) {
                     routeIntegrations.push(`(+) ${r}`);

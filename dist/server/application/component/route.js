@@ -57,6 +57,9 @@ class Route {
     toString() {
         return kleur.cyan(`${this.path} (${this.protocol})${this.props.description ? ": " + kleur.dim(this.props.description) : ""}`);
     }
+    toStringWithoutDescription() {
+        return kleur.cyan(`${this.path} (${this.protocol})`);
+    }
 }
 exports.Route = Route;
 Route.branchPathPrefix = "~";
