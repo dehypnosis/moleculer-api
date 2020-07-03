@@ -64,10 +64,17 @@ class ServiceAPIIntegration {
             message: "gateway has been updated successfully",
             branch: branch.toString(),
             version: {
-                from: version.parentVersion && version.parentVersion.toString(),
+                from: version.parentVersion && kleur.dim(version.parentVersion.toString()),
                 to: version.toString(),
             },
-            integrations: version.integrations.filter(int => int.status === ServiceAPIIntegration.Status.Succeed && int.type === ServiceAPIIntegration.Type.Add).map(int => int.service.toString()),
+            integrations: version.integrations
+                .filter(int => int.status === ServiceAPIIntegration.Status.Succeed && int.type === ServiceAPIIntegration.Type.Add)
+                .map(int => {
+                if (version.parentVersion && version.parentVersion.integrations.includes(int)) {
+                    return kleur.dim(int.service.toString());
+                }
+                return int.service.toString();
+            }),
             updates,
         }, "integrated:" + branch.toString());
     }

@@ -375,7 +375,7 @@ export class Branch {
 
       const routeIntegrations: string[] = [];
       for (const r of removedRoutes) {
-        routeIntegrations.push(`(-) ${r.toStringWithoutDescription()}`);
+        routeIntegrations.push(kleur.dim(`(-) ${r.toStringWithoutDescription()}`));
       }
       for (const r of updatedRoutes) {
         routeIntegrations.push(`(+) ${r}`);

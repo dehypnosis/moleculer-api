@@ -75,6 +75,10 @@ export class Service {
     return `${kleur.blue(`${this.props.id}:${this.shortHash}`)}${kleur.cyan("@")}${kleur.green(this.empty ? "empty-node-pool" : Array.from(this.nodeIdMap.keys()).join(","))}`;
   }
 
+  public toStringWithoutNodeIds(): string {
+    return `${kleur.blue(`${this.props.id}:${this.shortHash}`)}`;
+  }
+
   public get empty() {
     return this.nodeIdMap.size === 0;
   }

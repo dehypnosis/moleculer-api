@@ -319,7 +319,7 @@ class Branch {
                 removedRoutes.sort((a, b) => a.path > b.path && a.protocol > b.protocol ? 1 : 0);
                 const routeIntegrations = [];
                 for (const r of removedRoutes) {
-                    routeIntegrations.push(`(-) ${r.toStringWithoutDescription()}`);
+                    routeIntegrations.push(kleur.dim(`(-) ${r.toStringWithoutDescription()}`));
                 }
                 for (const r of updatedRoutes) {
                     routeIntegrations.push(`(+) ${r}`);

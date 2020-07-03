@@ -50,6 +50,9 @@ class Service {
     toString() {
         return `${kleur.blue(`${this.props.id}:${this.shortHash}`)}${kleur.cyan("@")}${kleur.green(this.empty ? "empty-node-pool" : Array.from(this.nodeIdMap.keys()).join(","))}`;
     }
+    toStringWithoutNodeIds() {
+        return `${kleur.blue(`${this.props.id}:${this.shortHash}`)}`;
+    }
     get empty() {
         return this.nodeIdMap.size === 0;
     }

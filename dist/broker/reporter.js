@@ -87,7 +87,7 @@ class Reporter {
     }
     /* Draw message stack as table */
     peekTable() {
-        const title = `< ${kleur.bold(kleur.white(`Report from API Gateway`))} ${kleur.dim(kleur.white(`@${this.gatewayNodeId}`))} -> ${this.props.service.toString()} >`;
+        const title = `${kleur.white(`api`)}${kleur.dim(kleur.white(`@${this.gatewayNodeId}`))} -> ${this.props.service.toStringWithoutNodeIds()}`;
         return `\n${title}\n` + table_1.table([["type", "message"].map(c => kleur.white(c))].concat(Reporter.reportsToRows(this.stack)), {
             border: table_1.getBorderCharacters("norc"),
             columns: {
