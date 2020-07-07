@@ -14,7 +14,7 @@ class Reporter {
         this.gatewayNodeId = os.hostname();
         this.stack = [];
         /* Flush messages */
-        this.debouncedFlush = _.debounce(this.flush.bind(this), 1000, { maxWait: 5000 });
+        this.debouncedFlush = _.debounce(this.flush.bind(this), 2000, { maxWait: 5000 });
         this.opts = _.defaultsDeep(this.opts || {}, {
             tableWidthZoomFactor: 1,
         });

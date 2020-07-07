@@ -49,7 +49,7 @@ export class Reporter {
   private readonly stack: Report[] = [];
 
   /* Flush messages */
-  private debouncedFlush = _.debounce(this.flush.bind(this), 1000, {maxWait: 5000}) as () => void;
+  private debouncedFlush = _.debounce(this.flush.bind(this), 2000, {maxWait: 5000}) as () => void;
 
   protected async flush(): Promise<void> {
     if (this.stack.length === 0) {

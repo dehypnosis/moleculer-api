@@ -186,21 +186,21 @@ class Branch {
             try {
                 const parentVersion = this.$latestVersion;
                 // get queue jobs and filter add/remove pairs
-                const compensatedIntegrations = integrations.filter(integration => {
-                    return integrations
-                        .some(int => int.schemaHash === integration.schemaHash && (int.type === Add && integration.type === Remove || int.type === Remove && integration.type === Add));
-                });
-                if (compensatedIntegrations.length > 0) {
-                    for (const integration of compensatedIntegrations) {
-                        integrations.splice(integrations.indexOf(integration), 1);
-                        integration.setSkipped(this, parentVersion);
-                    }
-                    this.props.logger.info(`${this} branch will skip to integrate complementary integrations:\n${compensatedIntegrations.join("\n")}`);
-                }
+                // const compensatedIntegrations = integrations.filter(integration => {
+                //   return integrations
+                //     .some(int => int.schemaHash === integration.schemaHash && (int.type === Add && integration.type === Remove || int.type === Remove && integration.type === Add));
+                // });
+                // if (compensatedIntegrations.length > 0) {
+                //   for (const integration of compensatedIntegrations) {
+                //     integrations.splice(integrations.indexOf(integration), 1);
+                //     integration.setSkipped(this, parentVersion);
+                //   }
+                //   this.props.logger.info(`${this} branch will skip to integrate complementary integrations:\n${compensatedIntegrations.join("\n")}`);
+                // }
                 // retry failed jobs or finish
-                if (integrations.length === 0 && !initialCompile) {
-                    return this.retryFailedIntegrationsFrom(parentVersion);
-                }
+                // if (integrations.length === 0 && !initialCompile) {
+                //   return this.retryFailedIntegrationsFrom(parentVersion);
+                // }
                 // create new schemaHashMap and pick up required schemata to compile
                 const { schemaHashMap, routeHashMapCache } = parentVersion.getChildVersionProps();
                 let shouldCompile = initialCompile;
@@ -232,7 +232,7 @@ class Branch {
                     for (const integration of integrations) {
                         integration.setSkipped(this, parentVersion);
                     }
-                    this.props.logger.info(`${this} branch skipped ${parentVersion} -> (new) version compile due to no changes:\n${integrations.concat(compensatedIntegrations).join("\n")}`);
+                    this.props.logger.info(`${this} branch skipped ${parentVersion} -> (new) version compile due to no changes:\n${integrations.join("\n")}`); // .concat(compensatedIntegrations)
                     // retry
                     return this.retryFailedIntegrationsFrom(parentVersion);
                 }
