@@ -85,7 +85,7 @@ export class ServiceAPIIntegration {
       message: "gateway has been failed to updated",
       branch: branch.toString(),
       version: version.toString(),
-      integrations: version.integrations.map(int => int.toString()),
+      integrations: version.integrations.map(int => int.schemaHash === this.schemaHash ? int.toString() : int.service.toString()),
       errors,
     });
   }
@@ -106,7 +106,7 @@ export class ServiceAPIIntegration {
           if (version.parentVersion && version.parentVersion.integrations.includes(int)) {
             return kleur.dim(int.service.toString());
           }
-          return int.service.toString();
+          return int.toString();
         }),
       updates,
     }, "integrated:" + branch.toString());

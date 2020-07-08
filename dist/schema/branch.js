@@ -186,42 +186,43 @@ class Branch {
             try {
                 const parentVersion = this.$latestVersion;
                 // get queue jobs and filter add/remove pairs
-                // const compensatedIntegrations = integrations.filter(integration => {
-                //   return integrations
-                //     .some(int => int.schemaHash === integration.schemaHash && (int.type === Add && integration.type === Remove || int.type === Remove && integration.type === Add));
-                // });
-                // if (compensatedIntegrations.length > 0) {
-                //   for (const integration of compensatedIntegrations) {
-                //     integrations.splice(integrations.indexOf(integration), 1);
-                //     integration.setSkipped(this, parentVersion);
-                //   }
-                //   this.props.logger.info(`${this} branch will skip to integrate complementary integrations:\n${compensatedIntegrations.join("\n")}`);
-                // }
+                const compensatedIntegrations = integrations.filter(integration => {
+                    return integrations
+                        .some(int => int.schemaHash === integration.schemaHash && (int.type === Add && integration.type === Remove || int.type === Remove && integration.type === Add));
+                });
+                if (compensatedIntegrations.length > 0) {
+                    for (const integration of compensatedIntegrations) {
+                        integrations.splice(integrations.indexOf(integration), 1);
+                        integration.setSkipped(this, parentVersion);
+                    }
+                    this.props.logger.info(`${this} branch will skip to integrate complementary integrations:\n${compensatedIntegrations.join("\n")}`);
+                }
                 // retry failed jobs or finish
-                // if (integrations.length === 0 && !initialCompile) {
-                //   return this.retryFailedIntegrationsFrom(parentVersion);
-                // }
+                if (integrations.length === 0 && !initialCompile) {
+                    return this.retryFailedIntegrationsFrom(parentVersion);
+                }
                 // create new schemaHashMap and pick up required schemata to compile
                 const { schemaHashMap, routeHashMapCache } = parentVersion.getChildVersionProps();
                 let shouldCompile = initialCompile;
                 for (const integration of integrations) {
                     if (integration.type === Add) {
+                        for (const [hash, oldIntegration] of schemaHashMap.entries()) {
+                            if (oldIntegration.service.id === integration.service.id) {
+                                schemaHashMap.delete(hash);
+                                this.props.logger.info(`${this} branch will remove duplicate old integration: ${oldIntegration.service.toString()}`);
+                                break;
+                            }
+                        }
                         if (!schemaHashMap.has(integration.schemaHash) || integration.status === integration_1.ServiceAPIIntegration.Status.Failed) {
                             shouldCompile = true;
-                        }
-                        else {
-                            // this.props.logger.warn(`${integration.schemaHash} is not the part of ${[...schemaHashMap.keys()]}`);
                         }
                         schemaHashMap.set(integration.schemaHash, integration); // override schema
                     }
                     else if (integration.type === Remove) {
                         if (schemaHashMap.has(integration.schemaHash) || integration.status === integration_1.ServiceAPIIntegration.Status.Failed) {
                             shouldCompile = true;
-                            schemaHashMap.delete(integration.schemaHash); // remove
                         }
-                        else {
-                            // this.props.logger.warn(`${integration.schemaHash} is not the part of ${[...schemaHashMap.keys()]}`);
-                        }
+                        schemaHashMap.delete(integration.schemaHash); // remove
                     }
                     else {
                         console.assert(false, "invalid integration type");
@@ -232,7 +233,7 @@ class Branch {
                     for (const integration of integrations) {
                         integration.setSkipped(this, parentVersion);
                     }
-                    this.props.logger.info(`${this} branch skipped ${parentVersion} -> (new) version compile due to no changes:\n${integrations.join("\n")}`); // .concat(compensatedIntegrations)
+                    this.props.logger.info(`${this} branch skipped ${parentVersion} -> (new) version compile due to no changes:\n${integrations.concat(compensatedIntegrations).join("\n")}`);
                     // retry
                     return this.retryFailedIntegrationsFrom(parentVersion);
                 }
