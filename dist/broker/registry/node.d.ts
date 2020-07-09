@@ -10,4 +10,9 @@ export declare class ServiceNode {
     get displayName(): string;
     get meta(): Readonly<object> | null;
     toString(): string;
+    getInformation(): {
+        id: string;
+        displayName: string;
+        meta: object | null;
+    };
 }

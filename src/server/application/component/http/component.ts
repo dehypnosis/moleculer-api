@@ -7,6 +7,7 @@ import { ServerApplicationComponent, ServerApplicationComponentProps } from "../
 import { HTTPRoute, HTTPRouteInternalHandler } from "./route";
 
 export type ServerHTTPApplicationOptions = {
+  jsonSpaces: number;
   trustProxy: boolean;
 };
 
@@ -20,6 +21,7 @@ export class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute>
   constructor(props: ServerApplicationComponentProps, opts?: RecursivePartial<ServerHTTPApplicationOptions>) {
     super(props);
     this.opts = _.defaultsDeep(opts || {}, {
+      jsonSpaces: 2,
       trustProxy: true,
     });
 
@@ -27,6 +29,7 @@ export class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute>
     this.module = express();
     Object.assign(this.module.settings, {
       "env": "production",
+      "json spaces": this.opts.jsonSpaces || null,
       "case sensitive routing": false,
       "strict routing": false,
       "trust proxy": this.opts.trustProxy,

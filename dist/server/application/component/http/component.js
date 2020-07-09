@@ -12,12 +12,14 @@ class ServerHTTPApplication extends component_1.ServerApplicationComponent {
         this.Route = route_1.HTTPRoute;
         this.routeHandlerExpressRouterMap = new Map();
         this.opts = _.defaultsDeep(opts || {}, {
+            jsonSpaces: 2,
             trustProxy: true,
         });
         // create express.Application without http.Server instance
         this.module = express_1.default();
         Object.assign(this.module.settings, {
             "env": "production",
+            "json spaces": this.opts.jsonSpaces || null,
             "case sensitive routing": false,
             "strict routing": false,
             "trust proxy": this.opts.trustProxy,

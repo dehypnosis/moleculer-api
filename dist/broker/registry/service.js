@@ -16,14 +16,15 @@ class Service {
         // clear nodes props for garbage collection
         this.props.nodes.splice(0);
     }
-    get information() {
+    getInformation(includeActions = false) {
         return {
             id: this.id,
             hash: this.hash,
             name: this.displayName,
             description: this.description,
             meta: this.meta,
-            nodes: [...this.nodeIdMap.keys()],
+            nodes: [...this.nodeIdMap.values()].map(node => node.getInformation()),
+            actions: includeActions ? [...this.actionMap.values()].map(action => action.getInformation(true)) : null,
         };
     }
     get hash() {
@@ -40,6 +41,9 @@ class Service {
     }
     get meta() {
         return this.props.meta;
+    }
+    updateMeta(meta) {
+        this.props.meta = meta;
     }
     get broker() {
         return this.$broker || null;

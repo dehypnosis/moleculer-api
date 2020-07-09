@@ -1,3 +1,4 @@
+import { Branch } from "../../branch";
 import { ServiceAPIIntegration } from "../../integration";
 import { Route } from "../../../server";
 import { Plugin, PluginProps } from "../plugin";
@@ -16,7 +17,7 @@ export declare type ProtocolPluginProps = PluginProps & {
 export declare abstract class ProtocolPlugin<PluginSchema extends IProtocolPluginSchema, PluginCatalog extends IProtocolPluginCatalog> extends Plugin<PluginSchema, PluginCatalog> {
     protected readonly props: ProtocolPluginProps;
     constructor(props: ProtocolPluginProps, opts?: any);
-    abstract compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): {
+    abstract compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[], branch: Branch): {
         hash: string;
         route: Readonly<Route>;
     }[];

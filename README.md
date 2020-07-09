@@ -78,9 +78,9 @@ yarn add moleculer-api
     - [] Schema Registry plugins
         - [] Filter access control policy plugin
         - [] Scope access control policy plugin
-    - [] Gateway schema presets
-        - [] Service Catalog and API Catalog in GraphQL
-        - [] Health Check endpoints in REST
+    - [x] Gateway schema presets
+        - [x] Service Catalog endpoints in REST
+        - [x] Empty scheme placeholder in GraphQL
     - [] Normalized errors
 - [] 1.0.x First Stable release
     - [x] API Server additional protocols

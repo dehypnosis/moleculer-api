@@ -19,6 +19,9 @@ class ServiceNode {
     toString() {
         return kleur.green(this.props.id);
     }
+    getInformation() {
+        return Object.assign({}, this.props);
+    }
 }
 exports.ServiceNode = ServiceNode;
 //# sourceMappingURL=node.js.map

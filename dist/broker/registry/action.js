@@ -13,6 +13,10 @@ class ServiceAction {
             this.paramsSchema = interface_1.normalizeValidationSchema(this.props.paramsSchema);
         }
     }
+    getInformation(includeExamples = false) {
+        const _a = this.props, { service } = _a, restProps = tslib_1.__rest(_a, ["service"]);
+        return Object.assign(Object.assign({}, restProps), { examples: includeExamples ? this.getExamples() : null });
+    }
     toString() {
         return kleur.blue(this.props.id);
     }

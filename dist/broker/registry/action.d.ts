@@ -24,6 +24,16 @@ export declare class ServiceAction {
     private readonly examples;
     readonly paramsSchema: Readonly<NormalizedValidationSchema> | null;
     constructor(props: ServiceActionProps);
+    getInformation(includeExamples?: boolean): {
+        examples: ActionExample[] | null;
+        id: string;
+        displayName: string;
+        description: string | null;
+        deprecated: boolean;
+        paramsSchema: NormalizedValidationSchema | null;
+        cachePolicy: ServiceActionCachePolicy | null;
+        meta: object | null;
+    };
     toString(): string;
     get id(): string;
     get displayName(): string;

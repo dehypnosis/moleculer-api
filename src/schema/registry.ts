@@ -137,16 +137,6 @@ export class SchemaRegistry {
     }
   }
 
-  public get information() {
-    return {
-      plugins: {
-        policy: this.plugin.policy.map(plugin => plugin.key),
-        protocol: this.plugin.protocol.map(plugin => plugin.key),
-      },
-      branches: [...this.branchMap.values()].map(branch => branch.information),
-    };
-  }
-
   /* service discovery */
   private lock = new AsyncLock({maxPending: 1000, timeout: 30 * 1000});
   private serviceReporterMap = new Map<Readonly<Service>, Reporter>();
@@ -220,13 +210,13 @@ export class SchemaRegistry {
     if (reporter) {
       reporter.info({
         message: `${service} service node pool has been updated`,
-        service: service.information,
+        service: service.getInformation(),
       }, "pool-updated");
     }
   }
 
   /* schema management */
-  private validateServiceAPISchema(schema: Readonly<ServiceAPISchema>): ValidationError[] {
+  private validateServiceAPISchema(schema: ServiceAPISchema): ValidationError[] {
     const errors = validateObject(schema, {
       branch: {
         type: "string",
@@ -243,10 +233,16 @@ export class SchemaRegistry {
             optional: true,
             check(value: any) {
               const errs = plugin.validateSchema(value);
-              return errs.length === 0 ? true : errs.map(err => {
-                err.field = `api.protocol.${plugin.key}.${err.field}`;
-                return err;
-              });
+              if (errs.length) {
+                return errs.map(err => {
+                  err.field = `api.protocol.${plugin.key}.${err.field}`;
+                  return err;
+                });
+              }
+
+              // update meta in case of update from plugin
+              schema.protocol[plugin.key as keyof typeof schema.protocol] = value;
+              return true;
             },
           };
           return props;
@@ -272,10 +268,16 @@ export class SchemaRegistry {
                   check(value: any) {
                     const idx = schema.policy[connectorType]!.indexOf(value);
                     const errs = plugin.validateSchema(value);
-                    return errs.length === 0 ? true : errs.map(err => {
-                      err.field = `api.policy.${connectorType}[${idx}].${plugin.key}${err.field ? `.${err.field}` : ""}`;
-                      return err;
-                    });
+                    if (errs.length) {
+                      return errs.map(err => {
+                        err.field = `api.policy.${connectorType}[${idx}].${plugin.key}${err.field ? `.${err.field}` : ""}`;
+                        return err;
+                      });
+                    }
+
+                    // update meta in case of update from plugin
+                    schema.policy[plugin.key as keyof typeof schema.policy] = value;
+                    return true;
                   },
                 };
                 return policyItemProps;

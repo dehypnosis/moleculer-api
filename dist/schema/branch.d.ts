@@ -30,17 +30,9 @@ export declare class Branch {
     private emitter;
     constructor(props: BranchProps, opts?: RecursivePartial<BranchOptions>);
     toString(): string;
-    get information(): {
+    getInformation(includeServices?: boolean): {
         branch: string;
         latestUsedAt: Date;
-        services: {
-            id: string;
-            hash: string;
-            name: string;
-            description: string | null;
-            meta: object | null;
-            nodes: string[];
-        }[];
         parentVersion: string | null;
         latestVersion: string;
         versions: {
@@ -55,6 +47,28 @@ export declare class Branch {
                 service: string;
             }[];
         }[];
+        services: {
+            id: string;
+            hash: string;
+            name: string;
+            description: string | null;
+            meta: object | null;
+            nodes: {
+                id: string;
+                displayName: string;
+                meta: object | null;
+            }[];
+            actions: {
+                examples: import("../broker/registry/action").ActionExample[] | null;
+                id: string;
+                displayName: string;
+                description: string | null;
+                deprecated: boolean;
+                paramsSchema: import("../interface").NormalizedValidationSchema | null;
+                cachePolicy: import("../broker/registry/action").ServiceActionCachePolicy | null;
+                meta: object | null;
+            }[] | null;
+        }[] | null;
     };
     get name(): string;
     get isMaster(): boolean;

@@ -1,3 +1,4 @@
+import { Branch } from "../../branch";
 import { ServiceAPIIntegration } from "../../integration";
 import { Route } from "../../../server";
 import { Plugin, PluginProps } from "../plugin";
@@ -23,5 +24,5 @@ export abstract class ProtocolPlugin<PluginSchema extends IProtocolPluginSchema,
   }
 
   /* Schema integration and route generation */
-  public abstract compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): { hash: string, route: Readonly<Route> }[];
+  public abstract compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[], branch: Branch): { hash: string, route: Readonly<Route> }[];
 }

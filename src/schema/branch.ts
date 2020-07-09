@@ -61,14 +61,14 @@ export class Branch {
     return `${kleur.bold(kleur.cyan(this.name))} ${kleur.cyan(`(${this.serviceCatalog.size} services)`)}`;
   }
 
-  public get information() {
+  public getInformation(includeServices = false) {
     return {
       branch: this.name,
       latestUsedAt: this.latestUsedAt,
-      services: this.serviceCatalog.services.map(service => service.information),
       parentVersion: this.props.parentVersion ? this.props.parentVersion.shortHash : null,
       latestVersion: this.$latestVersion.shortHash,
       versions: this.versions.map(v => v.information),
+      services: includeServices ? this.serviceCatalog.services.map(service => service.getInformation(true)) : null,
     };
   };
 
@@ -296,7 +296,7 @@ export class Branch {
       for (const plugin of this.props.protocolPlugins) {
         try {
           const pluginIntegrations = mergedIntegrations.filter(integration => integration.schema.protocol && (integration.schema.protocol as any)[plugin.key]);
-          const pluginResult = plugin.compileSchemata(routeHashMapCache, pluginIntegrations);
+          const pluginResult = plugin.compileSchemata(routeHashMapCache, pluginIntegrations, this);
           for (const {hash, route} of pluginResult) {
             const routeHashIndex = routeHashes.indexOf(hash);
             if (routeHashIndex !== -1) {

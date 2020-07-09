@@ -2,13 +2,11 @@
   GraphQL Plugin default options for base schema and resolvers
 */
 
-import { GraphQLHandlersOptions } from "./handlers";
+import { GraphQLProtocolPluginOptions } from "../plugin";
 import { InMemoryLRUCache } from "apollo-server-caching";
 import { GraphQLUpload } from "graphql-upload";
 import { GraphQLJSON } from "graphql-type-json";
 import { GraphQLDate, GraphQLDateTime, GraphQLTime } from "graphql-iso-date";
-
-// TODO: as preset
 
 delete GraphQLUpload.description;
 delete GraphQLJSON.description;
@@ -74,56 +72,7 @@ scalar DateTime
 `);
 resolvers.DateTime = GraphQLDateTime;
 
-/* base schema */
-typeDefs.push(`
-"""
-Root Query type
-"""
-type Query {
-  _: String
-}
-
-"""
-Root Mutation type
-"""
-type Mutation {
-  _: String
-}
-
-"""
-Root Subscription type
-"""
-type Subscription {
-  _: String
-}
-`);
-
-resolvers.Query = {
-  _: () => "dummy",
-};
-
-resolvers.Mutation = {
-  _: () => "dummy",
-};
-
-async function* dummyGenerator(count = 10, sleep = 1000) {
-  let i = 0;
-  while(i < count) {
-    await new Promise(resolve => setTimeout(resolve, sleep));
-    yield i++;
-  }
-}
-resolvers.Subscription = {
-  _: {
-    subscribe: () => dummyGenerator(),
-    resolve: (source: any) => source,
-  },
-};
-
-export const defaultGraphQLTypeDefs = typeDefs;
-export const defaultGraphQLResolvers = resolvers;
-
-export const defaultGraphQLHandlersOptions: GraphQLHandlersOptions = {
+export const defaultGraphQLHandlersOptions: GraphQLProtocolPluginOptions = {
   typeDefs,
   resolvers,
   subscriptions: {

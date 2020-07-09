@@ -20,19 +20,34 @@ export declare class Service {
     readonly shortHash: string;
     private $broker;
     constructor(props: ServiceProps);
-    get information(): {
+    getInformation(includeActions?: boolean): {
         id: string;
         hash: string;
         name: string;
         description: string | null;
         meta: object | null;
-        nodes: string[];
+        nodes: {
+            id: string;
+            displayName: string;
+            meta: object | null;
+        }[];
+        actions: {
+            examples: import("./action").ActionExample[] | null;
+            id: string;
+            displayName: string;
+            description: string | null;
+            deprecated: boolean;
+            paramsSchema: import("../../interface").NormalizedValidationSchema | null;
+            cachePolicy: import("./action").ServiceActionCachePolicy | null;
+            meta: object | null;
+        }[] | null;
     };
     get hash(): string;
     get id(): string;
     get displayName(): string;
     get description(): string | null;
     get meta(): Readonly<object> | null;
+    updateMeta(meta: any): void;
     get broker(): Readonly<ServiceBroker> | null;
     setBroker(broker: Readonly<ServiceBroker> | null): void;
     toString(): string;

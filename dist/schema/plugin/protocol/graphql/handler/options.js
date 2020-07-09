@@ -3,13 +3,11 @@
   GraphQL Plugin default options for base schema and resolvers
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defaultGraphQLHandlersOptions = exports.defaultGraphQLResolvers = exports.defaultGraphQLTypeDefs = void 0;
-const tslib_1 = require("tslib");
+exports.defaultGraphQLHandlersOptions = void 0;
 const apollo_server_caching_1 = require("apollo-server-caching");
 const graphql_upload_1 = require("graphql-upload");
 const graphql_type_json_1 = require("graphql-type-json");
 const graphql_iso_date_1 = require("graphql-iso-date");
-// TODO: as preset
 delete graphql_upload_1.GraphQLUpload.description;
 delete graphql_type_json_1.GraphQLJSON.description;
 delete graphql_iso_date_1.GraphQLDate.description;
@@ -67,52 +65,6 @@ DateTime scalar Type
 scalar DateTime
 `);
 resolvers.DateTime = graphql_iso_date_1.GraphQLDateTime;
-/* base schema */
-typeDefs.push(`
-"""
-Root Query type
-"""
-type Query {
-  _: String
-}
-
-"""
-Root Mutation type
-"""
-type Mutation {
-  _: String
-}
-
-"""
-Root Subscription type
-"""
-type Subscription {
-  _: String
-}
-`);
-resolvers.Query = {
-    _: () => "dummy",
-};
-resolvers.Mutation = {
-    _: () => "dummy",
-};
-function dummyGenerator(count = 10, sleep = 1000) {
-    return tslib_1.__asyncGenerator(this, arguments, function* dummyGenerator_1() {
-        let i = 0;
-        while (i < count) {
-            yield tslib_1.__await(new Promise(resolve => setTimeout(resolve, sleep)));
-            yield yield tslib_1.__await(i++);
-        }
-    });
-}
-resolvers.Subscription = {
-    _: {
-        subscribe: () => dummyGenerator(),
-        resolve: (source) => source,
-    },
-};
-exports.defaultGraphQLTypeDefs = typeDefs;
-exports.defaultGraphQLResolvers = resolvers;
 exports.defaultGraphQLHandlersOptions = {
     typeDefs,
     resolvers,

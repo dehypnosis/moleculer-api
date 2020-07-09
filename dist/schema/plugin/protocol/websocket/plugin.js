@@ -149,7 +149,7 @@ class WebSocketProtocolPlugin extends plugin_1.ProtocolPlugin {
             strict: true,
         });
     }
-    compileSchemata(routeHashMapCache, integrations) {
+    compileSchemata(routeHashMapCache, integrations, branch) {
         const items = new Array();
         for (const integration of integrations) {
             const schema = integration.schema.protocol[this.key];

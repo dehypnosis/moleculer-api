@@ -25,7 +25,8 @@ class GraphQLProtocolPlugin extends plugin_1.ProtocolPlugin {
     }
     validateSchema(schema) {
         const typeDefs = [];
-        return interface_1.validateObject(schema, {
+        let typeDefsString = "";
+        const result = interface_1.validateObject(schema, {
             description: {
                 type: "string",
                 optional: true,
@@ -33,10 +34,10 @@ class GraphQLProtocolPlugin extends plugin_1.ProtocolPlugin {
             typeDefs: {
                 type: "custom",
                 check(value) {
-                    // parse graphql.documentNode which can be generated with gql` ... `
+                    // parse graphql.documentNode which might have been generated with gql` ... `
                     if (typeof value === "object" && value !== null) {
                         try {
-                            value = language_1.print(value);
+                            typeDefsString = value = language_1.print(value);
                         }
                         catch (error) {
                             return [{
@@ -144,11 +145,11 @@ class GraphQLProtocolPlugin extends plugin_1.ProtocolPlugin {
                             continue;
                         }
                         // __isTypeOf field resolver is required for interface implementation
-                        const interfaceNames = partialTypeDefs.reduce((interfaceNames, typeDef) => {
+                        const interfaceNames = partialTypeDefs.reduce((names, typeDef) => {
                             if (typeDef.interfaces) {
-                                interfaceNames.push(...typeDef.interfaces.map(i => i.name.value));
+                                names.push(...typeDef.interfaces.map(i => i.name.value));
                             }
-                            return interfaceNames;
+                            return names;
                         }, []);
                         const isTypeOfFieldResolverRequired = interfaceNames.length > 0;
                         if (isTypeOfFieldResolverRequired) {
@@ -311,8 +312,13 @@ class GraphQLProtocolPlugin extends plugin_1.ProtocolPlugin {
         }, {
             strict: true,
         });
+        // convert original typeDefs as string too for human-readable information
+        if (typeDefsString) {
+            schema.typeDefs = typeDefsString;
+        }
+        return result;
     }
-    compileSchemata(routeHashMapCache, integrations) {
+    compileSchemata(routeHashMapCache, integrations, branch) {
         const items = new Array();
         /* calculate integrated hash to fetch cached handlers */
         const hashes = [];
@@ -363,6 +369,66 @@ class GraphQLProtocolPlugin extends plugin_1.ProtocolPlugin {
             const schema = integration.schema.protocol[this.key];
             typeDefs.push(typeof schema.typeDefs === "string" ? schema.typeDefs : language_1.print(schema.typeDefs));
             resolvers = _.merge(resolvers, this.createGraphQLResolvers(schema.resolvers, integration));
+        }
+        // add placeholders for root types
+        if (!resolvers.Query) {
+            typeDefs.push(`
+        """
+        Root Query type
+        """
+        type Query {
+          placeholder: String!
+        }
+      `);
+            resolvers.Query = {
+                placeholder: () => "DUMMY",
+            };
+        }
+        else {
+            typeDefs.push(`type Query\n`);
+        }
+        if (!resolvers.Mutation) {
+            typeDefs.push(`
+        """
+        Root Mutation type
+        """
+        type Mutation {
+          placeholder: String!
+        }
+      `);
+            resolvers.Mutation = {
+                placeholder: () => "DUMMY",
+            };
+        }
+        else {
+            typeDefs.push(`type Mutation\n`);
+        }
+        if (!resolvers.Subscription) {
+            typeDefs.push(`
+        """
+        Root Subscription type
+        """
+        type Subscription {
+          placeholder: String!
+        }
+      `);
+            resolvers.Subscription = {
+                placeholder: {
+                    subscribe: () => (function dummyGenerator() {
+                        return tslib_1.__asyncGenerator(this, arguments, function* dummyGenerator_1() {
+                            let i = 0;
+                            while (i < 10) {
+                                yield tslib_1.__await(new Promise(resolve => setTimeout(resolve, 1000)));
+                                yield yield tslib_1.__await(`DUMMY (${i++})`);
+                            }
+                        });
+                    })(),
+                    resolve: (source) => source,
+                },
+            };
+        }
+        else {
+            typeDefs.push(`type Subscription\n`);
         }
         const { handler, subscriptionHandler, playgroundHandler } = new handler_1.GraphQLHandlers((message) => {
             this.props.logger.error(message);

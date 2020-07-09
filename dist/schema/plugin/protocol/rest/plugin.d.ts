@@ -1,4 +1,5 @@
 import { RecursivePartial, ValidationError } from "../../../../interface";
+import { Branch } from "../../../branch";
 import { ServiceAPIIntegration } from "../../../integration";
 import { Route } from "../../../../server";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
@@ -8,6 +9,7 @@ export declare type RESTProtocolPluginOptions = {
         maxFiles: number;
         maxFileSize: number;
     };
+    introspection: boolean;
 };
 export declare class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema, RESTProtocolPluginCatalog> {
     protected readonly props: ProtocolPluginProps;
@@ -17,8 +19,8 @@ export declare class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPlugi
     constructor(props: ProtocolPluginProps, opts?: RecursivePartial<RESTProtocolPluginOptions>);
     start(): Promise<void>;
     stop(): Promise<void>;
-    validateSchema(schema: Readonly<RESTProtocolPluginSchema>): ValidationError[];
-    compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): {
+    validateSchema(schema: RESTProtocolPluginSchema): ValidationError[];
+    compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[], branch: Branch): {
         hash: string;
         route: Readonly<Route>;
     }[];

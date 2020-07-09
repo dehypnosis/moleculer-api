@@ -1,5 +1,6 @@
 import * as _ from "lodash";
 import { RecursivePartial, hashObject, validateObject, validateValue, ValidationError, ValidationRule, isReadStream } from "../../../../interface";
+import { Branch } from "../../../branch";
 import { ServiceAPIIntegration } from "../../../integration";
 import { Route, HTTPRoute, HTTPRouteHandler, HTTPRouteResponse } from "../../../../server";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
@@ -13,6 +14,7 @@ export type RESTProtocolPluginOptions = {
     maxFiles: number; // number
     maxFileSize: number; // byte
   };
+  introspection: boolean; // add [/~branch]/~status internal route handler which shows status of each branches
 };
 
 export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema, RESTProtocolPluginCatalog> {
@@ -22,6 +24,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
       maxFiles: Infinity,
       maxFileSize: Infinity,
     },
+    introspection: true,
   };
   private readonly opts: RESTProtocolPluginOptions;
 
@@ -36,7 +39,7 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
   public async stop(): Promise<void> {
   }
 
-  public validateSchema(schema: Readonly<RESTProtocolPluginSchema>): ValidationError[] {
+  public validateSchema(schema: RESTProtocolPluginSchema): ValidationError[] {
     const routeMethodAndPaths: string[] = [];
     return validateObject(schema, {
       description: {
@@ -218,8 +221,24 @@ export class RESTProtocolPlugin extends ProtocolPlugin<RESTProtocolPluginSchema,
     });
   }
 
-  public compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): { hash: string, route: Readonly<Route> }[] {
+  public compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[], branch: Branch): { hash: string, route: Readonly<Route> }[] {
     const items = new Array<{ hash: string, route: Readonly<Route> }>();
+
+    // introspection routes
+    if (this.opts.introspection) {
+      const introspectionRouteHash = "static@introspection";
+      items.push({
+        hash: introspectionRouteHash,
+        route: routeHashMapCache.get(introspectionRouteHash) || new HTTPRoute({
+          path: "/~status",
+          method: "GET",
+          description: `${branch.name} branch introspection endpoint`,
+          handler: async (context, req, res) => {
+            this.sendResponse(res, branch.getInformation(true));
+          },
+        }),
+      });
+    }
 
     for (const integration of integrations) {
       const schema: RESTProtocolPluginSchema = (integration.schema.protocol as any)[this.key];

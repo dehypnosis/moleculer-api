@@ -25,4 +25,8 @@ export class ServiceNode {
   public toString(): string {
     return kleur.green(this.props.id);
   }
+
+  public getInformation() {
+    return {...this.props};
+  }
 }

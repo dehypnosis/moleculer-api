@@ -1,6 +1,7 @@
 import { ValidationRule } from "fastest-validator";
 import * as _ from "lodash";
 import { hashObject, isReadStream, RecursivePartial, validateObject, validateValue, ValidationError } from "../../../../interface";
+import { Branch } from "../../../branch";
 import { ServiceAPIIntegration } from "../../../integration";
 import { WebSocketRoute, Route, WebSocketRouteHandler } from "../../../../server";
 import { ConnectorCompiler, ConnectorValidator } from "../../connector";
@@ -27,7 +28,7 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
   public async stop(): Promise<void> {
   }
 
-  public validateSchema(schema: Readonly<WebSocketProtocolPluginSchema>): ValidationError[] {
+  public validateSchema(schema: WebSocketProtocolPluginSchema): ValidationError[] {
     const routePaths: string[] = [];
     return validateObject(schema, {
       description: {
@@ -164,7 +165,7 @@ export class WebSocketProtocolPlugin extends ProtocolPlugin<WebSocketProtocolPlu
     });
   }
 
-  public compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[]): { hash: string; route: Readonly<Route>; }[] {
+  public compileSchemata(routeHashMapCache: Readonly<Map<string, Readonly<Route>>>, integrations: Readonly<ServiceAPIIntegration>[], branch: Branch): { hash: string; route: Readonly<Route>; }[] {
     const items = new Array<{ hash: string, route: Readonly<WebSocketRoute> }>();
 
     for (const integration of integrations) {

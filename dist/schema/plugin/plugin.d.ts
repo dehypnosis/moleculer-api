@@ -8,6 +8,6 @@ export declare abstract class Plugin<PluginSchema, PluginCatalog> extends Plugga
     constructor(props: PluginProps, opts?: any);
     abstract start(): Promise<void>;
     abstract stop(): Promise<void>;
-    abstract validateSchema(schema: Readonly<PluginSchema>): ValidationError[];
+    abstract validateSchema(schema: PluginSchema): ValidationError[];
     abstract describeSchema(schema: Readonly<PluginSchema>): PluginCatalog;
 }

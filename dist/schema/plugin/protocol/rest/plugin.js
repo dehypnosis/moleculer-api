@@ -200,8 +200,23 @@ class RESTProtocolPlugin extends plugin_1.ProtocolPlugin {
             strict: true,
         });
     }
-    compileSchemata(routeHashMapCache, integrations) {
+    compileSchemata(routeHashMapCache, integrations, branch) {
         const items = new Array();
+        // introspection routes
+        if (this.opts.introspection) {
+            const introspectionRouteHash = "static@introspection";
+            items.push({
+                hash: introspectionRouteHash,
+                route: routeHashMapCache.get(introspectionRouteHash) || new server_1.HTTPRoute({
+                    path: "/~status",
+                    method: "GET",
+                    description: `${branch.name} branch introspection endpoint`,
+                    handler: (context, req, res) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        this.sendResponse(res, branch.getInformation(true));
+                    }),
+                }),
+            });
+        }
         for (const integration of integrations) {
             const schema = integration.schema.protocol[this.key];
             for (const routeSchema of schema.routes) {
@@ -370,5 +385,6 @@ RESTProtocolPlugin.autoLoadOptions = {
         maxFiles: Infinity,
         maxFileSize: Infinity,
     },
+    introspection: true,
 };
 //# sourceMappingURL=plugin.js.map

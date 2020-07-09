@@ -104,15 +104,6 @@ class SchemaRegistry {
             }
         });
     }
-    get information() {
-        return {
-            plugins: {
-                policy: this.plugin.policy.map(plugin => plugin.key),
-                protocol: this.plugin.protocol.map(plugin => plugin.key),
-            },
-            branches: [...this.branchMap.values()].map(branch => branch.information),
-        };
-    }
     serviceConnected(service) {
         this.lock.acquire("discovery", () => tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.props.logger.info(`${service} service has been connected`);
@@ -174,7 +165,7 @@ class SchemaRegistry {
         if (reporter) {
             reporter.info({
                 message: `${service} service node pool has been updated`,
-                service: service.information,
+                service: service.getInformation(),
             }, "pool-updated");
         }
     }
@@ -196,10 +187,15 @@ class SchemaRegistry {
                         optional: true,
                         check(value) {
                             const errs = plugin.validateSchema(value);
-                            return errs.length === 0 ? true : errs.map(err => {
-                                err.field = `api.protocol.${plugin.key}.${err.field}`;
-                                return err;
-                            });
+                            if (errs.length) {
+                                return errs.map(err => {
+                                    err.field = `api.protocol.${plugin.key}.${err.field}`;
+                                    return err;
+                                });
+                            }
+                            // update meta in case of update from plugin
+                            schema.protocol[plugin.key] = value;
+                            return true;
                         },
                     };
                     return props;
@@ -225,10 +221,15 @@ class SchemaRegistry {
                                     check(value) {
                                         const idx = schema.policy[connectorType].indexOf(value);
                                         const errs = plugin.validateSchema(value);
-                                        return errs.length === 0 ? true : errs.map(err => {
-                                            err.field = `api.policy.${connectorType}[${idx}].${plugin.key}${err.field ? `.${err.field}` : ""}`;
-                                            return err;
-                                        });
+                                        if (errs.length) {
+                                            return errs.map(err => {
+                                                err.field = `api.policy.${connectorType}[${idx}].${plugin.key}${err.field ? `.${err.field}` : ""}`;
+                                                return err;
+                                            });
+                                        }
+                                        // update meta in case of update from plugin
+                                        schema.policy[plugin.key] = value;
+                                        return true;
                                     },
                                 };
                                 return policyItemProps;

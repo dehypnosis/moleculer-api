@@ -5,6 +5,7 @@ import { RouteHandlerMap } from "../route";
 import { ServerApplicationComponent, ServerApplicationComponentProps } from "../component";
 import { HTTPRoute } from "./route";
 export declare type ServerHTTPApplicationOptions = {
+    jsonSpaces: number;
     trustProxy: boolean;
 };
 export declare class ServerHTTPApplication extends ServerApplicationComponent<HTTPRoute> {

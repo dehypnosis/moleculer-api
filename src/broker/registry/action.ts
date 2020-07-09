@@ -27,6 +27,14 @@ export class ServiceAction {
     }
   }
 
+  public getInformation(includeExamples = false) {
+    const { service, ...restProps } = this.props;
+    return {
+      ...restProps,
+      examples: includeExamples ? this.getExamples() : null,
+    }
+  }
+
   public toString(): string {
     return kleur.blue(this.props.id);
   }

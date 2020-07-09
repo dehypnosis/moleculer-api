@@ -32,14 +32,15 @@ export class Service {
     this.props.nodes.splice(0);
   }
 
-  public get information() {
+  public getInformation(includeActions = false) {
     return {
       id: this.id,
       hash: this.hash,
       name: this.displayName,
       description: this.description,
       meta: this.meta,
-      nodes: [...this.nodeIdMap.keys()],
+      nodes: [...this.nodeIdMap.values()].map(node => node.getInformation()),
+      actions: includeActions ? [...this.actionMap.values()].map(action => action.getInformation(true)) : null,
     };
   }
 
@@ -61,6 +62,10 @@ export class Service {
 
   public get meta(): Readonly<object> | null {
     return this.props.meta;
+  }
+
+  public updateMeta(meta: any) {
+    this.props.meta = meta;
   }
 
   public get broker(): Readonly<ServiceBroker> | null {
