@@ -370,69 +370,18 @@ class GraphQLProtocolPlugin extends plugin_1.ProtocolPlugin {
             typeDefs.push(typeof schema.typeDefs === "string" ? schema.typeDefs : language_1.print(schema.typeDefs));
             resolvers = _.merge(resolvers, this.createGraphQLResolvers(schema.resolvers, integration));
         }
-        // add placeholders for root types
-        if (!resolvers.Query) {
-            typeDefs.push(`
-        """
-        Root Query type
-        """
-        type Query {
-          placeholder: String!
+        // merge base typeDefs
+        if (this.opts.typeDefs) {
+            typeDefs.push(...(Array.isArray(this.opts.typeDefs) ? this.opts.typeDefs : [this.opts.typeDefs])
+                .map(defs => typeof defs === "string" ? defs : language_1.print(defs)));
         }
-      `);
-            resolvers.Query = {
-                placeholder: () => "DUMMY",
-            };
-        }
-        else {
-            typeDefs.push(`type Query\n`);
-        }
-        if (!resolvers.Mutation) {
-            typeDefs.push(`
-        """
-        Root Mutation type
-        """
-        type Mutation {
-          placeholder: String!
-        }
-      `);
-            resolvers.Mutation = {
-                placeholder: () => "DUMMY",
-            };
-        }
-        else {
-            typeDefs.push(`type Mutation\n`);
-        }
-        if (!resolvers.Subscription) {
-            typeDefs.push(`
-        """
-        Root Subscription type
-        """
-        type Subscription {
-          placeholder: String!
-        }
-      `);
-            resolvers.Subscription = {
-                placeholder: {
-                    subscribe: () => (function dummyGenerator() {
-                        return tslib_1.__asyncGenerator(this, arguments, function* dummyGenerator_1() {
-                            let i = 0;
-                            while (i < 10) {
-                                yield tslib_1.__await(new Promise(resolve => setTimeout(resolve, 1000)));
-                                yield yield tslib_1.__await(`DUMMY (${i++})`);
-                            }
-                        });
-                    })(),
-                    resolve: (source) => source,
-                },
-            };
-        }
-        else {
-            typeDefs.push(`type Subscription\n`);
+        const resolversList = [resolvers];
+        if (this.opts.resolvers) {
+            resolversList.push(...(Array.isArray(this.opts.resolvers) ? this.opts.resolvers : [this.opts.resolvers]));
         }
         const { handler, subscriptionHandler, playgroundHandler } = new handler_1.GraphQLHandlers((message) => {
             this.props.logger.error(message);
-        }, Object.assign(Object.assign({}, this.opts), { typeDefs: typeDefs.concat(this.opts.typeDefs || []), resolvers: [resolvers].concat(this.opts.resolvers || []) }));
+        }, Object.assign(Object.assign({}, this.opts), { typeDefs, resolvers: resolversList }));
         return {
             route: new server_1.HTTPRoute({
                 method: "POST",

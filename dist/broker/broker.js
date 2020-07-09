@@ -189,7 +189,7 @@ class ServiceBroker {
                         // log in advance
                         this.props.logger[this.opts.log.call ? "info" : "debug"](`call ${action}${kleur.cyan("@")}${node} ${kleur.cyan(batchingParamsList.length)} times in a batch from ${kleur.yellow((context.id || "unknown") + "@" + (context.ip || "unknown"))}`);
                         // do batching call
-                        const response = yield this.delegator.call(ctx, { action, node, params: mergedParams, disableCache });
+                        const response = yield this.delegator.call(ctx, { action, node, params: mergedParams, disableCache, batchedParamsLength: batchingParamsList.length });
                         this.registry.addActionExample({ action, params: mergedParams, response });
                         return response;
                     }));

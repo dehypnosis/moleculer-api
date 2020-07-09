@@ -6,6 +6,7 @@ import { Report } from "../../reporter";
 import { NamePatternResolver } from "../../name";
 import { ServiceBrokerDelegator, ServiceBrokerDelegatorProps, DelegatedCallArgs, DelegatedEventPublishArgs } from "../delegator";
 export declare type MoleculerServiceBrokerDelegatorOwnOptions = {
+    batchedCallTimeout: (itemCount: number) => number;
     streamingCallTimeout: number;
     streamingToStringEncoding: "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "latin1" | "binary" | "hex";
 };

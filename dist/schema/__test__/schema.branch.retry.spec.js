@@ -68,7 +68,7 @@ beforeAll(() => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         }),
     ]);
     yield test_1.sleepUntil(() => {
-        return schema.getBranch("master").services.length >= 3 && schema.getBranch("master").latestVersion.routes.length >= 6;
+        return schema.getBranch("master").services.length >= 3 && schema.getBranch("master").latestVersion.routes.length >= 7;
     });
 }));
 describe("Schema registry integration retry test", () => {
@@ -81,7 +81,7 @@ describe("Schema registry integration retry test", () => {
     });
     it("branch should retry merging failed integrations", () => {
         const routes = schema.getBranch("master").latestVersion.routes;
-        expect(routes.length).toEqual(6); // graphql(3) +a +b +c
+        expect(routes.length).toEqual(7); // graphql(3) +a +b +c + introspection
         expect(schemaUpdated).toHaveBeenCalledTimes(4); // created + initial +a +retry(b, c)
     });
 });

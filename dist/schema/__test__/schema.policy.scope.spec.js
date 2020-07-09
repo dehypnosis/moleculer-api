@@ -114,7 +114,7 @@ beforeAll(() => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     yield remote2.stop();
     yield test_1.sleepUntil(() => {
         const dev = schema.getBranch("dev");
-        return dev && dev.latestVersion.routes.length >= 9 || false;
+        return dev && dev.latestVersion.routes.length >= 10 || false;
     });
 }));
 describe("Schema registry update", () => {
@@ -134,12 +134,12 @@ describe("Schema registry update", () => {
     });
     it("master branch should have 1+5+3 route by 4 updates", () => {
         expect(mocks.master).toBeCalledTimes(4); // created + initial + master-a + conflict-a
-        expect(schema.getBranch("master").latestVersion.routes.length).toEqual(9); // +master-a + conflict-a/master + graphql(3)
+        expect(schema.getBranch("master").latestVersion.routes.length).toEqual(10); // +master-a + conflict-a/master + graphql(3) + introspection
     });
     it("dev branch should have same routes by at least 3 updates", () => {
         expect(mocks.dev.mock.calls.length).toBeGreaterThanOrEqual(3); // min: forked(+master-a +conflict-a/master) +conflict-a/dev -conflict-a/dev
         expect(mocks.dev.mock.calls.length).toBeLessThanOrEqual(5); // max: forked() +conflict-a/master +conflict-a/dev +master-a/master -conflict-a/dev
-        expect(schema.getBranch("dev").latestVersion.routes.length).toEqual(9); // master-a + conflict-a/master + graphql(3)
+        expect(schema.getBranch("dev").latestVersion.routes.length).toEqual(10); // master-a + conflict-a/master + graphql(3) + introspection
     });
 });
 afterAll(() => tslib_1.__awaiter(void 0, void 0, void 0, function* () {

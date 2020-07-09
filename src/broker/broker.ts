@@ -35,7 +35,7 @@ export type ServiceBrokerListeners = {
 
 export type CallArgs = { action: Readonly<ServiceAction>, params?: any, batchingParams?: any, disableCache: boolean };
 export type EventPublishArgs = Omit<EventPacket, "from">;
-export type DelegatedCallArgs = Omit<CallArgs, "batchingParams"> & { node: Readonly<ServiceNode> };
+export type DelegatedCallArgs = Omit<CallArgs, "batchingParams"> & { node: Readonly<ServiceNode>, batchedParamsLength?: number };
 export type DelegatedEventPublishArgs = EventPublishArgs;
 
 export class ServiceBroker<DelegatorContext = any> {
@@ -236,7 +236,7 @@ export class ServiceBroker<DelegatorContext = any> {
           this.props.logger[this.opts.log!.call! ? "info" : "debug"](`call ${action}${kleur.cyan("@")}${node} ${kleur.cyan(batchingParamsList.length)} times in a batch from ${kleur.yellow((context.id || "unknown") + "@" + (context.ip || "unknown"))}`);
 
           // do batching call
-          const response = await this.delegator.call(ctx, {action, node, params: mergedParams, disableCache});
+          const response = await this.delegator.call(ctx, {action, node, params: mergedParams, disableCache, batchedParamsLength: batchingParamsList.length });
           this.registry.addActionExample({action, params: mergedParams, response});
           return response;
         });

@@ -12,6 +12,7 @@ import { createMoleculerLoggerOptions } from "./logger";
 import { createMoleculerServiceSchema } from "./service";
 
 export type MoleculerServiceBrokerDelegatorOwnOptions = {
+  batchedCallTimeout: (itemCount: number) => number; // count -> ms
   streamingCallTimeout: number; // ms, default is one hour
   streamingToStringEncoding: "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "latin1" | "binary" | "hex"; // default is base64, check your transporter on malformed streaming
 }
@@ -34,6 +35,9 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
 
     const {
       services = [],
+      batchedCallTimeout = (itemCount: number) => {
+        return Math.max(5000, Math.min(1000*60, itemCount * 1000));
+      },
       streamingCallTimeout = 1000 * 3600,
       streamingToStringEncoding = "base64",
       ...moleculerBrokerOptions
@@ -42,6 +46,7 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
     this.opts = {
       streamingCallTimeout,
       streamingToStringEncoding,
+      batchedCallTimeout,
     };
     const bOpts = moleculerBrokerOptions as Moleculer.BrokerOptions;
     bOpts.logger = createMoleculerLoggerOptions(this.props.logger);
@@ -155,6 +160,14 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
       } else if (await this.parseNestedStreamAsBuffer(callParams)) {
         callOpts.retries = 0;
         callOpts.timeout = this.opts.streamingCallTimeout;
+      }
+    }
+
+    // prepare batched request
+    if (args.batchedParamsLength) {
+      callOpts.timeout = this.opts.batchedCallTimeout(args.batchedParamsLength);
+      if (isNaN(callOpts.timeout)) {
+        delete callOpts.timeout;
       }
     }
 

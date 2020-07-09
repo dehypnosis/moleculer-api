@@ -36,6 +36,7 @@ export declare type CallArgs = {
 export declare type EventPublishArgs = Omit<EventPacket, "from">;
 export declare type DelegatedCallArgs = Omit<CallArgs, "batchingParams"> & {
     node: Readonly<ServiceNode>;
+    batchedParamsLength?: number;
 };
 export declare type DelegatedEventPublishArgs = EventPublishArgs;
 export declare class ServiceBroker<DelegatorContext = any> {

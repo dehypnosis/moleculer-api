@@ -2,8 +2,7 @@ import { GraphQLOptions } from "apollo-server-core";
 import { SubscriptionServerOptions } from "apollo-server-core/src/types";
 import { ApolloServer, Config as ApolloServerConfig } from "apollo-server-express";
 import { APIRequestContext, HTTPRouteHandler, WebSocketRouteHandler } from "../../../../../server";
-export declare type GraphQLHandlersOptions = Omit<ApolloServerConfig, "subscriptions" | "playground" | "schema" | "typeDefs" | "context"> & {
-    typeDefs?: string | string[];
+export declare type GraphQLHandlersOptions = Omit<ApolloServerConfig, "subscriptions" | "playground" | "schema" | "context"> & {
     subscriptions?: Omit<SubscriptionServerOptions, "path" | "onConnect" | "onDisconnect"> | false;
     playground?: boolean;
 };

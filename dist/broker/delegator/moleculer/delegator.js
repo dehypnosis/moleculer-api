@@ -16,10 +16,13 @@ class MoleculerServiceBrokerDelegator extends delegator_1.ServiceBrokerDelegator
         /* action/event name matching for call, publish, subscribe, clear cache */
         this.actionNameResolver = name_1.defaultNamePatternResolver;
         this.eventNameResolver = name_1.defaultNamePatternResolver;
-        const _a = opts || {}, { services = [], streamingCallTimeout = 1000 * 3600, streamingToStringEncoding = "base64" } = _a, moleculerBrokerOptions = tslib_1.__rest(_a, ["services", "streamingCallTimeout", "streamingToStringEncoding"]);
+        const _a = opts || {}, { services = [], batchedCallTimeout = (itemCount) => {
+            return Math.max(5000, Math.min(1000 * 60, itemCount * 1000));
+        }, streamingCallTimeout = 1000 * 3600, streamingToStringEncoding = "base64" } = _a, moleculerBrokerOptions = tslib_1.__rest(_a, ["services", "batchedCallTimeout", "streamingCallTimeout", "streamingToStringEncoding"]);
         this.opts = {
             streamingCallTimeout,
             streamingToStringEncoding,
+            batchedCallTimeout,
         };
         const bOpts = moleculerBrokerOptions;
         bOpts.logger = logger_1.createMoleculerLoggerOptions(this.props.logger);
@@ -117,6 +120,13 @@ class MoleculerServiceBrokerDelegator extends delegator_1.ServiceBrokerDelegator
                 else if (yield this.parseNestedStreamAsBuffer(callParams)) {
                     callOpts.retries = 0;
                     callOpts.timeout = this.opts.streamingCallTimeout;
+                }
+            }
+            // prepare batched request
+            if (args.batchedParamsLength) {
+                callOpts.timeout = this.opts.batchedCallTimeout(args.batchedParamsLength);
+                if (isNaN(callOpts.timeout)) {
+                    delete callOpts.timeout;
                 }
             }
             // call the action
