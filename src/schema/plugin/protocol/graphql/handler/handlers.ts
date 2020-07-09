@@ -1,25 +1,100 @@
-import fs from "fs";
 import * as path from "path";
 import { convertNodeHttpToRequest, runHttpQuery, processFileUploads, formatApolloErrors, GraphQLOptions } from "apollo-server-core";
 import { SubscriptionServerOptions } from "apollo-server-core/src/types";
 import { ApolloServer, Config as ApolloServerConfig, makeExecutableSchema } from "apollo-server-express";
-import { execute, subscribe } from "graphql";
+import { execute, parse, subscribe } from "graphql";
+import { IResolvers } from "graphql-tools";
 import { APIRequestContext, HTTPRouteHandler, WebSocketRouteHandler } from "../../../../../server";
 import { GraphQLSubscriptionHandler } from "./subscription";
 
-export type GraphQLHandlersOptions = Omit<ApolloServerConfig, "subscriptions" | "playground" | "schema" | "typeDefs" | "context"> & {
-  typeDefs?: string | string[];
+export type GraphQLHandlersOptions = Omit<ApolloServerConfig, "subscriptions" | "playground" | "schema" |"context"> & {
   subscriptions?: Omit<SubscriptionServerOptions, "path" | "onConnect" | "onDisconnect"> | false;
   playground?: boolean;
+};
+
+const dummyResolvers = {
+  Query: {
+    placeholder: () => {
+      return "DUMMY-Query";
+    },
+  },
+  Mutation: {
+    placeholder: () => {
+      return "DUMMY-Mutation";
+    },
+  },
+  Subscription: {
+    placeholder: {
+      subscribe: () => (async function* dummyGenerator() {
+        let i = 0;
+        while(i < 10) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          yield `DUMMY-Subscription (${i++})`;
+        }
+      })(),
+      resolve: (source: any) => source,
+    },
+  },
 };
 
 // ref: https://github.com/apollographql/apollo-server/blob/master/packages/apollo-server-core/src/ApolloServer.ts
 export class GraphQLHandlers extends ApolloServer {
   constructor(onMessage: (message: string | Error) => void, opts: GraphQLHandlersOptions) {
-    const {typeDefs, resolvers, schemaDirectives, parseOptions, subscriptions, uploads, playground, ...restOptions} = opts;
+    const {typeDefs = [], resolvers = [], schemaDirectives, parseOptions, subscriptions, uploads, playground, ...restOptions} = opts;
+    const parsedTypeDefs = (Array.isArray(typeDefs) ? typeDefs : [typeDefs]).map(defs => typeof defs === "string" ? parse(defs, opts.parseOptions) : defs);
+
+    // check root type definitions
+    const hasRootTypeDef = {Query: false, Mutation: false, Subscription: false};
+    const hasRootTypeFields = {Query: false, Mutation: false, Subscription: false};
+    for (const defs of parsedTypeDefs) {
+      for (const def of defs.definitions) {
+        if (def.kind === "ObjectTypeDefinition") {
+          const typeName = def.name.value as keyof typeof hasRootTypeDef;
+          if (typeof hasRootTypeDef[typeName] !== "undefined") {
+            hasRootTypeDef[typeName] = true;
+            if (!hasRootTypeFields[typeName] && def.fields && def.fields.length > 0) {
+              hasRootTypeFields[typeName] = true;
+            }
+          }
+        } else if (def.kind === "ObjectTypeExtension") {
+          const typeName = def.name.value as keyof typeof hasRootTypeDef;
+          if (!hasRootTypeFields[typeName] && def.fields && def.fields.length > 0) {
+            hasRootTypeFields[typeName] = true;
+          }
+        }
+      }
+    }
+
+    // add placeholders for root types
+    const rootTypeDefs: string[] = [];
+    const rootResolvers: IResolvers = {};
+    for (const typeName of Object.keys(hasRootTypeDef) as (keyof typeof hasRootTypeDef)[]) {
+      if (!hasRootTypeDef[typeName] && !hasRootTypeFields[typeName]) {
+        rootTypeDefs.push(`
+        type ${typeName} {
+          placeholder: String!
+        }
+      `);
+        rootResolvers[typeName] = {
+          placeholder: dummyResolvers[typeName].placeholder,
+        };
+      } else if (!hasRootTypeFields[typeName]) {
+        rootTypeDefs.push(`
+        extend type ${typeName} {
+          placeholder: String!
+        }
+      `);
+        rootResolvers[typeName] = {
+          placeholder: dummyResolvers[typeName].placeholder,
+        };
+      } else if (!hasRootTypeDef[typeName]) {
+        rootTypeDefs.push(`type ${typeName}\n`);
+      }
+    }
+
     const schema = makeExecutableSchema({
-      typeDefs: typeDefs || [],
-      resolvers,
+      typeDefs: parsedTypeDefs.concat(rootTypeDefs as any[]),
+      resolvers: (Array.isArray(resolvers) ? resolvers : [resolvers]).concat(rootResolvers),
       logger: {
         log: onMessage,
       },

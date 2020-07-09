@@ -6,7 +6,7 @@ import { Route, HTTPRoute, WebSocketRoute } from "../../../../server";
 import { ConnectorCompiler, ConnectorValidator } from "../../connector";
 import { ProtocolPlugin, ProtocolPluginProps } from "../plugin";
 
-import { GraphQLIsTypeOfFn } from "graphql";
+import { DocumentNode, GraphQLIsTypeOfFn } from "graphql";
 import { TypeDefinitionNode, TypeExtensionNode, ScalarTypeDefinitionNode, ScalarTypeExtensionNode, ObjectTypeDefinitionNode, ObjectTypeExtensionNode, parse as parseGraphQLSchema, print as printGraphQLSchema } from "graphql/language";
 import { IResolvers, IResolverObject, IFieldResolver, IResolverOptions } from "graphql-tools";
 import { GraphQLHandlers, GraphQLHandlersOptions, defaultGraphQLHandlersOptions } from "./handler";
@@ -422,70 +422,25 @@ export class GraphQLProtocolPlugin extends ProtocolPlugin<GraphQLProtocolPluginS
       resolvers = _.merge<IResolvers, IResolvers>(resolvers, this.createGraphQLResolvers(schema.resolvers, integration));
     }
 
-    // add placeholders for root types
-    if (!resolvers.Query) {
-      typeDefs.push(`
-        """
-        Root Query type
-        """
-        type Query {
-          placeholder: String!
-        }
-      `);
-      resolvers.Query = {
-        placeholder: () => "DUMMY",
-      };
-    } else {
-      typeDefs.push(`type Query\n`);
+    // merge base typeDefs
+    if (this.opts.typeDefs) {
+      typeDefs.push(
+        ...(Array.isArray(this.opts.typeDefs) ? this.opts.typeDefs : [this.opts.typeDefs])
+          .map(defs => typeof defs === "string" ? defs : printGraphQLSchema(defs))
+      );
     }
 
-    if (!resolvers.Mutation) {
-      typeDefs.push(`
-        """
-        Root Mutation type
-        """
-        type Mutation {
-          placeholder: String!
-        }
-      `);
-      resolvers.Mutation = {
-        placeholder: () => "DUMMY",
-      };
-    } else {
-      typeDefs.push(`type Mutation\n`);
-    }
-
-    if (!resolvers.Subscription) {
-      typeDefs.push(`
-        """
-        Root Subscription type
-        """
-        type Subscription {
-          placeholder: String!
-        }
-      `);
-      resolvers.Subscription = {
-        placeholder: {
-          subscribe: () => (async function* dummyGenerator() {
-            let i = 0;
-            while(i < 10) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              yield `DUMMY (${i++})`;
-            }
-          })(),
-          resolve: (source: any) => source,
-        },
-      };
-    } else {
-      typeDefs.push(`type Subscription\n`);
+    const resolversList = [resolvers];
+    if (this.opts.resolvers) {
+      resolversList.push(...(Array.isArray(this.opts.resolvers) ? this.opts.resolvers : [this.opts.resolvers]));
     }
 
     const {handler, subscriptionHandler, playgroundHandler} = new GraphQLHandlers((message) => {
       this.props.logger.error(message);
     }, {
       ...this.opts,
-      typeDefs: typeDefs.concat(this.opts.typeDefs || []),
-      resolvers: [resolvers].concat(this.opts.resolvers || []),
+      typeDefs,
+      resolvers: resolversList,
     });
 
     return {

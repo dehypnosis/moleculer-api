@@ -104,7 +104,7 @@ describe("Schema registry update", () => {
 
   it("master branch should have 4 route by 6 updates", () => {
     expect(mocks.master).toBeCalledTimes(6); // created +initial compile +a +b +c +conflict-a/master
-    expect(schema.getBranch("master")!.latestVersion.routes).toHaveLength(7); // a,b,c, conflict-a/master = 1 + graphql(3)
+    expect(schema.getBranch("master")!.latestVersion.routes).toHaveLength(8); // a,b,c, conflict-a/master = 1 + graphql(3) + introspection
   });
 
   it("dev branch should have 5 route by at least 3 updates (prefer dev branch)", () => {
@@ -121,7 +121,7 @@ describe("Schema registry update", () => {
         path: "/conflict-a/blublublu",
       }),
     ]));
-    expect(routes).toHaveLength(9); // a,b,c, conflict-a/dev = 2, dev-a + graphql(3)
+    expect(routes).toHaveLength(10); // a,b,c, conflict-a/dev = 2, dev-a + graphql(3) + introspection
   });
 });
 
