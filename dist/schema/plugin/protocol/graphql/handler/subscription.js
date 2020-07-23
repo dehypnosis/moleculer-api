@@ -48,7 +48,7 @@ class GraphQLSubscriptionHandler {
                 return;
             }
             const connectionContext = Object.create(null);
-            connectionContext.initPromise = Promise.resolve(true);
+            connectionContext.initPromise = Promise.resolve(context);
             connectionContext.isLegacy = false;
             connectionContext.socket = socket;
             connectionContext.request = request;

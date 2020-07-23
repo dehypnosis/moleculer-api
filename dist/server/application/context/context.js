@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.APIRequestContext = void 0;
 const tslib_1 = require("tslib");
+const qs_1 = tslib_1.__importDefault(require("qs"));
+const url = tslib_1.__importStar(require("url"));
 class APIRequestContext {
     constructor(props) {
         Object.assign(this, props);
@@ -11,6 +13,26 @@ class APIRequestContext {
         return (source) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (source.hasOwnProperty(APIRequestContext.SourceContextIsCreatingSymbol)) {
                 throw new Error("request already handled"); // TODO: normalize error
+            }
+            // update headers for websocket headers (blabla?headers=JSON.stringify({ ... }))
+            if (source.headers.connection === "upgrade") {
+                try {
+                    const { query } = url.parse(source.url);
+                    if (query) {
+                        const headersJSON = qs_1.default.parse(query, { allowPrototypes: true }).headers;
+                        if (headersJSON && typeof headersJSON === "string") {
+                            const headers = JSON.parse(headersJSON);
+                            for (const [k, v] of Object.entries(headers)) {
+                                if (typeof v === "string") {
+                                    source.headers[k.toLowerCase()] = v;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (err) {
+                    console.error(err);
+                }
             }
             // add reference to source which denote parsing context currently
             Object.defineProperty(source, APIRequestContext.SourceContextIsCreatingSymbol, { value: true });

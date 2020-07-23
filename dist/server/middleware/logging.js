@@ -68,8 +68,8 @@ class LoggingMiddleware extends middleware_1.ServerMiddleware {
 exports.LoggingMiddleware = LoggingMiddleware;
 LoggingMiddleware.key = "logging";
 LoggingMiddleware.autoLoadOptions = {
-    httpFormat: `:method ":url" HTTP/:http-version - :status :statusMessage :res[content-length] byte :response-time ms - ${kleur.dim(`":context[id]" ":ip" ":referrer" ":user-agent"`)} - ${kleur.dim(`":context[auth.identity.sub]" ":context[auth.identity.email]" ":context[auth.scope]" ":context[auth.client]"`)}`,
-    wsFormat: `:method ":url" HTTP/:http-version WebSocket/:ws-protocol - 101 Switching Protocols - byte - ms - ${kleur.dim(`":context[id]" ":ip" ":referrer" ":user-agent"`)} - ${kleur.dim(`":context[auth.identity.sub]" ":context[auth.identity.email]" ":context[auth.scope]" ":context[auth.client]"`)}`,
+    httpFormat: `:method ":url" HTTP/:http-version - :status :statusMessage :res[content-length] byte :response-time ms - ${kleur.dim(`":context[id]" ":ip" ":referrer" ":user-agent" ":req[x-client-id]"`)} - ${kleur.dim(`":context[auth.identity.sub]" ":context[auth.identity.email]" ":context[auth.scope]" ":context[auth.client]"`)}`,
+    wsFormat: `:method ":url" HTTP/:http-version WebSocket/:ws-protocol - 101 Switching Protocols - byte - ms - ${kleur.dim(`":context[id]" ":ip" ":referrer" ":user-agent" ":req[x-client-id]"`)} - ${kleur.dim(`":context[auth.identity.sub]" ":context[auth.identity.email]" ":context[auth.scope]" ":context[auth.client]"`)}`,
     level: "info",
 };
 //# sourceMappingURL=logging.js.map

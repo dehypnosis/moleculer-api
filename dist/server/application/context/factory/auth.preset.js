@@ -43,7 +43,7 @@ exports.createAuthContextOIDCParser = (opts) => {
                     }
                     else {
                         console.error(res, token);
-                        throw new Error("TODO: empty sub from IAM");
+                        throw new Error("assertion: cannot be empty sub from IAM");
                     }
                 }
             })
