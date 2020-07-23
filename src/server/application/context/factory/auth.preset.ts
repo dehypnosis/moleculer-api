@@ -1,7 +1,6 @@
 import { Issuer, Client } from "openid-client";
 import { AuthContextParser } from "./auth";
 // TODO: as composable presets
-// TODO: add simple LRU cache
 
 /* OIDC parser */
 export type AuthContextOIDCParserOptions = {
@@ -55,7 +54,7 @@ export const createAuthContextOIDCParser = (opts: AuthContextOIDCParserOptions):
               identity = res;
             } else {
               console.error(res, token);
-              throw new Error("TODO: empty sub from IAM");
+              throw new Error("assertion: cannot be empty sub from IAM");
             }
           }
         })

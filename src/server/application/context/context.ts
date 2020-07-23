@@ -1,3 +1,5 @@
+import qs from "qs";
+import * as url from "url";
 import { APIRequestContextFactory, APIRequestContextProps, APIRequestContextSource } from "./index";
 
 export type APIRequestContextConstructor = (source: APIRequestContextSource) => Promise<APIRequestContext>;
@@ -30,12 +32,33 @@ export class APIRequestContext {
         throw new Error("request already handled"); // TODO: normalize error
       }
 
+      // update headers for websocket headers (blabla?headers=JSON.stringify({ ... }))
+      if (source.headers.connection === "upgrade") {
+        try {
+          const { query } = url.parse(source.url!);
+          if (query) {
+            const headersJSON = qs.parse(query, {allowPrototypes: true}).headers;
+            if (headersJSON && typeof headersJSON === "string") {
+              const headers = JSON.parse(headersJSON);
+              for (const [k, v] of Object.entries(headers)) {
+                if (typeof v === "string") {
+                  source.headers[k.toLowerCase()] = v;
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
       // add reference to source which denote parsing context currently
       Object.defineProperty(source, APIRequestContext.SourceContextIsCreatingSymbol, {value: true});
 
       if (hooks && hooks.before) {
         hooks.before(source);
       }
+
 
       // create props
       const props: APIRequestContextProps = {};
