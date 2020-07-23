@@ -37,7 +37,15 @@ exports.createAuthContextOIDCParser = (opts) => {
         if (token && token.scheme === "Bearer" && typeof token.token === "string") {
             yield oidcClient.userinfo(token.token)
                 .then(res => {
-                identity = res;
+                if (res) {
+                    if (res.sub) {
+                        identity = res;
+                    }
+                    else {
+                        console.error(res, token);
+                        throw new Error("TODO: empty sub from IAM");
+                    }
+                }
             })
                 .catch(error => {
                 const err = new Error(error.message); // TODO: normalize error
