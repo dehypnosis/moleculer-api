@@ -31,7 +31,7 @@ export class AuthContextFactory extends APIRequestContextFactory<AuthContext> {
     // impersonation feature is disabled by default
     impersonator: false,
     cache: {
-      max: 1000,
+      max: 10000,
       maxAge: 1000 * 60 * 5, // 5min; default cache max age
     },
     tokenQueryKey: "auth",
