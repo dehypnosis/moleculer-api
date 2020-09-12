@@ -58,7 +58,7 @@
     "moleculer": "^0.14.7",
     "moment": "^2.26.0",
     "morgan": "^1.10.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "object-hash": "^2.0.3",
     "openid-client": "^3.15.1",
     "path-to-regexp": "^6.1.0",
