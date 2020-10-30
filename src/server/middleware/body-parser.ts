@@ -19,6 +19,7 @@ export class BodyParserMiddleware extends ServerMiddleware {
   public static readonly autoLoadOptions: BodyParserMiddlewareOptions = {
     json: {
       strict: false,
+      limit : "10mb",
     },
     urlencoded: {
       extended: true,
