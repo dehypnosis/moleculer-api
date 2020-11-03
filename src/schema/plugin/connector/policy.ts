@@ -1,50 +1,83 @@
-import { PolicyPlugin } from "..";
-import { CallPolicyArgs, CallPolicySchema, PublishPolicyArgs, PublishPolicySchema, SubscribePolicyArgs, SubscribePolicySchema } from "./schema";
+import { ServiceAPIIntegration } from "../../integration";
+import { CallPolicyTester, PolicyPlugin, PublishPolicyTester, SubscribePolicyTester } from "../policy";
+import { CallPolicySchema, PublishPolicySchema, SubscribePolicySchema } from "./schema";
 
-export function testCallPolicy(policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, policies: ReadonlyArray<Readonly<CallPolicySchema>>, args: Readonly<CallPolicyArgs>): boolean | any {
-  for (const policy of policies) {
-    for (const plugin of policyPlugins) {
-      const pluginSchema = policy[plugin.key];
-      if (!pluginSchema) {
-        continue;
-      }
-      const result = plugin.testCallPolicy(pluginSchema, args);
-      if (result === false || result !== true) {
-        return result;
+export const PolicyCompiler = {
+  call<MappableArgs extends { [key: string]: any }>(
+    policySchemata: ReadonlyArray<Readonly<CallPolicySchema>>,
+    policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>,
+    integration: Readonly<ServiceAPIIntegration>,
+    opts: {},
+  ): CallPolicyTester {
+    const testers: CallPolicyTester[] = [];
+    for (const policy of policySchemata) {
+      for (const plugin of policyPlugins) {
+        const pluginSchema = policy[plugin.key];
+        if (!pluginSchema) {
+          continue;
+        }
+        testers.push(plugin.compileCallPolicySchema(pluginSchema, integration));
       }
     }
-  }
-  return true;
-}
-
-export function testPublishPolicy(policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, policies: ReadonlyArray<Readonly<PublishPolicySchema>>, args: Readonly<PublishPolicyArgs>): boolean | any {
-  for (const policy of policies) {
-    for (const plugin of policyPlugins) {
-      const pluginSchema = policy[plugin.key];
-      if (!pluginSchema) {
-        continue;
+    return (args) => {
+      for (const tester of testers) {
+        if (!tester(args)) {
+          return false;
+        }
       }
-      const result = plugin.testPublishPolicy(pluginSchema, args);
-      if (result === false || result !== true) {
-        return result;
+      return true;
+    };
+  },
+
+  publish<MappableArgs extends { [key: string]: any }>(
+    policySchemata: ReadonlyArray<Readonly<PublishPolicySchema>>,
+    policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>,
+    integration: Readonly<ServiceAPIIntegration>,
+    opts: {},
+  ): PublishPolicyTester {
+    const testers: PublishPolicyTester[] = [];
+    for (const policy of policySchemata) {
+      for (const plugin of policyPlugins) {
+        const pluginSchema = policy[plugin.key];
+        if (!pluginSchema) {
+          continue;
+        }
+        testers.push(plugin.compilePublishPolicySchema(pluginSchema, integration));
       }
     }
-  }
-  return true;
-}
-
-export function testSubscribePolicy(policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, policies: ReadonlyArray<Readonly<SubscribePolicySchema>>, args: Readonly<SubscribePolicyArgs>): boolean | any {
-  for (const policy of policies) {
-    for (const plugin of policyPlugins) {
-      const pluginSchema = policy[plugin.key];
-      if (!pluginSchema) {
-        continue;
+    return (args) => {
+      for (const tester of testers) {
+        if (!tester(args)) {
+          return false;
+        }
       }
-      const result = plugin.testSubscribePolicy(pluginSchema, args);
-      if (result === false || result !== true) {
-        return result;
+      return true;
+    };
+  },
+
+  subscribe<MappableArgs extends { [key: string]: any }>(
+    policySchemata: ReadonlyArray<Readonly<SubscribePolicySchema>>,
+    policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>,
+    integration: Readonly<ServiceAPIIntegration>,
+    opts: {},
+  ): SubscribePolicyTester {
+    const testers: SubscribePolicyTester[] = [];
+    for (const policy of policySchemata) {
+      for (const plugin of policyPlugins) {
+        const pluginSchema = policy[plugin.key];
+        if (!pluginSchema) {
+          continue;
+        }
+        testers.push(plugin.compileSubscribePolicySchema(pluginSchema, integration));
       }
     }
-  }
-  return true;
-}
+    return (args) => {
+      for (const tester of testers) {
+        if (!tester(args)) {
+          return false;
+        }
+      }
+      return true;
+    };
+  },
+};

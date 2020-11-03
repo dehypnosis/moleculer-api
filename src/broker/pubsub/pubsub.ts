@@ -6,7 +6,7 @@ import { PubSub as PubSubDelegator } from "graphql-subscriptions";
 export type PubSubProps = {
   maxListeners: number;
   onError: (error: Error) => void;
-  eventNamePatternResolver: ((eventNamePattern: string) => string[]) | null;
+  // eventNamePatternResolver: ((eventNamePattern: string) => string[]) | null;
 };
 
 export abstract class PubSub<EVENTS extends { [event: string]: any }> {
@@ -21,13 +21,13 @@ export abstract class PubSub<EVENTS extends { [event: string]: any }> {
   }
 
   public asyncIterator<EVENT extends Extract<keyof EVENTS, string>>(eventNamePattern: EVENT): AsyncIterator<EVENTS[EVENT]> {
-    const eventNames = this.props.eventNamePatternResolver ? this.props.eventNamePatternResolver(eventNamePattern) : [eventNamePattern];
-    return this.delegator.asyncIterator<EVENTS[EVENT]>(eventNames);
+    // const eventNames = this.props.eventNamePatternResolver ? this.props.eventNamePatternResolver(eventNamePattern) : [eventNamePattern];
+    return this.delegator.asyncIterator<EVENTS[EVENT]>( [eventNamePattern]);
   }
 
   public subscribe<EVENT extends Extract<keyof EVENTS, string>>(eventNamePattern: EVENT, listener: (payload: EVENTS[EVENT]) => void): Promise<number[]> {
-    const eventNames = this.props.eventNamePatternResolver ? this.props.eventNamePatternResolver(eventNamePattern) : [eventNamePattern];
-    return Promise.all(eventNames.map(eventName => this.delegator.subscribe(eventName, listener)));
+    // const eventNames = this.props.eventNamePatternResolver ? this.props.eventNamePatternResolver(eventNamePattern) : [eventNamePattern];
+    return Promise.all([eventNamePattern].map(eventName => this.delegator.subscribe(eventName, listener)));
   }
 
   public unsubscribe(id: number): void {

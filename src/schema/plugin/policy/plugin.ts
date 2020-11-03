@@ -1,3 +1,4 @@
+import { ServiceAPIIntegration } from "../../integration";
 import { Plugin, PluginProps } from "../plugin";
 import { CallPolicyArgs, PublishPolicyArgs, SubscribePolicyArgs } from "../connector";
 
@@ -11,10 +12,12 @@ export interface IPolicyPluginSchema {
 
 export type PolicyPluginProps = PluginProps;
 
+export type CallPolicyTester = (args: Readonly<CallPolicyArgs>) => boolean;
+export type PublishPolicyTester = (args: Readonly<PublishPolicyArgs>) => boolean;
+export type SubscribePolicyTester = (args: Readonly<SubscribePolicyArgs>) => boolean;
+
 export abstract class PolicyPlugin<PluginSchema extends IPolicyPluginSchema, PluginCatalog extends IPolicyPluginCatalog> extends Plugin<PluginSchema, PluginCatalog> {
-  public abstract testCallPolicy(schema: Readonly<PluginSchema>, args: Readonly<CallPolicyArgs>): boolean | any;
-
-  public abstract testPublishPolicy(schema: Readonly<PluginSchema>, args: Readonly<PublishPolicyArgs>): boolean | any;
-
-  public abstract testSubscribePolicy(schema: Readonly<PluginSchema>, args: Readonly<SubscribePolicyArgs>): boolean | any;
+  public abstract compileCallPolicySchema(schema: Readonly<PluginSchema>, integration: Readonly<ServiceAPIIntegration>): CallPolicyTester;
+  public abstract compilePublishPolicySchema(schema: Readonly<PluginSchema>, integration: Readonly<ServiceAPIIntegration>): PublishPolicyTester;
+  public abstract compileSubscribePolicySchema(schema: Readonly<PluginSchema>, integration: Readonly<ServiceAPIIntegration>): SubscribePolicyTester;
 }

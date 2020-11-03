@@ -4,7 +4,6 @@ import { Logger } from "../../logger";
 import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../registry";
 import { Report } from "../reporter";
 import { EventPacket } from "../pubsub";
-import { NamePatternResolver } from "../name";
 import { DelegatedCallArgs, DelegatedEventPublishArgs } from "../broker";
 export { DelegatedCallArgs, DelegatedEventPublishArgs };
 
@@ -23,8 +22,8 @@ export abstract class ServiceBrokerDelegator<Context> extends HasStaticKey {
   public abstract readonly broker: any;
 
   /* action/event name matching for call, publish, subscribe, clear cache */
-  public abstract readonly actionNameResolver: NamePatternResolver;
-  public abstract readonly eventNameResolver: NamePatternResolver;
+  public abstract matchActionName(name: string, namePattern: string): boolean;
+  public abstract matchEventName(name: string, namePattern: string): boolean;
 
   /* lifecycle */
   public abstract start(): Promise<void>;

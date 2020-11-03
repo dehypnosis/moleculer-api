@@ -5,7 +5,7 @@ import { APIRequestContext } from "../../../server";
 import { isReadStream } from "../../../interface";
 import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../../registry";
 import { Report } from "../../reporter";
-import { defaultNamePatternResolver, NamePatternResolver } from "../../name";
+// import { defaultNamePatternResolver, NamePatternResolver } from "../../name";
 import { ServiceBrokerDelegator, ServiceBrokerDelegatorProps, DelegatedCallArgs, DelegatedEventPublishArgs } from "../delegator";
 import { proxyMoleculerServiceDiscovery } from "./discover";
 import { createMoleculerLoggerOptions } from "./logger";
@@ -65,8 +65,50 @@ export class MoleculerServiceBrokerDelegator extends ServiceBrokerDelegator<Cont
   }
 
   /* action/event name matching for call, publish, subscribe, clear cache */
-  public readonly actionNameResolver: NamePatternResolver = defaultNamePatternResolver;
-  public readonly eventNameResolver: NamePatternResolver = defaultNamePatternResolver;
+  public matchActionName(name: string, namePattern: string): boolean {
+    return this.matchName(name, namePattern);
+  }
+
+  public matchEventName(name: string, namePattern: string): boolean {
+    return this.matchName(name, namePattern);
+  }
+
+  // ref: https://github.com/moleculerjs/moleculer/blob/5b94fa27b38a4134b14d0fbe50717167d6b80cf8/src/utils.js#L266
+  private matchName(text: string, pattern: string): boolean {
+      // Exact match (eg. "prefix.event")
+      const firstStarPosition = pattern.indexOf("*");
+      if (firstStarPosition === -1) {
+        return pattern === text;
+      }
+
+      // Eg. "prefix**"
+      const len = pattern.length;
+      if (len > 2 && pattern.endsWith("**") && firstStarPosition > len - 3) {
+        pattern = pattern.substring(0, len - 2);
+        return text.startsWith(pattern);
+      }
+
+      // Eg. "prefix*"
+      if (len > 1 && pattern.endsWith("*") && firstStarPosition > len - 2) {
+        pattern = pattern.substring(0, len - 1);
+        if (text.startsWith(pattern)) {
+          return text.indexOf(".", len) === -1;
+        }
+        return false;
+      }
+
+      // Accept simple text, without point character (*)
+      if (len === 1 && firstStarPosition == 0) {
+        return text.indexOf(".") === -1;
+      }
+
+      // Accept all inputs (**)
+      if (len === 2 && firstStarPosition === 0 && pattern.lastIndexOf("*") === 1) {
+        return true;
+      }
+
+      return false;
+  }
 
   /* lifecycle */
   public async start(): Promise<void> {

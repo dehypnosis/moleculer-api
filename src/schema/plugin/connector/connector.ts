@@ -1,10 +1,10 @@
 import * as kleur from "kleur";
 import { PolicyPlugin } from "..";
-import { EventListener, EventPacket, ServiceAction } from "../../../broker";
+import { EventPacket, ServiceAction } from "../../../broker";
 import { ParamsMapper } from "../../../broker/params";
 import { ServiceAPIIntegration } from "../../integration";
 import { composeAsyncIterators, AsyncIteratorComposeItem } from "../../../interface";
-import { testCallPolicy, testPublishPolicy, testSubscribePolicy } from "./policy";
+import { PolicyCompiler } from "./policy";
 import {
   CallConnectorSchema, CallConnector, CallConnectorResponseMappableArgs, CallPolicyArgs,
   MapConnector,
@@ -84,9 +84,12 @@ export const ConnectorCompiler = {
     }) : null;
 
     // to apply access control policy plugin
-    const policies = integration.schema.policy && Array.isArray(integration.schema.policy.call)
+    const policySchemata = integration.schema.policy && Array.isArray(integration.schema.policy.call)
       ? integration.schema.policy.call.filter(policy => policy.actions.some(actionNamePattern => broker.matchActionName(actionId, actionNamePattern)))
       : [];
+
+    // to test permission
+    const policyTester = policySchemata.length ? PolicyCompiler.call(policySchemata, policyPlugins,  integration, {}) : null;
 
     const connector: CallConnector<MappableArgs> = async (context, mappableArgs, injectedParams): Promise<any> => {
       // dynamically load action before first call
@@ -121,7 +124,7 @@ export const ConnectorCompiler = {
 
       // test policy
       const request: CallPolicyArgs<MappableArgs> = {...mappableArgs, params: {...params, ...batchingParams} };
-      if (testCallPolicy(policyPlugins, policies, request) !== true) {
+      if (policyTester && !policyTester(request)) {
         throw new Error("forbidden call"); // TODO: normalize error
       }
 
@@ -208,9 +211,11 @@ export const ConnectorCompiler = {
     // for static event name
     if (typeof eventNameOrFn === "string") {
       const eventName = eventNameOrFn;
-      const policies = integration.schema.policy && Array.isArray(integration.schema.policy.publish)
+      const policySchemata = integration.schema.policy && Array.isArray(integration.schema.policy.publish)
         ? integration.schema.policy.publish.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(eventName, eventNamePattern)))
         : [];
+      const policyTester = policySchemata.length ? PolicyCompiler.publish(policySchemata, policyPlugins,  integration, {}) : null;
+
       const baseArgs = {event: eventName, groups: schema.groups || [], broadcast: schema.broadcast === true};
 
       const connector: PublishConnector = async (context, mappableArgs) => {
@@ -219,7 +224,7 @@ export const ConnectorCompiler = {
 
         // test policy
         const args: PublishPolicyArgs = {...baseArgs, context, params};
-        if (testPublishPolicy(policyPlugins, policies, args) !== true) {
+        if (policyTester && !policyTester(args)) {
           throw new Error("forbidden publish"); // TODO: normalize error
         }
 
@@ -235,7 +240,7 @@ export const ConnectorCompiler = {
     } else {
       // for dynamic event name
       const getEventName = eventNameOrFn;
-      const policies = integration.schema.policy && Array.isArray(integration.schema.policy.publish)
+      const policySchemata = integration.schema.policy && Array.isArray(integration.schema.policy.publish)
         ? integration.schema.policy.publish
         : [];
       const baseArgs = {groups: schema.groups || [], broadcast: schema.broadcast === true};
@@ -249,8 +254,9 @@ export const ConnectorCompiler = {
 
         // test policy
         const args = {...baseArgs, context, event: eventName, params};
-        const filteredPolicies = policies.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(eventName, eventNamePattern)));
-        if (testPublishPolicy(policyPlugins, filteredPolicies, args) !== true) {
+        const filteredPolicySchemata = policySchemata.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(eventName, eventNamePattern)));
+        const policyTester = filteredPolicySchemata.length ? PolicyCompiler.publish(filteredPolicySchemata, policyPlugins,  integration, {}) : null;
+        if (policyTester && !policyTester(args)) {
           throw new Error("forbidden publish"); // TODO: normalize error
         }
 
@@ -318,7 +324,7 @@ export const ConnectorCompiler = {
       eventNamesOrFn = schema.events;
     }
 
-    const policies = integration.schema.policy && Array.isArray(integration.schema.policy.subscribe) ? integration.schema.policy.subscribe : [];
+    const policySchemata = integration.schema.policy && Array.isArray(integration.schema.policy.subscribe) ? integration.schema.policy.subscribe : [];
 
     const connector: SubscribeConnector<MappableArgs, GetAsyncIterator extends true ? null : (packet: any) => void> = async (context, mappableArgs, listener) => {
       const eventNames = Array.isArray(eventNamesOrFn) ? eventNamesOrFn : eventNamesOrFn(mappableArgs);
@@ -327,10 +333,11 @@ export const ConnectorCompiler = {
       for (const event of eventNames) {
 
         // test policy
-        const filteredPolicies = policies.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(event, eventNamePattern)));
+        const filteredPolicySchemata = policySchemata.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(event, eventNamePattern)));
+        const policyTester = filteredPolicySchemata.length ? PolicyCompiler.subscribe(filteredPolicySchemata, policyPlugins,  integration, {}) : null;
         const args: SubscribePolicyArgs = {context, event};
 
-        if (testSubscribePolicy(policyPlugins, filteredPolicies, args) !== true) {
+        if (policyTester && !policyTester(args)) {
           throw new Error("forbidden subscribe"); // TODO: normalize error
         }
 

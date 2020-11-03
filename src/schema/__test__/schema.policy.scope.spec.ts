@@ -1,7 +1,8 @@
+import { mockRequest, mockResponse } from "jest-mock-req-res";
 import { sleep, getMoleculerServiceBroker, getSchemaRegistry, MoleculerServiceSchemaFactory, sleepUntil } from "../../test";
 
 const moleculer = {
-  namespace: "test-schema-branch-update-2",
+  namespace: "test-schema-policy-scope",
   transporter: {
     type: "TCP",
     options: {
@@ -15,145 +16,91 @@ const schema = getSchemaRegistry({
   delegator: {moleculer: {...moleculer, nodeID: "gateway"}},
 });
 
-const remote1 = getMoleculerServiceBroker({
-  logger: {level: "error", label: "remote"},
-  moleculer: {...moleculer, nodeID: "remote"},
+const service1 = getMoleculerServiceBroker({
+  logger: {level: "error", label: "service1"},
+  moleculer: {...moleculer, nodeID: "service1"},
   services: [
-    MoleculerServiceSchemaFactory.echo("master", "master-a"),
-    // @ts-ignore
-    MoleculerServiceSchemaFactory.echo("master", "conflict-a", {
-      protocol: {
-        REST: {
-          routes: [
-            {
-              method: "GET",
-              path: "/echo",
-              call: {
-                action: `/conflict-a/echo`,
-                params: {},
-              },
+    {
+      name: "echo",
+      metadata: {
+        api: {
+          branch: "master",
+          protocol: {
+            REST: {
+              basePath: `/echo`,
+              routes: [
+                {
+                  method: "GET",
+                  path: "/foo",
+                  call: {
+                    action: `echo.foo`,
+                    params: {
+                      hello: "@query.hello",
+                    },
+                  },
+                },
+              ],
             },
-            {
-              method: "GET",
-              path: "/echo2",
-              call: {
-                action: `/conflict-a/echo`,
-                params: {},
+          },
+          policy: {
+            call: [
+              {
+                actions: ["echo.**"],
+                scope: ["scope1"],
+                description: "all action call mappings require 'scope1' scope in the identity context",
               },
-            },
-            {
-              method: "GET",
-              path: "/echo3",
-              call: {
-                action: `/conflict-a/echo`,
-                params: {},
-              },
-            },
-            {
-              method: "GET",
-              path: "/echo4",
-              call: {
-                action: `/conflict-a/echo`,
-                params: {},
-              },
-            },
-            {
-              method: "GET",
-              path: "/echo5",
-              call: {
-                action: `/conflict-a/echo`,
-                params: {},
-              },
-            },
-          ],
+            ],
+          },
         },
       },
-    }),
-  ],
-});
-
-const remote2 = getMoleculerServiceBroker({
-  logger: {level: "error", label: "remote2"},
-  moleculer: {...moleculer, nodeID: "remote2"},
-  services: [
-    MoleculerServiceSchemaFactory.echo("dev", "conflict-a", {
-      protocol: {
-        REST: {
-          routes: [
-            {
-              method: "GET",
-              path: "/echo",
-              call: {
-                action: `/conflict-a/echo`,
-                params: {},
-              },
+      actions: {
+        foo: {
+          params: {
+            hello: {
+              type: "string",
+              default: "world",
             },
-          ],
+          },
+          async handler(ctx) {
+            return ctx.params.hello;
+          }
         },
       },
-    }),
+    },
   ],
 });
 
 jest.setTimeout(1000 * 20);
 
-const mocks = {
-  master: jest.fn().mockName("listeners.updated.master"),
-  dev: jest.fn().mockName("listeners.updated.dev"),
-};
 beforeAll(async () => {
   await Promise.all([
-    remote1.start(),
-    remote2.start(),
+    service1.start(),
     schema.start({
-      updated: branch => mocks[branch.name as "dev" | "master"](),
+      updated: jest.fn(),
       removed: jest.fn(),
     }),
+    sleepUntil(() => !!schema.getBranch("master")?.services?.length, 1000),
   ]);
-  await sleepUntil(() => {
-    const dev = schema.getBranch("dev");
-    return dev && dev.services.length >= 2 || false;
-  });
-  await remote2.stop();
-  await sleepUntil(() => {
-    const dev = schema.getBranch("dev");
-    return dev && dev.latestVersion.routes.length >= 10 || false;
-  });
 });
 
-describe("Schema registry update", () => {
-  it("master branch should gathered master/non-branched services", () => {
-    const serviceIds = schema.getBranch("master")!.services.map(s => s.id);
-    expect(serviceIds).toEqual(expect.arrayContaining([
-      "master-a", "conflict-a",
-    ]));
-    expect(serviceIds).toHaveLength(2);
-  });
-
-  it("dev should gathered dev/master/non-branched services and fall back to master branched service when dev branched service removed", () => {
-    const serviceIds = schema.getBranch("dev")!.services.map(s => s.id);
-    expect(serviceIds).toEqual(expect.arrayContaining([
-      "master-a", "conflict-a",
-    ]));
-    expect(serviceIds).toHaveLength(2);
-  });
-
-  it("master branch should have 1+5+3 route by 4 updates", () => {
-    expect(mocks.master).toBeCalledTimes(4); // created + initial + master-a + conflict-a
-    expect(schema.getBranch("master")!.latestVersion.routes.length).toEqual(10); // +master-a + conflict-a/master + graphql(3) + introspection
-  });
-
-  it("dev branch should have same routes by at least 3 updates", () => {
-    expect(mocks.dev.mock.calls.length).toBeGreaterThanOrEqual(3); // min: forked(+master-a +conflict-a/master) +conflict-a/dev -conflict-a/dev
-    expect(mocks.dev.mock.calls.length).toBeLessThanOrEqual(5); // max: forked() +conflict-a/master +conflict-a/dev +master-a/master -conflict-a/dev
-    expect(schema.getBranch("dev")!.latestVersion.routes.length).toEqual(10); // master-a + conflict-a/master + graphql(3) + introspection
+describe("schema policy should work", () => {
+  it("master branch should gathered master/non-branched services", async () => {
+    const branch = schema.getBranch("master")!;
+    const echoFooEndpoint = branch.latestVersion.routes.find(r => r.path === "/echo/foo")!;
+    const ctx = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
+    const req = mockRequest();
+    const res = mockResponse();
+    await echoFooEndpoint.handler(ctx, req, res);
+    console.log(res.statusCode, res.send.mock);
   });
 });
 
 afterAll(async () => {
   await Promise.all([
     schema.stop(),
-    remote1.stop(),
-    remote2.stop(),
+    service1.stop(),
   ]);
 });

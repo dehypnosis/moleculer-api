@@ -2,6 +2,7 @@ import { ParamsMappingInfo, ServiceStatus, EventPacket, EventListener } from "..
 import { PolicyCatalog } from "../policy";
 
 /* Connectors */
+// injected params usage eg.: inject client websocket stream to broker delegator
 export type CallConnector<MappableArgs extends { [key: string]: any } = any> = (context: any, mappableArgs: MappableArgs, injectedParams?: {[key: string]: any}) => Promise<any>;
 export type PublishConnector<MappableArgs extends { [key: string]: any } = any> = (context: any, mappableArgs: MappableArgs) => Promise<any>;
 export type SubscribeConnector<MappableArgs extends { [key: string]: any } = any, Listener extends EventListener | null = EventListener> = (
@@ -39,7 +40,7 @@ export type MapConnectorSchema<Fn extends (mappableArgs: any) => any = (mappable
   }
  */
 
-export type CallConnectorResponseMappableArgs<MappableArgs extends { [key: string]: any } = any> = { request: MappableArgs & { params: any }, response: any };
+export type CallConnectorResponseMappableArgs<MappableArgs extends { [key: string]: any } = { [key: string]: any }> = { request: MappableArgs & { context: any; params: any }, response: any };
 export type CallConnectorSchema<MappableArgs extends { [key: string]: any } = any> = {
   // action name
   action: string;
@@ -130,7 +131,7 @@ export type MapConnectorCatalog = {
 export type ConnectorCatalog = CallConnectorCatalog | PublishConnectorCatalog | SubscribeConnectorCatalog | MapConnectorCatalog;
 
 /* Policy */
-export type CallPolicyArgs<MappableArgs extends { [key: string]: any } = any> = CallConnectorResponseMappableArgs<MappableArgs>["request"];
+export type CallPolicyArgs<MappableArgs extends { [key: string]: any } = { [key: string]: any }> = CallConnectorResponseMappableArgs<MappableArgs>["request"];
 export type CallPolicySchema = {
   description: string;
   actions: string[];

@@ -1,7 +1,7 @@
 import { Service } from "../registry";
 import { PubSub, PubSubProps } from "./pubsub";
 
-export type DiscoveryPubSubProps = Omit<PubSubProps, "maxListeners"|"eventNamePatternResolver">;
+export type DiscoveryPubSubProps = Omit<PubSubProps, "maxListeners" /*|"eventNamePatternResolver"*/>;
 
 export class DiscoveryPubSub extends PubSub<{
   connected: Readonly<Service>;
@@ -9,7 +9,7 @@ export class DiscoveryPubSub extends PubSub<{
   nodePoolUpdated: Readonly<Service>;
 }> {
   public constructor(props: DiscoveryPubSubProps) {
-    super({ maxListeners: 1, eventNamePatternResolver: null, ...props });
+    super({ maxListeners: 1, /*eventNamePatternResolver: null,*/ ...props });
   }
 
   public async subscribeAll(listeners: {

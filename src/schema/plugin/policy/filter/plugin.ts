@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import { RecursivePartial, validateInlineFunction, ValidationError } from "../../../../interface";
-import { CallPolicyArgs, PublishPolicyArgs, SubscribePolicyArgs } from "../../connector";
-import { PolicyPlugin, PolicyPluginProps } from "../plugin";
+import { ServiceAPIIntegration } from "../../../integration";
+import { CallPolicyTester, PolicyPlugin, PolicyPluginProps, PublishPolicyTester, SubscribePolicyTester } from "../plugin";
 import { FilterPolicyPluginSchema, FilterPolicyPluginCatalog } from "./schema";
 
 export type FilterPolicyPluginOptions = {};
@@ -41,16 +41,21 @@ export class FilterPolicyPlugin extends PolicyPlugin<FilterPolicyPluginSchema, F
     return {} as FilterPolicyPluginCatalog;
   }
 
-  // TODO: filter policy plugin
-  public testCallPolicy(schema: Readonly<FilterPolicyPluginSchema>, args: Readonly<CallPolicyArgs>): boolean | any {
-    return true;
+  public compileCallPolicySchema(schema: Readonly<FilterPolicyPluginSchema>, integration: Readonly<ServiceAPIIntegration>): CallPolicyTester {
+    return (args) => {
+      return true;
+    };
   }
 
-  public testPublishPolicy(schema: Readonly<FilterPolicyPluginSchema>, args: Readonly<PublishPolicyArgs>): boolean | any {
-    return true;
+  public compilePublishPolicySchema(schema: Readonly<FilterPolicyPluginSchema>, integration: Readonly<ServiceAPIIntegration>): PublishPolicyTester {
+    return (args) => {
+      return true;
+    };
   }
 
-  public testSubscribePolicy(schema: Readonly<FilterPolicyPluginSchema>, args: Readonly<SubscribePolicyArgs>) {
-    return true;
+  public compileSubscribePolicySchema(schema: Readonly<FilterPolicyPluginSchema>, integration: Readonly<ServiceAPIIntegration>): SubscribePolicyTester {
+    return (args) => {
+      return true;
+    };
   }
 }
