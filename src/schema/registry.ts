@@ -10,6 +10,7 @@ import { ServiceAPIIntegrationSource } from "./integration";
 import { ServiceAPISchema, ServiceMetaDataSchema } from "./index";
 import { Branch, BranchOptions } from "./branch";
 import { ProtocolPlugin, PolicyPlugin, SchemaPluginConstructors, SchemaPluginConstructorOptions, defaultSchemaPluginConstructorOptions } from "./plugin";
+import { CallPolicySchema, PublishPolicySchema, SubscribePolicySchema } from "./plugin/connector";
 
 export type SchemaRegistryProps = {
   brokers: Readonly<ServiceBroker>[],
@@ -266,7 +267,7 @@ export class SchemaRegistry {
                   type: "custom",
                   optional: true,
                   check(value: any) {
-                    const idx = schema.policy[connectorType]!.indexOf(value);
+                    const idx = (schema.policy[connectorType]! as (CallPolicySchema|SubscribePolicySchema|PublishPolicySchema)[]).findIndex(p => p[plugin.key] === value);
                     const errs = plugin.validateSchema(value);
                     if (errs.length) {
                       return errs.map(err => {

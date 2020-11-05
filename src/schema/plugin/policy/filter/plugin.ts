@@ -4,11 +4,15 @@ import { ServiceAPIIntegration } from "../../../integration";
 import { CallPolicyTester, PolicyPlugin, PolicyPluginProps, PublishPolicyTester, SubscribePolicyTester } from "../plugin";
 import { FilterPolicyPluginSchema, FilterPolicyPluginCatalog } from "./schema";
 
-export type FilterPolicyPluginOptions = {};
+export type FilterPolicyPluginOptions = {
+  showOriginalError: boolean;
+};
 
 export class FilterPolicyPlugin extends PolicyPlugin<FilterPolicyPluginSchema, FilterPolicyPluginCatalog> {
   public static readonly key = "filter";
-  public static readonly autoLoadOptions: FilterPolicyPluginOptions = {};
+  public static readonly autoLoadOptions: FilterPolicyPluginOptions = {
+    showOriginalError: true,
+  };
   private readonly opts: FilterPolicyPluginOptions;
 
   constructor(protected readonly props: PolicyPluginProps, opts?: RecursivePartial<FilterPolicyPluginOptions>) {
@@ -79,11 +83,21 @@ export class FilterPolicyPlugin extends PolicyPlugin<FilterPolicyPluginSchema, F
 
     return (args: Readonly<{ context: any; params: any; }>) => {
       for (const tester of testers) {
-        if (!tester(args)) {
+        let authorized = false;
+        let originalError: Error | null = null;
+        try {
+          authorized = tester(args);
+        } catch (err) {
+          originalError = err;
+        }
+        if (!authorized) {
           // TODO: normalize error
           const error: any = new Error("permission denied");
           error.statusCode = 401;
           error.description = descriptionsMap.get(tester);
+          if (this.opts.showOriginalError) {
+            error.originalError = originalError ? originalError.message : null;
+          }
           throw error;
         }
       }
