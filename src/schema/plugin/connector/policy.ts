@@ -9,24 +9,18 @@ export const PolicyCompiler = {
     integration: Readonly<ServiceAPIIntegration>,
     opts: {},
   ): CallPolicyTester {
-    const testers: CallPolicyTester[] = [];
-    for (const policy of policySchemata) {
-      for (const plugin of policyPlugins) {
-        const pluginSchema = policy[plugin.key];
-        if (!pluginSchema) {
-          continue;
+    const testers: CallPolicyTester[] = policyPlugins
+      .map(plugin => {
+        const matchedList = policySchemata.filter(s => typeof s[plugin.key] !== "undefined").map(s => [s[plugin.key], s.description || null]);
+        if (!matchedList.length) {
+          return null as any;
         }
-        testers.push(plugin.compileCallPolicySchema(pluginSchema, integration));
-      }
-    }
-    return (args) => {
-      for (const tester of testers) {
-        if (!tester(args)) {
-          return false;
-        }
-      }
-      return true;
-    };
+        const schemata = matchedList.map(m => m[0]);
+        const descriptions = matchedList.map(m => m[1]);
+        return plugin.compileCallPolicySchemata(schemata, descriptions, integration);
+      })
+      .filter(fn => !!fn);
+    return (args) => testers.every(tester => tester(args));
   },
 
   publish<MappableArgs extends { [key: string]: any }>(
@@ -35,24 +29,18 @@ export const PolicyCompiler = {
     integration: Readonly<ServiceAPIIntegration>,
     opts: {},
   ): PublishPolicyTester {
-    const testers: PublishPolicyTester[] = [];
-    for (const policy of policySchemata) {
-      for (const plugin of policyPlugins) {
-        const pluginSchema = policy[plugin.key];
-        if (!pluginSchema) {
-          continue;
+    const testers: PublishPolicyTester[] = policyPlugins
+      .map(plugin => {
+        const matchedList = policySchemata.filter(s => typeof s[plugin.key] !== "undefined").map(s => [s[plugin.key], s.description || null]);
+        if (!matchedList.length) {
+          return null as any;
         }
-        testers.push(plugin.compilePublishPolicySchema(pluginSchema, integration));
-      }
-    }
-    return (args) => {
-      for (const tester of testers) {
-        if (!tester(args)) {
-          return false;
-        }
-      }
-      return true;
-    };
+        const schemata = matchedList.map(m => m[0]);
+        const descriptions = matchedList.map(m => m[1]);
+        return plugin.compilePublishPolicySchemata(schemata, descriptions, integration);
+      })
+      .filter(fn => !!fn);
+    return (args) => testers.every(tester => tester(args));
   },
 
   subscribe<MappableArgs extends { [key: string]: any }>(
@@ -61,23 +49,17 @@ export const PolicyCompiler = {
     integration: Readonly<ServiceAPIIntegration>,
     opts: {},
   ): SubscribePolicyTester {
-    const testers: SubscribePolicyTester[] = [];
-    for (const policy of policySchemata) {
-      for (const plugin of policyPlugins) {
-        const pluginSchema = policy[plugin.key];
-        if (!pluginSchema) {
-          continue;
+    const testers: SubscribePolicyTester[] = policyPlugins
+      .map(plugin => {
+        const matchedList = policySchemata.filter(s => typeof s[plugin.key] !== "undefined").map(s => [s[plugin.key], s.description || null]);
+        if (!matchedList.length) {
+          return null as any;
         }
-        testers.push(plugin.compileSubscribePolicySchema(pluginSchema, integration));
-      }
-    }
-    return (args) => {
-      for (const tester of testers) {
-        if (!tester(args)) {
-          return false;
-        }
-      }
-      return true;
-    };
+        const schemata = matchedList.map(m => m[0]);
+        const descriptions = matchedList.map(m => m[1]);
+        return plugin.compileSubscribePolicySchemata(schemata, descriptions, integration);
+      })
+      .filter(fn => !!fn);
+    return (args) => testers.every(tester => tester(args));
   },
 };

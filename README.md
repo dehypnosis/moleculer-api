@@ -73,11 +73,11 @@ yarn add moleculer-api
     - [x] Streaming support for GraphQL/REST plugin multipart/form-data request
     - [x] Streaming support for REST plugin response
     - [x] Bidirectional streaming support for WebSocket plugin
-- [] 0.3.x Beta
+- [x] 0.3.x Beta
     - [x] Integration example with `moleculer-iam` (OIDC provider)
-    - [] Schema Registry plugins
-        - [] Filter access control policy plugin
-        - [] Scope access control policy plugin
+    - [x] Schema Registry plugins
+        - [x] Filter access control policy plugin
+        - [x] Scope access control policy plugin
     - [x] Gateway schema presets
         - [x] Service Catalog endpoints in REST
         - [x] Empty scheme placeholder in GraphQL

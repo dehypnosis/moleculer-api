@@ -40,7 +40,7 @@ export const ConnectorCompiler = {
     return withLabel(connector, `mapConnector`);
   },
 
-  call<MappableArgs extends { [key: string]: any }>(
+  call<MappableArgs extends { [key: string]: any; context: any }>(
     schema: Readonly<CallConnectorSchema>,
     integration: Readonly<ServiceAPIIntegration>,
     policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>,
