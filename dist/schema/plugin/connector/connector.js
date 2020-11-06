@@ -48,9 +48,11 @@ exports.ConnectorCompiler = {
             }),
         }) : null;
         // to apply access control policy plugin
-        const policies = integration.schema.policy && Array.isArray(integration.schema.policy.call)
+        const policySchemata = integration.schema.policy && Array.isArray(integration.schema.policy.call)
             ? integration.schema.policy.call.filter(policy => policy.actions.some(actionNamePattern => broker.matchActionName(actionId, actionNamePattern)))
             : [];
+        // to test permission
+        const policyTester = policySchemata.length ? policy_1.PolicyCompiler.call(policySchemata, policyPlugins, integration, {}) : null;
         const connector = (context, mappableArgs, injectedParams) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             // dynamically load action before first call
             if (!action) {
@@ -79,7 +81,7 @@ exports.ConnectorCompiler = {
             const { params, batchingParams } = paramsMapper.map(mappableArgs);
             // test policy
             const request = Object.assign(Object.assign({}, mappableArgs), { params: Object.assign(Object.assign({}, params), batchingParams) });
-            if (policy_1.testCallPolicy(policyPlugins, policies, request) !== true) {
+            if (policyTester && !policyTester(request)) {
                 throw new Error("forbidden call"); // TODO: normalize error
             }
             // call
@@ -148,16 +150,17 @@ exports.ConnectorCompiler = {
         // for static event name
         if (typeof eventNameOrFn === "string") {
             const eventName = eventNameOrFn;
-            const policies = integration.schema.policy && Array.isArray(integration.schema.policy.publish)
+            const policySchemata = integration.schema.policy && Array.isArray(integration.schema.policy.publish)
                 ? integration.schema.policy.publish.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(eventName, eventNamePattern)))
                 : [];
+            const policyTester = policySchemata.length ? policy_1.PolicyCompiler.publish(policySchemata, policyPlugins, integration, {}) : null;
             const baseArgs = { event: eventName, groups: schema.groups || [], broadcast: schema.broadcast === true };
             const connector = (context, mappableArgs) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                 // map params
                 const { params } = paramsMapper.map(mappableArgs); // batching disabled
                 // test policy
                 const args = Object.assign(Object.assign({}, baseArgs), { context, params });
-                if (policy_1.testPublishPolicy(policyPlugins, policies, args) !== true) {
+                if (policyTester && !policyTester(args)) {
                     throw new Error("forbidden publish"); // TODO: normalize error
                 }
                 // publish
@@ -171,7 +174,7 @@ exports.ConnectorCompiler = {
         else {
             // for dynamic event name
             const getEventName = eventNameOrFn;
-            const policies = integration.schema.policy && Array.isArray(integration.schema.policy.publish)
+            const policySchemata = integration.schema.policy && Array.isArray(integration.schema.policy.publish)
                 ? integration.schema.policy.publish
                 : [];
             const baseArgs = { groups: schema.groups || [], broadcast: schema.broadcast === true };
@@ -182,8 +185,9 @@ exports.ConnectorCompiler = {
                 const eventName = getEventName(mappableArgs);
                 // test policy
                 const args = Object.assign(Object.assign({}, baseArgs), { context, event: eventName, params });
-                const filteredPolicies = policies.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(eventName, eventNamePattern)));
-                if (policy_1.testPublishPolicy(policyPlugins, filteredPolicies, args) !== true) {
+                const filteredPolicySchemata = policySchemata.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(eventName, eventNamePattern)));
+                const policyTester = filteredPolicySchemata.length ? policy_1.PolicyCompiler.publish(filteredPolicySchemata, policyPlugins, integration, {}) : null;
+                if (policyTester && !policyTester(args)) {
                     throw new Error("forbidden publish"); // TODO: normalize error
                 }
                 // publish
@@ -233,15 +237,16 @@ exports.ConnectorCompiler = {
         else {
             eventNamesOrFn = schema.events;
         }
-        const policies = integration.schema.policy && Array.isArray(integration.schema.policy.subscribe) ? integration.schema.policy.subscribe : [];
+        const policySchemata = integration.schema.policy && Array.isArray(integration.schema.policy.subscribe) ? integration.schema.policy.subscribe : [];
         const connector = (context, mappableArgs, listener) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const eventNames = Array.isArray(eventNamesOrFn) ? eventNamesOrFn : eventNamesOrFn(mappableArgs);
             const asyncIteratorComposeItems = [];
             for (const event of eventNames) {
                 // test policy
-                const filteredPolicies = policies.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(event, eventNamePattern)));
+                const filteredPolicySchemata = policySchemata.filter(policy => policy.events.some(eventNamePattern => broker.matchEventName(event, eventNamePattern)));
+                const policyTester = filteredPolicySchemata.length ? policy_1.PolicyCompiler.subscribe(filteredPolicySchemata, policyPlugins, integration, {}) : null;
                 const args = { context, event };
-                if (policy_1.testSubscribePolicy(policyPlugins, filteredPolicies, args) !== true) {
+                if (policyTester && !policyTester(args)) {
                     throw new Error("forbidden subscribe"); // TODO: normalize error
                 }
                 if (opts.getAsyncIterator) {
@@ -304,4 +309,4 @@ function recGetPathOfPartialSchema(partialSchema, schema, keys) {
     }
     return null;
 }
-//# sourceMappingURL=compiler.js.map
+//# sourceMappingURL=connector.js.map

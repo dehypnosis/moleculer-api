@@ -1,5 +1,14 @@
-import { PolicyPlugin } from "..";
-import { CallPolicyArgs, CallPolicySchema, PublishPolicyArgs, PublishPolicySchema, SubscribePolicyArgs, SubscribePolicySchema } from "./schema";
-export declare function testCallPolicy(policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, policies: ReadonlyArray<Readonly<CallPolicySchema>>, args: Readonly<CallPolicyArgs>): boolean | any;
-export declare function testPublishPolicy(policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, policies: ReadonlyArray<Readonly<PublishPolicySchema>>, args: Readonly<PublishPolicyArgs>): boolean | any;
-export declare function testSubscribePolicy(policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, policies: ReadonlyArray<Readonly<SubscribePolicySchema>>, args: Readonly<SubscribePolicyArgs>): boolean | any;
+import { ServiceAPIIntegration } from "../../integration";
+import { CallPolicyTester, PolicyPlugin, PublishPolicyTester, SubscribePolicyTester } from "../policy";
+import { CallPolicySchema, PublishPolicySchema, SubscribePolicySchema } from "./schema";
+export declare const PolicyCompiler: {
+    call<MappableArgs extends {
+        [key: string]: any;
+    }>(policySchemata: ReadonlyArray<Readonly<CallPolicySchema>>, policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, integration: Readonly<ServiceAPIIntegration>, opts: {}): CallPolicyTester;
+    publish<MappableArgs_1 extends {
+        [key: string]: any;
+    }>(policySchemata: ReadonlyArray<Readonly<PublishPolicySchema>>, policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, integration: Readonly<ServiceAPIIntegration>, opts: {}): PublishPolicyTester;
+    subscribe<MappableArgs_2 extends {
+        [key: string]: any;
+    }>(policySchemata: ReadonlyArray<Readonly<SubscribePolicySchema>>, policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, integration: Readonly<ServiceAPIIntegration>, opts: {}): SubscribePolicyTester;
+};

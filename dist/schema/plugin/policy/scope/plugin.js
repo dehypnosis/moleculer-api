@@ -9,9 +9,7 @@ class ScopePolicyPlugin extends plugin_1.PolicyPlugin {
     constructor(props, opts) {
         super(props);
         this.props = props;
-        this.opts = _.defaultsDeep(opts || {}, {
-        // default options
-        });
+        this.opts = _.defaultsDeep(opts || {}, ScopePolicyPlugin.autoLoadOptions);
     }
     validateSchema(schema) {
         return interface_1.validateValue(schema, {
@@ -24,29 +22,69 @@ class ScopePolicyPlugin extends plugin_1.PolicyPlugin {
     }
     start() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            throw new Error("not implemented");
         });
     }
     stop() {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            throw new Error("not implemented");
         });
     }
     describeSchema(schema) {
         return {};
     }
-    // TODO: OIDC Scope plugin
-    testCallPolicy(schema, args) {
-        return true;
+    compileCallPolicySchemata(schemata, descriptions, integration) {
+        return this.compilePolicySchemata(schemata, descriptions, integration);
     }
-    testPublishPolicy(schema, args) {
-        return true;
+    compilePublishPolicySchemata(schemata, descriptions, integration) {
+        return this.compilePolicySchemata(schemata, descriptions, integration);
     }
-    testSubscribePolicy(schema, args) {
-        return true;
+    compileSubscribePolicySchemata(schemata, descriptions, integration) {
+        return this.compilePolicySchemata(schemata, descriptions, integration);
+    }
+    compilePolicySchemata(requiredScopesList, descriptions, integration) {
+        const requiredScopes = [];
+        for (const requiredScopesEntry of requiredScopesList) {
+            for (const scope of requiredScopesEntry) {
+                if (!requiredScopes.includes(scope)) {
+                    requiredScopes.push(scope);
+                }
+            }
+        }
+        const descriptionsMap = requiredScopes.reduce((map, scope) => {
+            const matchedDescriptions = requiredScopesList.reduce((arr, requiredScopesEntry, index) => {
+                const desc = descriptions[index];
+                if (desc && requiredScopesEntry.includes(scope)) {
+                    if (!arr.includes(desc)) {
+                        arr.push(desc);
+                    }
+                }
+                return arr;
+            }, []);
+            map[scope] = matchedDescriptions;
+            return map;
+        }, {});
+        return (args) => {
+            const contextScopes = this.opts.getScopesFromContext(args.context);
+            for (const requiredScope of requiredScopes) {
+                if (!contextScopes.includes(requiredScope)) {
+                    // TODO: normalize error
+                    const error = new Error("permission denied");
+                    error.statusCode = 401;
+                    error.expected = requiredScopes;
+                    error.actual = contextScopes;
+                    error.description = descriptionsMap[requiredScope];
+                    throw error;
+                }
+            }
+            return true;
+        };
     }
 }
 exports.ScopePolicyPlugin = ScopePolicyPlugin;
 ScopePolicyPlugin.key = "scope";
-ScopePolicyPlugin.autoLoadOptions = false; // plugin is disabled in default
+ScopePolicyPlugin.autoLoadOptions = {
+    getScopesFromContext: (ctx) => {
+        var _a;
+        return Array.isArray((_a = ctx === null || ctx === void 0 ? void 0 : ctx.auth) === null || _a === void 0 ? void 0 : _a.scope) ? ctx.auth.scope : [];
+    },
+};
 //# sourceMappingURL=plugin.js.map

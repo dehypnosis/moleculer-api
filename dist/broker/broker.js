@@ -41,7 +41,7 @@ class ServiceBroker {
         // create event buses
         this.eventPubSub = new pubsub_1.EventPubSub({
             onError: error => this.props.logger.error(error),
-            eventNamePatternResolver: this.delegator.eventNameResolver,
+            // eventNamePatternResolver: this.delegator.eventNameResolver,
             maxListeners: Infinity,
         });
         this.discoveryPubSub = new pubsub_1.DiscoveryPubSub({
@@ -84,7 +84,7 @@ class ServiceBroker {
             }
             // publish and store
             yield this.eventPubSub.publish(packet.event, packet);
-            this.registry.addEventExample(this.resolveEventName(packet.event), packet);
+            this.registry.addEventExample([packet.event], packet);
             // log
             this.props.logger[this.opts.log.event ? "info" : "debug"](`received ${kleur.green(packet.event)} ${packet.broadcast ? "broadcast " : ""}event from ${kleur.yellow(packet.from || "unknown")}`);
         });
@@ -260,7 +260,7 @@ class ServiceBroker {
             // add from information to original packet and store as example
             const packet = args;
             packet.from = `${context.id || "unknown"}@${context.ip || "unknown"}`;
-            this.registry.addEventExample(this.resolveEventName(args.event), packet);
+            this.registry.addEventExample([args.event], packet);
             // log
             this.props.logger[this.opts.log.event ? "info" : "debug"](`published ${kleur.green(packet.event)} ${packet.broadcast ? "broadcast " : ""}event from ${kleur.yellow(packet.from)}`);
         });
@@ -284,16 +284,10 @@ class ServiceBroker {
     }
     /* pattern matching for action and event names */
     matchActionName(name, namePattern) {
-        return this.delegator.actionNameResolver(name).includes(namePattern);
-    }
-    resolveActionName(name) {
-        return this.delegator.actionNameResolver(name);
+        return this.delegator.matchActionName(name, namePattern);
     }
     matchEventName(name, namePattern) {
-        return this.delegator.eventNameResolver(name).includes(namePattern);
-    }
-    resolveEventName(name) {
-        return this.delegator.eventNameResolver(name);
+        return this.delegator.matchEventName(name, namePattern);
     }
     /* health check */
     healthCheckService(service) {

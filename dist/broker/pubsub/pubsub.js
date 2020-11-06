@@ -13,12 +13,12 @@ class PubSub {
         this.delegator.ee.on("error", props.onError);
     }
     asyncIterator(eventNamePattern) {
-        const eventNames = this.props.eventNamePatternResolver ? this.props.eventNamePatternResolver(eventNamePattern) : [eventNamePattern];
-        return this.delegator.asyncIterator(eventNames);
+        // const eventNames = this.props.eventNamePatternResolver ? this.props.eventNamePatternResolver(eventNamePattern) : [eventNamePattern];
+        return this.delegator.asyncIterator([eventNamePattern]);
     }
     subscribe(eventNamePattern, listener) {
-        const eventNames = this.props.eventNamePatternResolver ? this.props.eventNamePatternResolver(eventNamePattern) : [eventNamePattern];
-        return Promise.all(eventNames.map(eventName => this.delegator.subscribe(eventName, listener)));
+        // const eventNames = this.props.eventNamePatternResolver ? this.props.eventNamePatternResolver(eventNamePattern) : [eventNamePattern];
+        return Promise.all([eventNamePattern].map(eventName => this.delegator.subscribe(eventName, listener)));
     }
     unsubscribe(id) {
         this.delegator.unsubscribe(id);

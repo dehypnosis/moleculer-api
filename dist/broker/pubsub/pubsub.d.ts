@@ -1,7 +1,6 @@
 export declare type PubSubProps = {
     maxListeners: number;
     onError: (error: Error) => void;
-    eventNamePatternResolver: ((eventNamePattern: string) => string[]) | null;
 };
 export declare abstract class PubSub<EVENTS extends {
     [event: string]: any;

@@ -1,52 +1,48 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.testSubscribePolicy = exports.testPublishPolicy = exports.testCallPolicy = void 0;
-function testCallPolicy(policyPlugins, policies, args) {
-    for (const policy of policies) {
-        for (const plugin of policyPlugins) {
-            const pluginSchema = policy[plugin.key];
-            if (!pluginSchema) {
-                continue;
+exports.PolicyCompiler = void 0;
+exports.PolicyCompiler = {
+    call(policySchemata, policyPlugins, integration, opts) {
+        const testers = policyPlugins
+            .map(plugin => {
+            const matchedList = policySchemata.filter(s => typeof s[plugin.key] !== "undefined").map(s => [s[plugin.key], s.description || null]);
+            if (!matchedList.length) {
+                return null;
             }
-            const result = plugin.testCallPolicy(pluginSchema, args);
-            if (result === false || result !== true) {
-                return result;
+            const schemata = matchedList.map(m => m[0]);
+            const descriptions = matchedList.map(m => m[1]);
+            return plugin.compileCallPolicySchemata(schemata, descriptions, integration);
+        })
+            .filter(fn => !!fn);
+        return (args) => testers.every(tester => tester(args));
+    },
+    publish(policySchemata, policyPlugins, integration, opts) {
+        const testers = policyPlugins
+            .map(plugin => {
+            const matchedList = policySchemata.filter(s => typeof s[plugin.key] !== "undefined").map(s => [s[plugin.key], s.description || null]);
+            if (!matchedList.length) {
+                return null;
             }
-        }
-    }
-    return true;
-}
-exports.testCallPolicy = testCallPolicy;
-function testPublishPolicy(policyPlugins, policies, args) {
-    for (const policy of policies) {
-        for (const plugin of policyPlugins) {
-            const pluginSchema = policy[plugin.key];
-            if (!pluginSchema) {
-                continue;
+            const schemata = matchedList.map(m => m[0]);
+            const descriptions = matchedList.map(m => m[1]);
+            return plugin.compilePublishPolicySchemata(schemata, descriptions, integration);
+        })
+            .filter(fn => !!fn);
+        return (args) => testers.every(tester => tester(args));
+    },
+    subscribe(policySchemata, policyPlugins, integration, opts) {
+        const testers = policyPlugins
+            .map(plugin => {
+            const matchedList = policySchemata.filter(s => typeof s[plugin.key] !== "undefined").map(s => [s[plugin.key], s.description || null]);
+            if (!matchedList.length) {
+                return null;
             }
-            const result = plugin.testPublishPolicy(pluginSchema, args);
-            if (result === false || result !== true) {
-                return result;
-            }
-        }
-    }
-    return true;
-}
-exports.testPublishPolicy = testPublishPolicy;
-function testSubscribePolicy(policyPlugins, policies, args) {
-    for (const policy of policies) {
-        for (const plugin of policyPlugins) {
-            const pluginSchema = policy[plugin.key];
-            if (!pluginSchema) {
-                continue;
-            }
-            const result = plugin.testSubscribePolicy(pluginSchema, args);
-            if (result === false || result !== true) {
-                return result;
-            }
-        }
-    }
-    return true;
-}
-exports.testSubscribePolicy = testSubscribePolicy;
+            const schemata = matchedList.map(m => m[0]);
+            const descriptions = matchedList.map(m => m[1]);
+            return plugin.compileSubscribePolicySchemata(schemata, descriptions, integration);
+        })
+            .filter(fn => !!fn);
+        return (args) => testers.every(tester => tester(args));
+    },
+};
 //# sourceMappingURL=policy.js.map

@@ -4,7 +4,6 @@ import { Logger } from "../../logger";
 import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../registry";
 import { Report } from "../reporter";
 import { EventPacket } from "../pubsub";
-import { NamePatternResolver } from "../name";
 import { DelegatedCallArgs, DelegatedEventPublishArgs } from "../broker";
 export { DelegatedCallArgs, DelegatedEventPublishArgs };
 export declare type ServiceBrokerDelegatorProps = {
@@ -17,8 +16,8 @@ export declare abstract class ServiceBrokerDelegator<Context> extends HasStaticK
     protected readonly props: ServiceBrokerDelegatorProps;
     constructor(props: ServiceBrokerDelegatorProps, opts?: any);
     abstract readonly broker: any;
-    abstract readonly actionNameResolver: NamePatternResolver;
-    abstract readonly eventNameResolver: NamePatternResolver;
+    abstract matchActionName(name: string, namePattern: string): boolean;
+    abstract matchEventName(name: string, namePattern: string): boolean;
     abstract start(): Promise<void>;
     abstract stop(): Promise<void>;
     abstract createContext(base: APIRequestContext): Context;

@@ -3,7 +3,6 @@ import { ServiceMetaDataSchema } from "../../../schema";
 import { APIRequestContext } from "../../../server";
 import { Service, ServiceAction, ServiceNode, ServiceStatus } from "../../registry";
 import { Report } from "../../reporter";
-import { NamePatternResolver } from "../../name";
 import { ServiceBrokerDelegator, ServiceBrokerDelegatorProps, DelegatedCallArgs, DelegatedEventPublishArgs } from "../delegator";
 export declare type MoleculerServiceBrokerDelegatorOwnOptions = {
     batchedCallTimeout: (itemCount: number) => number;
@@ -23,8 +22,9 @@ export declare class MoleculerServiceBrokerDelegator extends ServiceBrokerDelega
     private readonly service;
     private readonly opts;
     constructor(props: ServiceBrokerDelegatorProps, opts?: MoleculerServiceBrokerDelegatorOptions);
-    readonly actionNameResolver: NamePatternResolver;
-    readonly eventNameResolver: NamePatternResolver;
+    matchActionName(name: string, namePattern: string): boolean;
+    matchEventName(name: string, namePattern: string): boolean;
+    private matchName;
     start(): Promise<void>;
     stop(): Promise<void>;
     createContext(base: APIRequestContext): Context;

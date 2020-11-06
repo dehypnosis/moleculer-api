@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
+const jest_mock_req_res_1 = require("jest-mock-req-res");
 const test_1 = require("../../test");
 const moleculer = {
-    namespace: "test-schema-branch-update-2",
+    namespace: "test-schema-policy-scope",
     transporter: {
         type: "TCP",
         options: {
@@ -15,138 +16,244 @@ const schema = test_1.getSchemaRegistry({
     logger: { level: "error", label: "gateway", silent: false },
     delegator: { moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "gateway" }) },
 });
-const remote1 = test_1.getMoleculerServiceBroker({
-    logger: { level: "error", label: "remote" },
-    moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "remote" }),
-    services: [
-        test_1.MoleculerServiceSchemaFactory.echo("master", "master-a"),
-        // @ts-ignore
-        test_1.MoleculerServiceSchemaFactory.echo("master", "conflict-a", {
-            protocol: {
-                REST: {
-                    routes: [
-                        {
-                            method: "GET",
-                            path: "/echo",
-                            call: {
-                                action: `/conflict-a/echo`,
-                                params: {},
-                            },
-                        },
-                        {
-                            method: "GET",
-                            path: "/echo2",
-                            call: {
-                                action: `/conflict-a/echo`,
-                                params: {},
-                            },
-                        },
-                        {
-                            method: "GET",
-                            path: "/echo3",
-                            call: {
-                                action: `/conflict-a/echo`,
-                                params: {},
-                            },
-                        },
-                        {
-                            method: "GET",
-                            path: "/echo4",
-                            call: {
-                                action: `/conflict-a/echo`,
-                                params: {},
-                            },
-                        },
-                        {
-                            method: "GET",
-                            path: "/echo5",
-                            call: {
-                                action: `/conflict-a/echo`,
-                                params: {},
-                            },
-                        },
-                    ],
-                },
-            },
-        }),
+const policy = {
+    call: [
+        {
+            actions: ["echo.authorized.*"],
+            scope: ["echo-scope"],
+            description: "all echo.authorized.* action call mappings require 'echo-scope' scope in the auth context",
+        },
+        {
+            actions: ["echo.authorized.foo"],
+            scope: ["echo-foo-scope"],
+            description: "echo.authorized.foo action call mappings require 'echo-foo-scope' scope in the auth context",
+        },
+        {
+            actions: ["echo.authorized.bar"],
+            scope: ["echo-bar-scope"],
+            filter: `({ context, ...args }) => !!context.auth.identity`,
+            description: "echo.authorized.bar action call mappings require 'echo-bar-scope' and non-null identity in the auth context",
+        },
     ],
-});
-const remote2 = test_1.getMoleculerServiceBroker({
-    logger: { level: "error", label: "remote2" },
-    moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "remote2" }),
+};
+const service1 = test_1.getMoleculerServiceBroker({
+    logger: { level: "error", label: "service1" },
+    moleculer: Object.assign(Object.assign({}, moleculer), { nodeID: "service1" }),
     services: [
-        test_1.MoleculerServiceSchemaFactory.echo("dev", "conflict-a", {
-            protocol: {
-                REST: {
-                    routes: [
-                        {
-                            method: "GET",
-                            path: "/echo",
-                            call: {
-                                action: `/conflict-a/echo`,
-                                params: {},
-                            },
+        {
+            name: "echo",
+            metadata: {
+                api: {
+                    branch: "master",
+                    protocol: {
+                        REST: {
+                            basePath: `/echo`,
+                            routes: [
+                                {
+                                    method: "GET",
+                                    path: "/foo",
+                                    call: {
+                                        action: `echo.authorized.foo`,
+                                        params: {
+                                            hello: "@query.hello",
+                                        },
+                                    },
+                                },
+                                {
+                                    method: "GET",
+                                    path: "/bar",
+                                    call: {
+                                        action: `echo.authorized.bar`,
+                                        params: {
+                                            hello: "@query.hello",
+                                        },
+                                    },
+                                },
+                                {
+                                    method: "GET",
+                                    path: "/foobar",
+                                    call: {
+                                        action: `echo.guest.fooBar`,
+                                        params: {},
+                                    },
+                                },
+                            ],
                         },
-                    ],
+                    },
+                    policy,
                 },
             },
-        }),
+            actions: {
+                "authorized.foo": {
+                    params: {
+                        hello: {
+                            type: "string",
+                            default: "world",
+                        },
+                    },
+                    handler(ctx) {
+                        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                            return ctx.params.hello;
+                        });
+                    }
+                },
+                "authorized.bar": {
+                    params: {
+                        hello: {
+                            type: "string",
+                            default: "world",
+                        },
+                    },
+                    handler(ctx) {
+                        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                            return ctx.params.hello;
+                        });
+                    }
+                },
+                "guest.fooBar": () => {
+                    return true;
+                },
+            },
+        },
     ],
 });
 jest.setTimeout(1000 * 20);
-const mocks = {
-    master: jest.fn().mockName("listeners.updated.master"),
-    dev: jest.fn().mockName("listeners.updated.dev"),
-};
 beforeAll(() => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     yield Promise.all([
-        remote1.start(),
-        remote2.start(),
+        service1.start(),
         schema.start({
-            updated: branch => mocks[branch.name](),
+            updated: jest.fn(),
             removed: jest.fn(),
         }),
+        test_1.sleepUntil(() => { var _a, _b; return !!((_b = (_a = schema.getBranch("master")) === null || _a === void 0 ? void 0 : _a.services) === null || _b === void 0 ? void 0 : _b.length); }, 1000),
     ]);
-    yield test_1.sleepUntil(() => {
-        const dev = schema.getBranch("dev");
-        return dev && dev.services.length >= 2 || false;
-    });
-    yield remote2.stop();
-    yield test_1.sleepUntil(() => {
-        const dev = schema.getBranch("dev");
-        return dev && dev.latestVersion.routes.length >= 10 || false;
-    });
 }));
-describe("Schema registry update", () => {
-    it("master branch should gathered master/non-branched services", () => {
-        const serviceIds = schema.getBranch("master").services.map(s => s.id);
-        expect(serviceIds).toEqual(expect.arrayContaining([
-            "master-a", "conflict-a",
-        ]));
-        expect(serviceIds).toHaveLength(2);
-    });
-    it("dev should gathered dev/master/non-branched services and fall back to master branched service when dev branched service removed", () => {
-        const serviceIds = schema.getBranch("dev").services.map(s => s.id);
-        expect(serviceIds).toEqual(expect.arrayContaining([
-            "master-a", "conflict-a",
-        ]));
-        expect(serviceIds).toHaveLength(2);
-    });
-    it("master branch should have 1+5+3 route by 4 updates", () => {
-        expect(mocks.master).toBeCalledTimes(4); // created + initial + master-a + conflict-a
-        expect(schema.getBranch("master").latestVersion.routes.length).toEqual(10); // +master-a + conflict-a/master + graphql(3) + introspection
-    });
-    it("dev branch should have same routes by at least 3 updates", () => {
-        expect(mocks.dev.mock.calls.length).toBeGreaterThanOrEqual(3); // min: forked(+master-a +conflict-a/master) +conflict-a/dev -conflict-a/dev
-        expect(mocks.dev.mock.calls.length).toBeLessThanOrEqual(5); // max: forked() +conflict-a/master +conflict-a/dev +master-a/master -conflict-a/dev
-        expect(schema.getBranch("dev").latestVersion.routes.length).toEqual(10); // master-a + conflict-a/master + graphql(3) + introspection
-    });
+describe("schema policy should work", () => {
+    it("scope plugin works", () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        const branch = schema.getBranch("master");
+        const echoFooEndpoint = branch.latestVersion.routes.find(r => r.path === "/echo/foo");
+        const ctx = {
+            get: jest.fn(),
+            set: jest.fn(),
+        };
+        const req = jest_mock_req_res_1.mockRequest();
+        const res = jest_mock_req_res_1.mockResponse();
+        yield expect(new Promise((resolve, reject) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+            try {
+                yield echoFooEndpoint.handler(ctx, req, res);
+                resolve();
+            }
+            catch (err) {
+                reject(err);
+            }
+        }))).rejects.toThrow(expect.objectContaining({
+            message: "permission denied",
+            actual: [],
+            expected: ["echo-scope", "echo-foo-scope"],
+            description: [policy.call[0].description],
+        }));
+        expect(res.send.mock.calls.length).toEqual(0);
+        const ctx2 = {
+            get: jest.fn(),
+            set: jest.fn(),
+            auth: {
+                scope: ["echo-scope", "echo-foo-scope"],
+            },
+        };
+        const req2 = jest_mock_req_res_1.mockRequest();
+        req2.query.hello = "world!";
+        const res2 = jest_mock_req_res_1.mockResponse();
+        yield expect(new Promise((resolve, reject) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+            try {
+                yield echoFooEndpoint.handler(ctx2, req2, res2);
+                resolve();
+            }
+            catch (err) {
+                reject(err);
+            }
+        }))).resolves.not.toThrow();
+        expect(res2.send.mock.calls[0]).toEqual(["world!"]);
+    }));
+    it("scope + filter plugin works", () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        const branch = schema.getBranch("master");
+        const echoFooEndpoint = branch.latestVersion.routes.find(r => r.path === "/echo/bar");
+        const ctx = {
+            get: jest.fn(),
+            set: jest.fn(),
+            auth: {
+                scope: ["echo-scope"],
+                identity: { sub: "adcd" },
+            },
+        };
+        const req = jest_mock_req_res_1.mockRequest();
+        const res = jest_mock_req_res_1.mockResponse();
+        yield expect(new Promise((resolve, reject) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+            try {
+                yield echoFooEndpoint.handler(ctx, req, res);
+                resolve();
+            }
+            catch (err) {
+                reject(err);
+            }
+        }))).rejects.toThrow(expect.objectContaining({
+            message: "permission denied",
+            actual: ["echo-scope"],
+            expected: ["echo-scope", "echo-bar-scope"],
+            description: [
+                policy.call[2].description,
+            ],
+        }));
+        expect(res.send.mock.calls.length).toEqual(0);
+        const ctx2 = {
+            get: jest.fn(),
+            set: jest.fn(),
+            auth: {
+                scope: ["echo-scope", "echo-bar-scope"],
+            },
+        };
+        const req2 = jest_mock_req_res_1.mockRequest();
+        const res2 = jest_mock_req_res_1.mockResponse();
+        yield expect(new Promise((resolve, reject) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+            try {
+                yield echoFooEndpoint.handler(ctx2, req2, res2);
+                resolve();
+            }
+            catch (err) {
+                reject(err);
+            }
+        }))).rejects.toThrow(expect.objectContaining({
+            message: "permission denied",
+            description: [
+                policy.call[2].description,
+            ],
+        }));
+        expect(res2.send.mock.calls.length).toEqual(0);
+    }));
+    it("(empty) plugin works", () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        const branch = schema.getBranch("master");
+        const echoFooBarEndpoint = branch.latestVersion.routes.find(r => r.path === "/echo/foobar");
+        const ctx = {
+            get: jest.fn(),
+            set: jest.fn(),
+        };
+        const req = jest_mock_req_res_1.mockRequest();
+        const res = jest_mock_req_res_1.mockResponse();
+        yield expect(new Promise((resolve, reject) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+            try {
+                yield echoFooBarEndpoint.handler(ctx, req, res);
+                resolve();
+            }
+            catch (err) {
+                reject(err);
+            }
+        }))).resolves.not.toThrow();
+        expect(res.send.mock.calls[0]).toEqual([true]);
+    }));
 });
 afterAll(() => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     yield Promise.all([
         schema.stop(),
-        remote1.stop(),
-        remote2.stop(),
+        service1.stop(),
     ]);
 }));
 //# sourceMappingURL=schema.policy.scope.spec.js.map

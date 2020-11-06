@@ -71,9 +71,7 @@ export declare class ServiceBroker<DelegatorContext = any> {
     createInlineFunction<MappableArgs, Return>(props: InlineFunctionProps<MappableArgs, Return>): (args: MappableArgs) => Return;
     createReporter(service: Readonly<Service>): Reporter;
     matchActionName(name: string, namePattern: string): boolean;
-    resolveActionName(name: string): string[];
     matchEventName(name: string, namePattern: string): boolean;
-    resolveEventName(name: string): string[];
     healthCheckService(service: Readonly<Service>): Promise<import("./registry").ServiceStatus>;
     healthCheckCall(action: Readonly<ServiceAction>): Promise<import("./registry").ServiceStatus>;
     healthCheckPublish(args: Omit<EventPublishArgs, "params">): Promise<import("./registry").ServiceStatus>;

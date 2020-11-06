@@ -7,6 +7,7 @@ export declare const ConnectorCompiler: {
     }): MapConnector<MappableArgs>;
     call<MappableArgs_1 extends {
         [key: string]: any;
+        context: any;
     }>(schema: Readonly<CallConnectorSchema>, integration: Readonly<ServiceAPIIntegration>, policyPlugins: ReadonlyArray<Readonly<PolicyPlugin<any, any>>>, opts: {
         explicitMappableKeys: Extract<keyof MappableArgs_1, string>[];
         implicitMappableKeys: Extract<keyof MappableArgs_1, string>[];

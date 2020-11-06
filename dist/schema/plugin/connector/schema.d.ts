@@ -28,8 +28,11 @@ export declare type MapConnectorSchema<Fn extends (mappableArgs: any) => any = (
 }) => any> = string;
 export declare type CallConnectorResponseMappableArgs<MappableArgs extends {
     [key: string]: any;
-} = any> = {
+} = {
+    [key: string]: any;
+}> = {
     request: MappableArgs & {
+        context: any;
         params: any;
     };
     response: any;
@@ -104,7 +107,9 @@ export declare type MapConnectorCatalog = {
 export declare type ConnectorCatalog = CallConnectorCatalog | PublishConnectorCatalog | SubscribeConnectorCatalog | MapConnectorCatalog;
 export declare type CallPolicyArgs<MappableArgs extends {
     [key: string]: any;
-} = any> = CallConnectorResponseMappableArgs<MappableArgs>["request"];
+} = {
+    [key: string]: any;
+}> = CallConnectorResponseMappableArgs<MappableArgs>["request"];
 export declare type CallPolicySchema = {
     description: string;
     actions: string[];

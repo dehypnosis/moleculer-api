@@ -4,7 +4,7 @@ exports.MoleculerServiceBrokerDelegator = void 0;
 const tslib_1 = require("tslib");
 const Moleculer = tslib_1.__importStar(require("moleculer"));
 const interface_1 = require("../../../interface");
-const name_1 = require("../../name");
+// import { defaultNamePatternResolver, NamePatternResolver } from "../../name";
 const delegator_1 = require("../delegator");
 const discover_1 = require("./discover");
 const logger_1 = require("./logger");
@@ -13,9 +13,6 @@ class MoleculerServiceBrokerDelegator extends delegator_1.ServiceBrokerDelegator
     constructor(props, opts) {
         super(props);
         this.props = props;
-        /* action/event name matching for call, publish, subscribe, clear cache */
-        this.actionNameResolver = name_1.defaultNamePatternResolver;
-        this.eventNameResolver = name_1.defaultNamePatternResolver;
         const _a = opts || {}, { services = [], batchedCallTimeout = (itemCount) => {
             return Math.max(5000, Math.min(1000 * 60, itemCount * 1000));
         }, streamingCallTimeout = 1000 * 3600, streamingToStringEncoding = "base64" } = _a, moleculerBrokerOptions = tslib_1.__rest(_a, ["services", "batchedCallTimeout", "streamingCallTimeout", "streamingToStringEncoding"]);
@@ -36,6 +33,44 @@ class MoleculerServiceBrokerDelegator extends delegator_1.ServiceBrokerDelegator
         }
         // create a service which handles event and service discovery
         this.service = this.broker.createService(service_1.createMoleculerServiceSchema(props));
+    }
+    /* action/event name matching for call, publish, subscribe, clear cache */
+    matchActionName(name, namePattern) {
+        return this.matchName(name, namePattern);
+    }
+    matchEventName(name, namePattern) {
+        return this.matchName(name, namePattern);
+    }
+    // ref: https://github.com/moleculerjs/moleculer/blob/5b94fa27b38a4134b14d0fbe50717167d6b80cf8/src/utils.js#L266
+    matchName(text, pattern) {
+        // Exact match (eg. "prefix.event")
+        const firstStarPosition = pattern.indexOf("*");
+        if (firstStarPosition === -1) {
+            return pattern === text;
+        }
+        // Eg. "prefix**"
+        const len = pattern.length;
+        if (len > 2 && pattern.endsWith("**") && firstStarPosition > len - 3) {
+            pattern = pattern.substring(0, len - 2);
+            return text.startsWith(pattern);
+        }
+        // Eg. "prefix*"
+        if (len > 1 && pattern.endsWith("*") && firstStarPosition > len - 2) {
+            pattern = pattern.substring(0, len - 1);
+            if (text.startsWith(pattern)) {
+                return text.indexOf(".", len) === -1;
+            }
+            return false;
+        }
+        // Accept simple text, without point character (*)
+        if (len === 1 && firstStarPosition == 0) {
+            return text.indexOf(".") === -1;
+        }
+        // Accept all inputs (**)
+        if (len === 2 && firstStarPosition === 0 && pattern.lastIndexOf("*") === 1) {
+            return true;
+        }
+        return false;
     }
     /* lifecycle */
     start() {

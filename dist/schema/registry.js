@@ -219,7 +219,7 @@ class SchemaRegistry {
                                     type: "custom",
                                     optional: true,
                                     check(value) {
-                                        const idx = schema.policy[connectorType].indexOf(value);
+                                        const idx = schema.policy[connectorType].findIndex(p => p[plugin.key] === value);
                                         const errs = plugin.validateSchema(value);
                                         if (errs.length) {
                                             return errs.map(err => {

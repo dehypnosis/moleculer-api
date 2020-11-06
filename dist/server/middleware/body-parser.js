@@ -25,6 +25,7 @@ BodyParserMiddleware.key = "bodyParser";
 BodyParserMiddleware.autoLoadOptions = {
     json: {
         strict: false,
+        limit: "10mb",
     },
     urlencoded: {
         extended: true,
