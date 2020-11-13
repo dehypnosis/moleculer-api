@@ -6,93 +6,39 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
 
 [![Build Status](https://travis-ci.org/qmit-pro/moleculer-api.svg?branch=master)](https://travis-ci.org/qmit-pro/moleculer-api) [![Coverage Status](https://coveralls.io/repos/github/qmit-pro/moleculer-api/badge.svg?branch=master)](https://coveralls.io/github/qmit-pro/moleculer-api?branch=master) [![David](https://img.shields.io/david/qmit-pro/moleculer-api.svg)](https://david-dm.org/qmit-pro/moleculer-api) [![Known Vulnerabilities](https://snyk.io/test/github/qmit-pro/moleculer-api/badge.svg)](https://snyk.io/test/github/qmit-pro/moleculer-api) [![NPM version](https://img.shields.io/npm/v/moleculer-api.svg)](https://www.npmjs.com/package/moleculer-api) [![Moleculer](https://badgen.net/badge/Powered%20by/Moleculer/0e83cd)](https://moleculer.services)
 
-![Project Architecture Diagram](docs/.gitbook/assets/diagram.svg)
+Moleculer API Gateway는 분산 서비스 환경에서 동적으로 마이크로 서비스들의 API 스키마를 수집하고 조합하며 무중단으로 API를 제공하는 웹 서버 모듈입니다.
 
-## Usage
+서비스 API 스키마는 분산 서비스의 프로시저\(이하 **액션**\)의 호출\(`call`\)이나 중앙 메시징 서비스에 대한 **이벤트** 발행\(`publish`\) 및 구독\(`subscribe`\)을 웹 기반 프로토콜\(REST, GraphQL, WebSocket 지원\)의 엔드포인트에 맵핑합니다. 서비스 API 스키마는 단일한 JSON 포맷으로 구성되어있으며 각 맵핑에 대한 접근 제어 정책을 포함 할 수 있습니다.
 
-### 1. Documents
+서비스 API 스키마가 제거, 수정, 추가되면 Gateway는 기존 통합 API 스키마에 병합을 시도하고 성공시 무중단으로 라우터를 업데이트하며 그 결과 메시지를 원격 서비스에 다시 보고합니다.
 
-* [Features and details: ./docs](docs/api-gateway/api-gateway.md)
 
-### 2. Examples
 
-* [MoleculerJs: ./src/examples](https://github.com/qmit-pro/moleculer-api/tree/master/src/examples)
+### Features
 
-![Project Architecture Diagram](docs/.gitbook/assets/report.png)
-
-### 3. Quick Start
-
-```text
-yarn add moleculer-api
-```
-
-...
-
-## Release Road-map
-
-* [x] 0.1.x Pre-alpha
-  * [x] Service Broker
-    * [x] Service Registry which can discover and distinguish equally named but different services
-    * [x] Collect action params and response, subscribed events examples
-    * [x] Delegate action call with Dataloader batching support
-    * [x] Delegate event publishing
-    * [x] Delegate event subscription with either handler or async iterator
-    * [x] Delegate health check
-    * [x] Reporter which reports errors and information to origin services
-    * [x] Inline function parser \(VM\)
-    * [x] Explicit/implicit parameters mapping from service action validation schema 
-    * [x] Support multiple Service Broker for a single gateway
-    * [x] MoleculerJS Delegator
-  * [x] Schema Registry
-    * [x] Validate service API schema and report
-    * [x] Integrations compile and major plugins
-    * [x] REST protocol plugin
-    * [x] GraphQL protocol plugin with subscription support
-    * [x] Retry failed integrations compile
-    * [x] Branch and version managements
-  * [x] Logger
-    * [x] Winston: also can be used with MoleculerJS delegator logger
-  * [x] API Server
-    * [x] Branch, Version specific routes while reusing handlers
-    * [x] HTTP, WebSocket components \(express, ws modules\)
-    * [x] HTTP protocol which mounts HTTP/WS components' modules
-* [x] 0.2.x Alpha
-  * [x] Middleware
-  * [x] Helmet \(disabled by default\)
-  * [x] CORS \(enabled, including WebSocket\)
-  * [x] Serve Static \(disabled\)
-  * [x] Body Parser \(enabled\)
-  * [x] Logging \(enabled, including WebSocket\)
-  * [x] Error Handler \(enabled, including WebSocket\)
-  * \[X\] Context Factory
-  * [x] ID \(enabled; request id generation\)
-  * [x] User Agent \(enabled\)
-  * [x] Cookie Parser \(enabled\)
-  * [x] Locale \(enabled\)
-  * [x] Auth \(enabled; Bearer/OAuth, Basic, Digest, AWS, [RFC7235](https://tools.ietf.org/html/rfc7235)\)
-  * [x] Schema Registry plugins
-    * [x] WebSocket protocol plugin
-  * [x] Streaming support for GraphQL/REST plugin multipart/form-data request
-  * [x] Streaming support for REST plugin response
-  * [x] Bidirectional streaming support for WebSocket plugin
-* [x] 0.3.x Beta
-  * [x] Integration example with `moleculer-iam` \(OIDC provider\)
-  * [x] Schema Registry plugins
-    * [x] Filter access control policy plugin
-    * [x] Scope access control policy plugin
-  * [x] Gateway schema presets
-    * [x] Service Catalog endpoints in REST
-    * [x] Empty scheme placeholder in GraphQL
-  * \[\] Normalized errors
-* \[\] 1.0.x First Stable release
-  * [x] API Server additional protocols
-    * [x] HTTPS
-    * \[\] HTTP2, HTTP2S
-  * \[\] Integration example with `moleculer-file`
-  * \[\] Unit tests coverage over 90%
-  * \[\] Memory leak test
-  * \[\] Stress test and performance profiling
-  * \[\] Update documents and translate to English
+* 분산 서비스의 API 스키마를 수집하고 병합하여 API를 실시간으로 업데이트
+* 개발 편의를 위한 브랜치 및 태그
+* 상태 검사 및 문서 생성
+  * API Gateway 상태 검사
+  * API 엔드포인트별 상태 검사
+  * API 엔드포인트별 설명, 파라미터, 접근 제어 정보 생성
+  * 분산 서비스 액션 및 이벤트 구독, 발행 정보 생성
+* 확장 가능한 웹 서버 구성
+  * Cookie/Body Parser
+  * ETag
+  * CORS
+  * HTTP/2
+  * TLS
+* 미들웨어 방식의 컨텍스트 생성
+  * 인증
+  * Locale
+* 프로토콜 플러그인 \(핸들러 및 스키마 확장\)
+  * REST
+  * GraphQL
+  * WebSocket \(TODO\)
+* 접근 제어 정책 플러그인 \(핸들러 및 스키마 확장\)
+  * OAuth2 scope 기반 접근 제어
+  * JavaScript [FBAC; Function Based Access Control](https://arxiv.org/abs/1609.04514) 기반 접근 제어
 
 ## Development
 
