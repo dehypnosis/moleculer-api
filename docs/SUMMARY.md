@@ -19,8 +19,9 @@
 * [Authentication](quick-start/authentication/README.md)
   * [Parse OIDC/OAuth2 context](quick-start/authentication/parse-oidc-oauth2-context.md)
 * [Authorization](quick-start/authorization/README.md)
-  * [Access Control with auth scope](quick-start/authorization/access-control-with-auth-scope.md)
-  * [Access Control with auth token](quick-start/authorization/access-control-with-auth-token.md)
+  * [Access Control with Auth token scopes](quick-start/authorization/access-control-with-auth-scope.md)
+  * [Access Control with Auth token claims](quick-start/authorization/access-control-with-auth-token.md)
+  * [Access Control with IP address](quick-start/authorization/access-control-with-ip-address.md)
 
 ## API Gateway
 

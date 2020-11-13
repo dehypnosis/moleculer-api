@@ -1,2 +1,2 @@
-# Access Control with auth token
+# Access Control with Auth token claims
 

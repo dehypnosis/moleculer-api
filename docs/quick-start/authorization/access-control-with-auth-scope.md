@@ -1,2 +1,2 @@
-# Access Control with auth scope
+# Access Control with Auth token scopes
 
