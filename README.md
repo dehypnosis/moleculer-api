@@ -1,4 +1,4 @@
-# README
+# Introduction
 
 ## moleculer-api
 
@@ -6,19 +6,19 @@ A dynamic API Gateway which updates REST endpoints, GraphQL schema, Websocket ha
 
 [![Build Status](https://travis-ci.org/qmit-pro/moleculer-api.svg?branch=master)](https://travis-ci.org/qmit-pro/moleculer-api) [![Coverage Status](https://coveralls.io/repos/github/qmit-pro/moleculer-api/badge.svg?branch=master)](https://coveralls.io/github/qmit-pro/moleculer-api?branch=master) [![David](https://img.shields.io/david/qmit-pro/moleculer-api.svg)](https://david-dm.org/qmit-pro/moleculer-api) [![Known Vulnerabilities](https://snyk.io/test/github/qmit-pro/moleculer-api/badge.svg)](https://snyk.io/test/github/qmit-pro/moleculer-api) [![NPM version](https://img.shields.io/npm/v/moleculer-api.svg)](https://www.npmjs.com/package/moleculer-api) [![Moleculer](https://badgen.net/badge/Powered%20by/Moleculer/0e83cd)](https://moleculer.services)
 
-![Project Architecture Diagram](.gitbook/assets/diagram.svg)
+![Project Architecture Diagram](docs/.gitbook/assets/diagram.svg)
 
 ## Usage
 
 ### 1. Documents
 
-* [Features and details: ./docs](get-started/docs.md)
+* [Features and details: ./docs](docs/api-gateway/api-gateway.md)
 
 ### 2. Examples
 
 * [MoleculerJs: ./src/examples](https://github.com/qmit-pro/moleculer-api/tree/master/src/examples)
 
-![Project Architecture Diagram](.gitbook/assets/report.png)
+![Project Architecture Diagram](docs/.gitbook/assets/report.png)
 
 ### 3. Quick Start
 

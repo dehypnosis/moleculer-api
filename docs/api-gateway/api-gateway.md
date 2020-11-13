@@ -1,4 +1,4 @@
-# API Gateway
+# Overview
 
 ## Overview
 
@@ -104,7 +104,7 @@ Moleculer API Gateway는 아래 원칙을 기반으로 고안되었습니다.
   protocol: {
 ```
 
-이하 protocol 항목에 외부에 제공하려는 API를 작성하고 `call`, `publish`, `subscribe`, `map` 커넥터에 맵핑합니다. 각 커넥터에 대한 추가적인 내용은 아래 [Connectors for API Handler](docs.md#d-connectors-for-api-handler) 섹션에서 다룹니다.
+이하 protocol 항목에 외부에 제공하려는 API를 작성하고 `call`, `publish`, `subscribe`, `map` 커넥터에 맵핑합니다. 각 커넥터에 대한 추가적인 내용은 아래 [Connectors for API Handler](api-gateway.md#d-connectors-for-api-handler) 섹션에서 다룹니다.
 
 #### A. REST
 
@@ -689,7 +689,7 @@ Gateway 상태에 따른 각 엔드포인트의 HTTP 상태 코드는 다음과 
 
 **API Endpoint Health Check**
 
-Gateway API 스키마의 각 엔드포인트 별 상태 확인 기능을 내장하고 있습니다. 엔드포인트에 연결된 커넥터를 기반으로 상태가 측정됩니다. 대부분의 커넥터의 상태 확인은 서비스 브로커에게 위임됩니다. 자세한 사항은 아래의 [Connector](docs.md#1-connector) 섹션을 참조 할 수 있습니다.
+Gateway API 스키마의 각 엔드포인트 별 상태 확인 기능을 내장하고 있습니다. 엔드포인트에 연결된 커넥터를 기반으로 상태가 측정됩니다. 대부분의 커넥터의 상태 확인은 서비스 브로커에게 위임됩니다. 자세한 사항은 아래의 [Connector](api-gateway.md#1-connector) 섹션을 참조 할 수 있습니다.
 
 API 엔드포인트의 상태는 위처럼 HTTP로 제공되지 않으며 아래의 API Catalog를 통해서 제공됩니다.
 
@@ -801,7 +801,7 @@ Header 미들웨어는 Header Context에 값이 할당된 경우 응답 헤더�
 
 ### 1. Protocol
 
-프토토콜 플러그인별 스키마 양식은 [API Schema](docs.md#1-api-schema) 섹션을 참조하십시오. 이 섹션에서는 기본 플러그인의 구동 방식을 개괄적으로 설명합니다.
+프토토콜 플러그인별 스키마 양식은 [API Schema](api-gateway.md#1-api-schema) 섹션을 참조하십시오. 이 섹션에서는 기본 플러그인의 구동 방식을 개괄적으로 설명합니다.
 
 #### A. REST
 
@@ -829,7 +829,7 @@ TODO: WIP
 
 ### 2. Access Control Policy
 
-접근 제어 플러그인별 스키마 양식은 [Access Control Policy](docs.md#d-access-control-policy) 섹션을 참조하십시오. 이 섹션에서는 기본 플러그인의 구동 방식을 개괄적으로 설명합니다.
+접근 제어 플러그인별 스키마 양식은 [Access Control Policy](api-gateway.md#d-access-control-policy) 섹션을 참조하십시오. 이 섹션에서는 기본 플러그인의 구동 방식을 개괄적으로 설명합니다.
 
 프로토콜의 확장성과 접근제어 정책의 정합성을 위해서, 접근 제어 정책은 프로토콜별 엔드포인트가 아니라 액션과 이벤트를 주체로 적용됩니다.
 

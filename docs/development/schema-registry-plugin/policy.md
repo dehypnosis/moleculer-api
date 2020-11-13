@@ -1,2 +1,2 @@
-# Policy
+# Policy Plugin
 

@@ -1,4 +1,4 @@
-# Delegator implementation consensus
+# Streaming Request/Response
 
 ## 1. Streaming Request
 
