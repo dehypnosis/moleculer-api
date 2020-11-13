@@ -2,7 +2,7 @@
 
 * [README](README.md)
 
-## API Gateway <a id="get-started"></a>
+## API Gateway
 
 * [Overview](get-started/docs.md)
 * [Service Broker](get-started/service-broker.md)
