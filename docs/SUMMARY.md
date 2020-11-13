@@ -4,7 +4,7 @@
 
 ## API Gateway
 
-* [Overview](get-started/docs.md)
+* [API Gateway](get-started/docs.md)
 * [Service Broker](get-started/service-broker.md)
 
 ## API Schema
