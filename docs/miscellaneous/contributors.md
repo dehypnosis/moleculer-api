@@ -6,7 +6,7 @@
 
 ## Contributors
 
-Nobody Yet
+Nobody yet
 
 ## 
 

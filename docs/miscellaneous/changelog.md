@@ -4,7 +4,7 @@
 
 ### Added
 
-* Created gitbook documentation: [https://moleculer-api.gitbook.io/](https://moleculer-api.gitbook.io/)
+* Created gitbook documentation: [https://moleculer-api.gitbook.io/api/](https://moleculer-api.gitbook.io/api/)
 
 
 

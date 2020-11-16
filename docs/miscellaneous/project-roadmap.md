@@ -1,7 +1,5 @@
 # Project Roadmap
 
-
-
 * [x] 0.1.x Pre-alpha
   * [x] Service Broker
     * [x] Service Registry which can discover and distinguish equally named but different services
