@@ -34,6 +34,8 @@
   * [Protocol Plugin](api-gateway/schema-registry/protocol-plugin.md)
   * [Policy Plugin](api-gateway/schema-registry/policy-plugin.md)
   * [API Handler](api-gateway/schema-registry/api-handler.md)
+  * [API Document Generation](api-gateway/schema-registry/api-document-generation.md)
+  * [Health Check](api-gateway/schema-registry/health-check.md)
 * [API Server](api-gateway/api-server/README.md)
   * [Application](api-gateway/api-server/application/README.md)
     * [Component](api-gateway/api-server/application/component/README.md)
@@ -86,11 +88,14 @@
 
 ## Miscellaneous
 
-* [API Document Generation](miscellaneous/api-document-generation.md)
 * [Project Roadmap](miscellaneous/project-roadmap.md)
 * [CHANGELOG](miscellaneous/changelog.md)
 * [FAQ](miscellaneous/faq.md)
 * [Contributors](miscellaneous/contributors.md)
 * [Supporters](miscellaneous/supporters.md)
+
+---
+
 * [Github](https://github.com/qmit-pro/moleculer-api)
+* [moleculer-iam](https://moleculer-api.gitbook.io/iam/)
 
