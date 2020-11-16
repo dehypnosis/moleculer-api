@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Introduction](../README.md)
+* [moleculer-api](../README.md)
 
 ## Quick Start
 

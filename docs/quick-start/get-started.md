@@ -8,5 +8,5 @@ yarn add moleculer-api
 
 
 
-![Project Architecture Diagram](../.gitbook/assets/report.png)
+
 
