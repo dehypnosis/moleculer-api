@@ -376,6 +376,71 @@ description: >-
 }
 ```
 {% endtab %}
+
+{% tab title="Chat WebSocket API" %}
+```javascript
+{
+  branch: "master",
+  policy: {},
+  protocol: {
+    WebSocket: {
+      basePath: "/chat",
+      description: "...",
+      routes: [
+        /* bidirectional streaming chat */
+        {
+          path: "/message-stream/:roomId",
+          call: {
+            action: "chat.message.stream",
+            params: {
+              roomId: "@path.roomId",
+            },
+          },
+        },
+        /* pub/sub chat */
+        {
+          path: "/message-pubsub/:roomId",
+          subscribe: {
+            events: `({ path }) => ["chat.message." + path.roomId]`,
+          },
+          publish: {
+            event: `({ path }) => "chat.message." + path.roomId`,
+            params: "@message",
+          },
+        },
+        /* pub/sub video */
+        {
+          path: "/video-pubsub",
+          subscribe: {
+            events: ["chat.video"],
+          },
+          publish: {
+            event: "chat.video",
+            params: {
+              id: "@context.id",
+              username: "@query.username",
+              data: "@message",
+            },
+            filter: `({ params }) => params.id && params.username && params.data`,
+          },
+        },
+        /* streaming video */
+        {
+          path: "/video-stream/:type",
+          call: {
+            action: "chat.video.stream",
+            params: {
+              id: "@context.id",
+              type: "@path.type",
+            },
+          },
+        },
+      ],
+    },
+  },
+}
+```
+{% endtab %}
 {% endtabs %}
 
 Gateway는 특정 서비스 API 스키마의 추가, 제거 및 업데이트시 기존 통합 API 스키마에 병합을 시도하고, 성공시 무중단으로 라우터를 업데이트하며 그 결과를 원격 서비스에 다시 보고합니다.
