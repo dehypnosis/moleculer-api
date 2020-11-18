@@ -4,7 +4,7 @@ description: Configure and run the gateway server.
 
 # Get Started
 
-## 1. Install package
+## 1. Install the package
 
 {% tabs %}
 {% tab title="YARN" %}
@@ -22,7 +22,7 @@ npm i --save moleculer-api
 
 Add `moleculer-api` package from npm.
 
-## 2. Configure and run the gateway
+## 2. Run the gateway
 
 {% tabs %}
 {% tab title="TypeScript" %}
@@ -58,9 +58,9 @@ gateway.start()
 {% endtab %}
 {% endtabs %}
 
-And setup entry script as like above. For now, let's skip the configuration for detail options.
+And write entry script like above. For now, let's skip setting detailed options.
 
-## 3. Check the log and visit few default endpoints
+## 3. Check the log and few endpoints
 
 ```text
 2020-11-17T07:25:17.944Z info dwkimqmit.local/broker[0]/moleculer: Moleculer v0.14.11 is starting...
