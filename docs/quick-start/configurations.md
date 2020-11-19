@@ -240,7 +240,7 @@ Specific options for the Service Broker Delegator. Can choose only one among sup
 ```typescript
 type ServiceBrokerDelegatorConstructorOptions = {
   moleculer?: MoleculerServiceBrokerDelegatorOptions;
-  [otherDelegatorKey]?: any;
+  [otherDelegatorKey: string]?: never;
 };
 ```
 
@@ -314,6 +314,8 @@ type ProtocolPluginConstructorOptions = {
 | GraphQL  | - | Options for [GraphQL](https://graphql.org/) Protocol Plugin. |
 | WebSocket | - | Options for [WebSocket \(ws\)](https://github.com/websockets/ws) Protocol Plugin. |
 
+WIP
+
 
 
 ### 3.2. PolicyPluginConstructorOptions
@@ -332,15 +334,36 @@ type PolicyPluginConstructorOptions = {
 | scope | - | Options for Scope Policy Plugins. |
 | filter | - | Options for Filter Policy Plugins. |
 
- 
+ WIP
+
+
 
 ## 4. APIServerOptions
 
-...
+```typescript
+type APIServerOptions = {
+  update: APIServerUpdateOptions;
+  application: ServerApplicationOptions;
+  middleware: ServerMiddlewareConstructorOptions;
+  protocol: ServerProtocolConstructorOptions;
+  context: APIRequestContextFactoryConstructorOptions;
+};
+```
+
+ WIP
+
+
 
 ## 5. LoggerConstructorOptions
 
+```typescript
+type LoggerConstructorOptions = {
+  [WinstonLogger.key]: WinstonLoggerOptions;
+  [OtherLoggerKey: string]: never;
+};
+```
 
+ WIP
 
 
 
