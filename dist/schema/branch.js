@@ -6,8 +6,8 @@ const async_lock_1 = tslib_1.__importDefault(require("async-lock"));
 const events_1 = require("events");
 const kleur = tslib_1.__importStar(require("kleur"));
 const _ = tslib_1.__importStar(require("lodash"));
-const error_1 = require("tslint/lib/error");
 const broker_1 = require("../broker");
+const interface_1 = require("../interface");
 const catalog_1 = require("./catalog");
 const integration_1 = require("./integration");
 const version_1 = require("./version");
@@ -284,7 +284,9 @@ class Branch {
                         integration.setFailed(this, parentVersion, errors);
                     }
                     if (initialCompile) { // throw errors when failed in initial compile
-                        throw new error_1.FatalError("failed to compile empty schemata initially", errors); // TODO: normalize error
+                        const err = new interface_1.FatalError("failed to compile empty schemata initially"); // TODO: normalize error
+                        err.detail = errors;
+                        throw err;
                     }
                     else {
                         const at = new Date();
@@ -351,7 +353,7 @@ class Branch {
                 return this.retryFailedIntegrationsFrom(parentVersion);
             }
             catch (error) {
-                if (error instanceof error_1.FatalError) {
+                if (error instanceof interface_1.FatalError) {
                     throw error;
                 }
                 this.props.logger.error(`${this} branch failed to process integration jobs:\n${integrations.join("\n")}`, error);

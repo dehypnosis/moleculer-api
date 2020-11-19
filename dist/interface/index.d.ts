@@ -6,3 +6,4 @@ export * from "./validation";
 export * from "./keyed";
 export * from "./pluggable";
 export * from "./iterable";
+export * from "./error";

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServerApplication = void 0;
 const tslib_1 = require("tslib");
 const async_lock_1 = tslib_1.__importDefault(require("async-lock"));
-const error_1 = require("tslint/lib/error");
+const interface_1 = require("../../interface");
 const component_1 = require("./component");
 const context_1 = require("./context");
 class ServerApplication {
@@ -104,7 +104,7 @@ class ServerApplication {
                     this.props.logger.info(`${branch} handler mounted for ${component} component`);
                 })
                     .catch(error => {
-                    if (error instanceof error_1.FatalError) {
+                    if (error instanceof interface_1.FatalError) {
                         throw error;
                     }
                     this.props.logger.error(`failed to mount ${branch} handler for ${component}: ${error}`);
@@ -138,7 +138,7 @@ class ServerApplication {
                     this.props.logger.info(`${branch} handler unmounted for ${component}`);
                 })
                     .catch(error => {
-                    if (error instanceof error_1.FatalError) {
+                    if (error instanceof interface_1.FatalError) {
                         throw error;
                     }
                     this.props.logger.info(`failed to unmount ${branch} handler for ${component}`, error);

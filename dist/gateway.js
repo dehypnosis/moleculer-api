@@ -4,8 +4,8 @@ exports.APIGateway = void 0;
 const tslib_1 = require("tslib");
 const os = tslib_1.__importStar(require("os"));
 const _ = tslib_1.__importStar(require("lodash"));
-const error_1 = require("tslint/lib/error");
 const broker_1 = require("./broker");
+const interface_1 = require("./interface");
 const schema_1 = require("./schema");
 const server_1 = require("./server");
 const logger_1 = require("./logger");
@@ -17,7 +17,7 @@ class APIGateway {
         }).bind(this);
         this.handleUncaughtError = ((reason, ...args) => {
             console.error("uncaught error:", reason, ...args);
-            if (reason instanceof error_1.FatalError) { // TODO: normalize error
+            if (reason instanceof interface_1.FatalError) { // TODO: normalize error
                 return this.stop();
             }
         }).bind(this);

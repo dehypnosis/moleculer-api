@@ -9,4 +9,5 @@ tslib_1.__exportStar(require("./validation"), exports);
 tslib_1.__exportStar(require("./keyed"), exports);
 tslib_1.__exportStar(require("./pluggable"), exports);
 tslib_1.__exportStar(require("./iterable"), exports);
+tslib_1.__exportStar(require("./error"), exports);
 //# sourceMappingURL=index.js.map

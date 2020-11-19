@@ -6,7 +6,6 @@ const events_1 = require("events");
 const async_lock_1 = tslib_1.__importDefault(require("async-lock"));
 const kleur = tslib_1.__importStar(require("kleur"));
 const lodash_1 = tslib_1.__importDefault(require("lodash"));
-const error_1 = require("tslint/lib/error");
 const interface_1 = require("../interface");
 const broker_1 = require("../broker");
 const branch_1 = require("./branch");
@@ -135,7 +134,7 @@ class SchemaRegistry {
             }
         }))
             .catch(error => {
-            if (error instanceof error_1.FatalError)
+            if (error instanceof interface_1.FatalError)
                 throw error;
             this.props.logger.error(`failed to connect ${service} service`, error);
         });
@@ -150,7 +149,7 @@ class SchemaRegistry {
             this.serviceReporterMap.delete(service);
         }))
             .catch(error => {
-            if (error instanceof error_1.FatalError)
+            if (error instanceof interface_1.FatalError)
                 throw error;
             this.props.logger.error(`failed to disconnect ${service} service`, error);
         });
