@@ -10,10 +10,10 @@ APIGatewayOptions type is a kind of container for all the subordinate components
 
 ```typescript
 type APIGatewayOptions = {
-  brokers?: RecursivePartial<ServiceBrokerOptions>[],
-  schema?: RecursivePartial<SchemaRegistryOptions>,
-  server?: RecursivePartial<APIServerOptions>,
-  logger?: LoggerConstructorOptions,
+  brokers: RecursivePartial<ServiceBrokerOptions>[],
+  schema: RecursivePartial<SchemaRegistryOptions>,
+  server: RecursivePartial<APIServerOptions>,
+  logger: LoggerConstructorOptions,
 } & RecursivePartial<APIGatewayOwnOptions>;
 ```
 
@@ -32,7 +32,7 @@ Options for the gateway itself rather inner components.
 
 ```typescript
 type APIGatewayOwnOptions = {
-  skipProcessEventRegistration?: boolean,
+  skipProcessEventRegistration: boolean;
 };
 ```
 
@@ -79,10 +79,10 @@ type ServiceRegistryOptions = {
     queueLimit: number;
     limitPerActions: number;
     limitPerEvents: number;
-    streamNotation: string,
-    omittedNotation: string,
-    omittedLimit: number,
-    redactedNotation: string,
+    streamNotation: string;
+    omittedNotation: string;
+    omittedLimit: number;
+    redactedNotation: string;
     redactedParamNameRegExps: RegExp[];
   };
   healthCheck: {
@@ -239,8 +239,8 @@ Specific options for the Service Broker Delegator. Can choose only one among sup
 
 ```typescript
 type ServiceBrokerDelegatorConstructorOptions = {
-  moleculer?: MoleculerServiceBrokerDelegatorOptions,
-  [otherDelegatorKey]?: any,
+  moleculer?: MoleculerServiceBrokerDelegatorOptions;
+  [otherDelegatorKey]?: any;
 };
 ```
 
@@ -258,10 +258,10 @@ type ServiceBrokerDelegatorConstructorOptions = {
 import * as Moleculer from "moleculer";
 
 type MoleculerServiceBrokerDelegatorOptions = Moleculer.BrokerOptions & {
-  batchedCallTimeout?: (itemCount: number) => number;
-  streamingCallTimeout?: number;
-  streamingToStringEncoding?: "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "latin1" | "binary" | "hex";
-  services?: Moleculer.ServiceSchema[];
+  batchedCallTimeout: (itemCount: number) => number;
+  streamingCallTimeout: number;
+  streamingToStringEncoding: "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "latin1" | "binary" | "hex";
+  services: Moleculer.ServiceSchema[];
 };
 ```
 
@@ -291,28 +291,48 @@ type SchemaRegistryOptions = {
 | :--- | :--- | :--- |
 | maxVersions | 10 | Maximum number of old versions for each branches. |
 | maxUnusedSeconds  | 1800 | Maximum unused duration until deleting non-master branches. |
-| protocol | - | A ProtocolPlugin handles mapping Public API to calling internal services' procedure, publishing and subscribing event messages. |
-| policy | - | A PolicyPlugin handles access controls \(authorization\) while calling internal services' procedure, publishing and subscribing event messages. |
+| protocol | - | Options for Protocol Plugins. |
+| policy | - | Options for Policy Plugins. |
 
 
 
 ### 3.1. ProtocolPluginConstructorOptions
 
+A ProtocolPlugin handles mapping Public API to calling internal services' procedure, publishing and subscribing event messages.
+
 ```typescript
 type ProtocolPluginConstructorOptions = {
-  GraphQL: RecursivePartial<GraphQLProtocolPluginOptions> | false,
-  REST: RecursivePartial<RESTProtocolPluginOptions> | false,
-  WebSocket: RecursivePartial<WebSocketProtocolPluginOptions> | false,
+  REST: RecursivePartial<RESTProtocolPluginOptions> | false;
+  GraphQL: RecursivePartial<GraphQLProtocolPluginOptions> | false;
+  WebSocket: RecursivePartial<WebSocketProtocolPluginOptions> | false;
 }
 ```
 
- ...
+| name | default | description |
+| :--- | :--- | :--- |
+| REST | - | Options for REST Protocol Plugin. |
+| GraphQL  | - | Options for [GraphQL](https://graphql.org/) Protocol Plugin. |
+| WebSocket | - | Options for [WebSocket \(ws\)](https://github.com/websockets/ws) Protocol Plugin. |
 
 
 
 ### 3.2. PolicyPluginConstructorOptions
 
+A PolicyPlugin handles access controls \(authorization\) while calling internal services' procedure, publishing and subscribing event messages.
 
+```typescript
+type PolicyPluginConstructorOptions = {
+  scope: RecursivePartial<ScopePolicyPluginOptions> | false;
+  filter: RecursivePartial<FilterPolicyPluginOptions> | false;
+};
+```
+
+| name | default | description |
+| :--- | :--- | :--- |
+| scope | - | Options for Scope Policy Plugins. |
+| filter | - | Options for Filter Policy Plugins. |
+
+ 
 
 ## 4. APIServerOptions
 
