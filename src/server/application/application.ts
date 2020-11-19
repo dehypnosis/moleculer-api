@@ -1,6 +1,5 @@
 import AsyncLock from "async-lock";
-import { FatalError } from "tslint/lib/error";
-import { RecursivePartial } from "../../interface";
+import { FatalError, RecursivePartial } from "../../interface";
 import { Logger } from "../../logger";
 import { Branch, Version } from "../../schema";
 import {

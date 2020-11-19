@@ -2,9 +2,8 @@ import AsyncLock from "async-lock";
 import { EventEmitter } from "events";
 import * as kleur from "kleur";
 import * as _ from "lodash";
-import { FatalError } from "tslint/lib/error";
 import { Reporter, Service } from "../broker";
-import { RecursivePartial, ValidationError } from "../interface";
+import { FatalError, RecursivePartial, ValidationError } from "../interface";
 import { Logger } from "../logger";
 import { ServiceCatalog } from "./catalog";
 import { ProtocolPlugin } from "./plugin";
@@ -338,7 +337,9 @@ export class Branch {
         }
 
         if (initialCompile) { // throw errors when failed in initial compile
-          throw new FatalError("failed to compile empty schemata initially", errors as any); // TODO: normalize error
+          const err: any = new FatalError("failed to compile empty schemata initially"); // TODO: normalize error
+          err.detail = errors as any;
+          throw err;
         } else {
           const at = new Date();
           const errorsTable = Reporter.getTable(errors.map(message => ({type: "error", message, at})));

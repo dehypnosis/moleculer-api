@@ -1,8 +1,7 @@
 import * as os from "os";
 import * as _ from "lodash";
-import { FatalError } from "tslint/lib/error";
 import { ServiceBroker, ServiceBrokerOptions } from "./broker";
-import { RecursivePartial } from "./interface";
+import { FatalError, RecursivePartial } from "./interface";
 import { SchemaRegistry, SchemaRegistryOptions } from "./schema";
 import { APIServer, APIServerOptions } from "./server";
 import { Logger, LoggerConstructors, LoggerConstructorOptions } from "./logger";
