@@ -1,10 +1,11 @@
 # Table of contents
 
-* [Introduction](../README.md)
+* [moleculer-api](../README.md)
 
 ## Quick Start
 
 * [Get Started](quick-start/get-started.md)
+* [Configurations](quick-start/configurations.md)
 * [Quick Examples](quick-start/quick-examples/README.md)
   * [REST](quick-start/quick-examples/rest/README.md)
     * [REST Endpoints](quick-start/quick-examples/rest/rest-endpoints.md)
